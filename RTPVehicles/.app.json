@@ -1,0 +1,40 @@
+{
+  "type": "kendo-ui-mobile",
+  "views": [
+    {
+      "type": "kendo-ui-mobile:view",
+      "name": "home",
+      "components": [
+        {
+          "type": "kendo-ui-mobile:form",
+          "components": [
+            {
+              "type": "kendo-ui-mobile:field",
+              "name": "userName",
+              "title": "Name",
+              "inputType": "text",
+              "titlePosition": "top",
+              "placeholder": "name"
+            }
+          ],
+          "name": "homeModel",
+          "submitButton": "Confirm",
+          "cancelButton": "Cancel"
+        }
+      ],
+      "title": "Home View",
+      "addToNavigation": true,
+      "icon": "home"
+    }
+  ],
+  "dataProviders": [],
+  "name": "kendoUiMobileApp",
+  "navigation": "tabstrip",
+  "view": "home",
+  "transition": "slide",
+  "showMoreTab": false,
+  "skin": "nova",
+  "skinMainColor": "#32364c",
+  "skinTextColor": "#ffffff",
+  "skinAccentColor": "#ff4350"
+}

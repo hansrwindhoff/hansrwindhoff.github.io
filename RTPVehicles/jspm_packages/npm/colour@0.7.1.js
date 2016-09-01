@@ -1,0 +1,1 @@
+module.exports = require("npm:colour@0.7.1/colour.min.js");

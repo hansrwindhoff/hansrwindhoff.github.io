@@ -1,0 +1,33 @@
+{
+  "name": "RTDPositions",
+  "short_name": "RTDPos",
+  "start_url": "https://dl.dropboxusercontent.com/u/8561342/gtfshw/h2/index.html",
+  "display": "standalone",
+  "background_color": "#aad",
+  "description": "Track RTD vehicle positions on a map. ~1-2 min delay, update every 30s.",
+  "icons": [{
+    "src": "images/marker-icon48.png",
+    "sizes": "48x48",
+    "type": "image/png"
+  }, {
+    "src": "images/marker-icon72.png",
+    "sizes": "72x72",
+    "type": "image/png"
+  }, {
+    "src": "images/marker-icon96.png",
+    "sizes": "96x96",
+    "type": "image/png"
+  }, {
+    "src": "images/marker-icon144.png",
+    "sizes": "144x144",
+    "type": "image/png"
+  }, {
+    "src": "images/marker-icon168.png",
+    "sizes": "168x168",
+    "type": "image/png"
+  }, {
+    "src": "images/marker-icon192.png",
+    "sizes": "192x192",
+    "type": "image/png"
+  }]
+}
