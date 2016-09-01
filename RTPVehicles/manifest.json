@@ -1,7 +1,7 @@
 {
   "name": "RTDPositions",
   "short_name": "RTDPos",
-  "start_url": "https://dl.dropboxusercontent.com/u/8561342/gtfshw/h2/index.html",
+  "start_url": "https://hansrwindhoff.github.io/RTPVehicles/t1.html",
   "display": "standalone",
   "background_color": "#aad",
   "description": "Track RTD vehicle positions on a map. ~1-2 min delay, update every 30s.",
