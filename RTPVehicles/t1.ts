@@ -1,4 +1,4 @@
-/// <reference path="../typings/tsd.d.ts" />
+/// <reference path="./typings/tsd.d.ts" />
 // test script for the node server endpoint
 "use strict";
 import xhr from 'xhr';

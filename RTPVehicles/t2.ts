@@ -1,4 +1,4 @@
-/// <reference path="../typings/tsd.d.ts" />
+/// <reference path="./typings/tsd.d.ts" />
 "use strict";
 
 import xhr from 'xhr';
@@ -10,7 +10,7 @@ var markers = [];
 var drawingPins = false;
 var map: L.Map;
 const polTime = 33000;
-const countDownSteps = polTime/1000;
+const countDownSteps = polTime / 1000;
 let countDownInterval;
 let counterdown = countDownSteps;
 
@@ -47,27 +47,41 @@ var redrawPins = () => {
     }
 };
 
-let countDown = ()=>{
+let countDown = () => {
     counterdown--;
-    $('#countdown').text(counterdown.toString()+'s')
+    $('#countdown').text(counterdown.toString() + 's')
 };
 
 let getNewPositions = function() {
     app.positions = [];
     app.positions.ready = false;
     xhr({
-        url: 'https://rtdrelay2.azurewebsites.net/rtdpos',
+        //url: 'https://rtdrelay2.azurewebsites.net/rtdpos',
+        url: 'http://localhost:3000/rtdpos',
         method: 'get'
     },
         function(error, response, body) {
             if (!error && response.statusCode == 200) {
-                var feed = JSON.parse(body);
-                feed.forEach(function(entity) {
-                    app.positions.push(entity);
-                });
-                app.positions.ready = true;
-                removePins();
-                redrawPins();
+                try {
+                    var feed = JSON.parse(body);    
+                } catch (error) {
+                    $('#infotext')
+                    .text(body)
+                    .show()
+                    .css({'color': 'red','font-size':'x-large'});
+                    console.log(body)
+                }
+                
+                if (typeof feed === 'object'){
+                    $('#infotext').hide();
+                    feed.forEach(function(entity) {
+                        app.positions.push(entity);
+                    });
+                    app.positions.ready = true;
+                    removePins();
+                    redrawPins();
+                }
+                
             }
             else if (error) {
                 console.log('request returned an error');
@@ -78,16 +92,16 @@ let getNewPositions = function() {
                 console.log(error);
             }
         });
-        if (countDownInterval){clearInterval(countDownInterval);}
-        countDownInterval =setInterval(countDown, 1000);
-        counterdown = countDownSteps;
+    if (countDownInterval) { clearInterval(countDownInterval); }
+    countDownInterval = setInterval(countDown, 1000);
+    counterdown = countDownSteps;
 };
 
 
 function InitMapLoop(startLoc) {
     if (!mapStarted) {
         mapStarted = true;
-        $('#infotext').remove();
+        $('#infotext').hide();
 
         map = L.map('map').setView(startLoc, 15);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
