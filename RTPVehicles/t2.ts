@@ -55,9 +55,9 @@ let countDown = () => {
 let getNewPositions = function() {
     app.positions = [];
     app.positions.ready = false;
+
     xhr({
         url: 'https://rtdrelay2.azurewebsites.net/rtdpos',
-        
         method: 'get'
     },
         function(error, response, body) {
@@ -68,7 +68,7 @@ let getNewPositions = function() {
                     $('#infotext')
                     .text(body)
                     .show()
-                    .css({'color': 'red','font-size':'x-large'});
+                    .css({'color': 'red','font-size':'large'});
                     console.log(body)
                 }
                 

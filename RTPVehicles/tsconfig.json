@@ -20,10 +20,7 @@
         "typings/browser",
         "typings/browser.d.ts"
     ],
-    "include":[
-        "./t2.ts"
-        
-    ],
+  
     "compileOnSave": true,
     "buildOnSave": false,
     "atom": {

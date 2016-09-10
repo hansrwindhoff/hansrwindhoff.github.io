@@ -82,7 +82,7 @@ System.register(['xhr'], function(exports_1, context_1) {
                             $('#infotext')
                                 .text(body)
                                 .show()
-                                .css({ 'color': 'red', 'font-size': 'x-large' });
+                                .css({ 'color': 'red', 'font-size': 'large' });
                             console.log(body);
                         }
                         if (typeof feed === 'object') {
