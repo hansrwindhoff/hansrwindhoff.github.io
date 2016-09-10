@@ -56,8 +56,8 @@ let getNewPositions = function() {
     app.positions = [];
     app.positions.ready = false;
     xhr({
-        //url: 'https://rtdrelay2.azurewebsites.net/rtdpos',
-        url: 'http://localhost:3000/rtdpos',
+        url: 'https://rtdrelay2.azurewebsites.net/rtdpos',
+        
         method: 'get'
     },
         function(error, response, body) {
