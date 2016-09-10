@@ -71,7 +71,7 @@ System.register(['xhr'], function(exports_1, context_1) {
                 app.positions = [];
                 app.positions.ready = false;
                 xhr_1.default({
-                    url: 'http://localhost:3000/rtdpos',
+                    url: 'https://rtdrelay2.azurewebsites.net/rtdpos',
                     method: 'get'
                 }, function (error, response, body) {
                     if (!error && response.statusCode == 200) {
