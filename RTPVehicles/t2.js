@@ -19,6 +19,17 @@ System.register(['xhr'], function(exports_1, context_1) {
             });
         }
     }
+    function reCenterMap() {
+        if ("geolocation" in navigator) {
+            navigator.geolocation.getCurrentPosition(function (position) {
+                var curLoc = [position.coords.latitude, position.coords.longitude];
+                if (mapStarted) {
+                    map.setView(curLoc);
+                }
+            }, function (err) {
+            });
+        }
+    }
     return {
         setters:[
             function (xhr_1_1) {
@@ -111,6 +122,7 @@ System.register(['xhr'], function(exports_1, context_1) {
                 counterdown = countDownSteps;
             };
             (function start() {
+                window.reCenterMap = reCenterMap;
                 setTimeout(function () {
                     InitMapLoop(startLoc);
                 }, 10000);

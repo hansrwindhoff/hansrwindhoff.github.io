@@ -117,8 +117,26 @@ function InitMapLoop(startLoc) {
         });
     }
 }
+function reCenterMap(){
+ if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                var curLoc = [position.coords.latitude, position.coords.longitude];
+                if (mapStarted) {
+                    map.setView(curLoc);
+                    
+                }
+            },
+            function(err) {
+                
+            });
+    }
+
+}
 
 (function start() {
+    window.reCenterMap = reCenterMap;
+
     setTimeout(function() {
         InitMapLoop(startLoc);
     }, 10000);

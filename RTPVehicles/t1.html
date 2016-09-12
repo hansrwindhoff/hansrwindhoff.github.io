@@ -16,12 +16,13 @@
 
 <body>
 
+  <link rel="stylesheet" href="./fa/font-awesome/css/font-awesome.min.css">
   <div id="map" style="position:absolute; top:20px;left:1%;width :98%;bottom:20px;"></div>
   <div style="position:absolute;top:0px;left:1%;height:20px;background:darkblue;width:98%">
     <span style="position:absolute;left:1%; width:100%;text-anchor:middle; color:white;text-align:center;font-family:Arial"> RTD Vehicle Positions, next update in <div style="display: inline-block" id="countdown"></div>
     </span>
   </div>
-  
+
   <div style="position:absolute;bottom:0px;left:1%;height:20px;background:darkblue;width:98%; color:white;">
     <span style="position:absolute;left:1%; width:100%;text-anchor:middle; color:white;text-align:center;font-family:Arial">
       <a href="https://dl.dropboxusercontent.com/u/8561342/home/index.html" target="_blank" style="color:white;">Wellc, Denver, CO</a>,
@@ -32,6 +33,14 @@
   <div id="infotext" style="position:absolute;text-align:center;top:50%;height:20px;font-family:Arial">
     We are trying to initialize you device's location service, if an error occurs or if the location service is disabled or too
     slow, we will start the map at the default location (downtown Denver) in 10 seconds
+  </div>
+  <div style="position:absolute; right:20px;top:20px;">
+    <a href="javascript:reCenterMap()">
+      <i style="z-index:1000;" class="fa fa-crosshairs fa-4x" aria-hidden="true"></i>
+    </a>
+  </div>
+  <div style="position:absolute; left:50%;top:50%;">
+      <i style="z-index:1000;color:red;" class="fa fa-crosshairs" aria-hidden="true"></i>
   </div>
 
   <script type="text/javascript" src="jspm_packages/system.js"></script>
