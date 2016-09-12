@@ -63,16 +63,16 @@ let getNewPositions = function() {
         function(error, response, body) {
             if (!error && response.statusCode == 200) {
                 try {
-                    var feed = JSON.parse(body);    
+                    var feed = JSON.parse(body);
                 } catch (error) {
                     $('#infotext')
-                    .text(body)
-                    .show()
-                    .css({'color': 'red','font-size':'large'});
+                        .text(body)
+                        .show()
+                        .css({ 'color': 'red', 'font-size': 'large' });
                     console.log(body)
                 }
-                
-                if (typeof feed === 'object'){
+
+                if (typeof feed === 'object') {
                     $('#infotext').hide();
                     feed.forEach(function(entity) {
                         app.positions.push(entity);
@@ -81,7 +81,7 @@ let getNewPositions = function() {
                     removePins();
                     redrawPins();
                 }
-                
+
             }
             else if (error) {
                 console.log('request returned an error');
@@ -117,18 +117,27 @@ function InitMapLoop(startLoc) {
         });
     }
 }
-function reCenterMap(){
- if ("geolocation" in navigator) {
+function reCenterMap() {
+    if ("geolocation" in navigator) {
         navigator.geolocation.getCurrentPosition(
             function(position) {
                 var curLoc = [position.coords.latitude, position.coords.longitude];
                 if (mapStarted) {
                     map.setView(curLoc);
-                    
+
                 }
             },
             function(err) {
-                
+                $('#infotext')
+                    .text('we could not get your devices location, please try again in a few seconds')
+                    .show()
+                    .css({ 'color': 'red', 'font-size': 'large' });
+                setTimeout(() => {
+                    $('#infotext')
+                        .text('')
+                        .hide()
+                }, 3000)
+
             });
     }
 
