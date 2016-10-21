@@ -1,7 +1,7 @@
 System.config({
-  
+  baseURL: ".",
   defaultJSExtensions: true,
-  transpiler: "babel",
+  transpiler: false,
   babelOptions: {
     "optional": [
       "runtime",
@@ -18,10 +18,12 @@ System.config({
     "babel-runtime": "npm:babel-runtime@5.8.38",
     "core-js": "npm:core-js@1.2.6",
     "gtfs-realtime-bindings": "npm:gtfs-realtime-bindings@0.0.4",
+    "jquery": "npm:jquery@3.1.1",
+    "leaflet": "github:Leaflet/Leaflet@1.0.1",
     "request": "npm:request@2.72.0",
-    "xhr": "npm:xhr@2.2.0",
+    "xhr": "npm:xhr@2.2.2",
     "github:jspm/nodelibs-assert@0.1.0": {
-      "assert": "npm:assert@1.3.0"
+      "assert": "npm:assert@1.4.1"
     },
     "github:jspm/nodelibs-buffer@0.1.0": {
       "buffer": "npm:buffer@3.6.0"
@@ -60,7 +62,7 @@ System.config({
       "path-browserify": "npm:path-browserify@0.0.0"
     },
     "github:jspm/nodelibs-process@0.1.2": {
-      "process": "npm:process@0.11.3"
+      "process": "npm:process@0.11.9"
     },
     "github:jspm/nodelibs-punycode@0.1.0": {
       "punycode": "npm:punycode@1.3.2"
@@ -128,7 +130,10 @@ System.config({
       "stream": "github:jspm/nodelibs-stream@0.1.0",
       "util": "github:jspm/nodelibs-util@0.1.0"
     },
-    "npm:assert@1.3.0": {
+    "npm:assert@1.4.1": {
+      "assert": "github:jspm/nodelibs-assert@0.1.0",
+      "buffer": "github:jspm/nodelibs-buffer@0.1.0",
+      "process": "github:jspm/nodelibs-process@0.1.2",
       "util": "npm:util@0.10.3"
     },
     "npm:async@1.5.2": {
@@ -220,7 +225,7 @@ System.config({
       "base64-js": "npm:base64-js@0.0.8",
       "child_process": "github:jspm/nodelibs-child_process@0.1.0",
       "fs": "github:jspm/nodelibs-fs@0.1.2",
-      "ieee754": "npm:ieee754@1.1.6",
+      "ieee754": "npm:ieee754@1.1.8",
       "isarray": "npm:isarray@1.0.0",
       "process": "github:jspm/nodelibs-process@0.1.2"
     },
@@ -387,7 +392,7 @@ System.config({
       "process": "github:jspm/nodelibs-process@0.1.2",
       "tty": "github:jspm/nodelibs-tty@0.1.0"
     },
-    "npm:global@4.3.0": {
+    "npm:global@4.3.1": {
       "process": "npm:process@0.5.2"
     },
     "npm:graceful-readlink@1.0.1": {
@@ -539,6 +544,11 @@ System.config({
     },
     "npm:process@0.11.3": {
       "assert": "github:jspm/nodelibs-assert@0.1.0"
+    },
+    "npm:process@0.11.9": {
+      "assert": "github:jspm/nodelibs-assert@0.1.0",
+      "fs": "github:jspm/nodelibs-fs@0.1.2",
+      "vm": "github:jspm/nodelibs-vm@0.1.0"
     },
     "npm:protobufjs@2.0.5": {
       "ascli": "npm:ascli@1.0.0",
@@ -719,10 +729,9 @@ System.config({
     "npm:vm-browserify@0.0.4": {
       "indexof": "npm:indexof@0.0.1"
     },
-    "npm:xhr@2.2.0": {
-      "global": "npm:global@4.3.0",
+    "npm:xhr@2.2.2": {
+      "global": "npm:global@4.3.1",
       "is-function": "npm:is-function@1.0.1",
-      "once": "npm:once@1.1.1",
       "parse-headers": "npm:parse-headers@2.0.1",
       "process": "github:jspm/nodelibs-process@0.1.2",
       "xtend": "npm:xtend@4.0.1"
