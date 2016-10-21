@@ -1,8 +1,6 @@
 module.exports = {
   staticFileGlobs: [
     './*.css',
-    './service-worker.js',
-    './service-worker-registration.js',
     './fa/**/*.*',
     './*.png',
     './*.html',
