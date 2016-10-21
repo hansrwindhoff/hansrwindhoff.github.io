@@ -3,8 +3,6 @@
 
 import xhr from 'xhr';
 import * as L from 'leaflet';
-import $ from 'jquery';
-
 
 module realTimeRtdPos {
 
@@ -80,7 +78,8 @@ module realTimeRtdPos {
 
     let countDown = () => {
         counterdown--;
-        $('#countdown').text(counterdown.toString() + 's')
+        document.getElementById("countdown").textContent = counterdown.toString() + 's';
+        //$('#countdown').text(counterdown.toString() + 's')
     };
 
     let getNewPositions = function() {
@@ -97,15 +96,24 @@ module realTimeRtdPos {
                     try {
                         feed = JSON.parse(body);
                     } catch (error) {
-                        $('#infotext')
-                            .text(body)
-                            .show()
-                            .css({ 'color': 'red', 'font-size': 'large' });
+                        var el = document.getElementById("infotext");
+                        el.textContent= body;
+                        el.style.visibility = "visible";
+                        el.style.color = "red";
+                        el.style.fontSize = "large";
+
+
+                        // $('#infotext')
+                        //     .text(body)
+                        //     .show()
+                        //     .css({ 'color': 'red', 'font-size': 'large' });
                         console.log(body)
                     }
 
                     if (typeof feed === 'object') {
-                        $('#infotext').hide();
+                        document.getElementById("infotext").style.visibility = "hidden";
+
+                        // $('#infotext').hide();
                         feed.forEach(function(entity) {
                             app.positions.push(entity);
                         });
@@ -133,7 +141,8 @@ module realTimeRtdPos {
     function InitMapLoop(startLoc) {
         if (!mapStarted) {
             mapStarted = true;
-            $('#infotext').hide();
+            document.getElementById("infotext").style.visibility = "hidden";
+            //$('#infotext').hide();
 
             map = L.map('map').setView(startLoc, 15);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -146,7 +155,8 @@ module realTimeRtdPos {
             map.on('dragend zoomend', function(e) {
                 removePins();
                 redrawPins();
-                $('#mapcenter').hide();
+                document.getElementById("mapcenter").style.visibility = "hidden";
+                //$('#mapcenter').hide();
             });
         }
     }
@@ -158,19 +168,29 @@ module realTimeRtdPos {
                     myLocation = new L.LatLng(position.coords.latitude, position.coords.longitude);
                     if (mapStarted) {
                         map.setView(curLoc);
-                        $('#mapcenter').show();
+                        document.getElementById("mapcenter").style.visibility = "visible";
+                        //$('#mapcenter').show();
 
                     }
                 },
                 function(err) {
-                    $('#infotext')
-                        .text('we could not get your devices location, please try again in a few seconds')
-                        .show()
-                        .css({ 'color': 'red', 'font-size': 'large' });
+                    var el = document.getElementById("infotext"); 
+                    el.style.visibility = "visible";
+                    el.style.color = "red";
+                    el.style.fontSize = "large"
+                    el.textContent = 'we could not get your devices location, please try again in a few seconds';
+
+                    // $('#infotext')
+                    //     .text('we could not get your devices location, please try again in a few seconds')
+                    //     .show()
+                    //     .css({ 'color': 'red', 'font-size': 'large' });
+
                     setTimeout(() => {
-                        $('#infotext')
-                            .text('')
-                            .hide()
+                        el.textContent = '';
+                        el.style.visibility = "hidden";
+                        // $('#infotext')
+                        //     .text('')
+                        //     .hide()
                     }, 3000)
 
                 });

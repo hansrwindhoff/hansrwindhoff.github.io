@@ -1,7 +1,7 @@
-System.register(['xhr', 'leaflet', 'jquery'], function(exports_1, context_1) {
+System.register(['xhr', 'leaflet'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
-    var xhr_1, L, jquery_1;
+    var xhr_1, L;
     var realTimeRtdPos;
     return {
         setters:[
@@ -10,9 +10,6 @@ System.register(['xhr', 'leaflet', 'jquery'], function(exports_1, context_1) {
             },
             function (L_1) {
                 L = L_1;
-            },
-            function (jquery_1_1) {
-                jquery_1 = jquery_1_1;
             }],
         execute: function() {
             (function (realTimeRtdPos) {
@@ -69,7 +66,7 @@ System.register(['xhr', 'leaflet', 'jquery'], function(exports_1, context_1) {
                 };
                 var countDown = function () {
                     counterdown--;
-                    jquery_1.default('#countdown').text(counterdown.toString() + 's');
+                    document.getElementById("countdown").textContent = counterdown.toString() + 's';
                 };
                 var getNewPositions = function () {
                     app.positions = [];
@@ -84,14 +81,15 @@ System.register(['xhr', 'leaflet', 'jquery'], function(exports_1, context_1) {
                                 feed = JSON.parse(body);
                             }
                             catch (error) {
-                                jquery_1.default('#infotext')
-                                    .text(body)
-                                    .show()
-                                    .css({ 'color': 'red', 'font-size': 'large' });
+                                var el = document.getElementById("infotext");
+                                el.textContent = body;
+                                el.style.visibility = "visible";
+                                el.style.color = "red";
+                                el.style.fontSize = "large";
                                 console.log(body);
                             }
                             if (typeof feed === 'object') {
-                                jquery_1.default('#infotext').hide();
+                                document.getElementById("infotext").style.visibility = "hidden";
                                 feed.forEach(function (entity) {
                                     app.positions.push(entity);
                                 });
@@ -118,7 +116,7 @@ System.register(['xhr', 'leaflet', 'jquery'], function(exports_1, context_1) {
                 function InitMapLoop(startLoc) {
                     if (!mapStarted) {
                         mapStarted = true;
-                        jquery_1.default('#infotext').hide();
+                        document.getElementById("infotext").style.visibility = "hidden";
                         map = L.map('map').setView(startLoc, 15);
                         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                             attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
@@ -128,7 +126,7 @@ System.register(['xhr', 'leaflet', 'jquery'], function(exports_1, context_1) {
                         map.on('dragend zoomend', function (e) {
                             removePins();
                             redrawPins();
-                            jquery_1.default('#mapcenter').hide();
+                            document.getElementById("mapcenter").style.visibility = "hidden";
                         });
                     }
                 }
@@ -139,17 +137,17 @@ System.register(['xhr', 'leaflet', 'jquery'], function(exports_1, context_1) {
                             myLocation = new L.LatLng(position.coords.latitude, position.coords.longitude);
                             if (mapStarted) {
                                 map.setView(curLoc);
-                                jquery_1.default('#mapcenter').show();
+                                document.getElementById("mapcenter").style.visibility = "visible";
                             }
                         }, function (err) {
-                            jquery_1.default('#infotext')
-                                .text('we could not get your devices location, please try again in a few seconds')
-                                .show()
-                                .css({ 'color': 'red', 'font-size': 'large' });
+                            var el = document.getElementById("infotext");
+                            el.style.visibility = "visible";
+                            el.style.color = "red";
+                            el.style.fontSize = "large";
+                            el.textContent = 'we could not get your devices location, please try again in a few seconds';
                             setTimeout(function () {
-                                jquery_1.default('#infotext')
-                                    .text('')
-                                    .hide();
+                                el.textContent = '';
+                                el.style.visibility = "hidden";
                             }, 3000);
                         });
                     }

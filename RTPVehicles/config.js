@@ -18,7 +18,6 @@ System.config({
     "babel-runtime": "npm:babel-runtime@5.8.38",
     "core-js": "npm:core-js@1.2.6",
     "gtfs-realtime-bindings": "npm:gtfs-realtime-bindings@0.0.4",
-    "jquery": "npm:jquery@3.1.1",
     "leaflet": "github:Leaflet/Leaflet@1.0.1",
     "request": "npm:request@2.72.0",
     "xhr": "npm:xhr@2.2.2",
