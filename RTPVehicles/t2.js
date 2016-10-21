@@ -2,7 +2,7 @@ System.register(['xhr'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var xhr_1;
-    var app, mapStarted, markers, drawingPins, map, polTime, countDownSteps, countDownInterval, counterdown, removePins, redrawPins, countDown, getNewPositions;
+    var app, mapStarted, markers, drawingPins, map, polTime, countDownSteps, countDownInterval, counterdown, removePins, currentMeMarker, redrawPins, countDown, getNewPositions, RedIcon, redIcon, myLocation;
     function InitMapLoop(startLoc) {
         if (!mapStarted) {
             mapStarted = true;
@@ -16,6 +16,7 @@ System.register(['xhr'], function(exports_1, context_1) {
             map.on('dragend zoomend', function (e) {
                 removePins();
                 redrawPins();
+                $('#mapcenter').hide();
             });
         }
     }
@@ -23,10 +24,21 @@ System.register(['xhr'], function(exports_1, context_1) {
         if ("geolocation" in navigator) {
             navigator.geolocation.getCurrentPosition(function (position) {
                 var curLoc = [position.coords.latitude, position.coords.longitude];
+                myLocation = new L.LatLng(position.coords.latitude, position.coords.longitude);
                 if (mapStarted) {
                     map.setView(curLoc);
+                    $('#mapcenter').show();
                 }
             }, function (err) {
+                $('#infotext')
+                    .text('we could not get your devices location, please try again in a few seconds')
+                    .show()
+                    .css({ 'color': 'red', 'font-size': 'large' });
+                setTimeout(function () {
+                    $('#infotext')
+                        .text('')
+                        .hide();
+                }, 3000);
             });
         }
     }
@@ -61,6 +73,10 @@ System.register(['xhr'], function(exports_1, context_1) {
                 if (!drawingPins && map) {
                     drawingPins = true;
                     var bounds = map.getBounds();
+                    if (currentMeMarker) {
+                        map.removeLayer(currentMeMarker);
+                    }
+                    currentMeMarker = L.marker(myLocation, { icon: redIcon }).addTo(map);
                     if (app.positions.ready) {
                         app.positions.forEach(function (pos) {
                             if (bounds.contains(L.latLng(pos.lat, pos.long))) {
@@ -121,6 +137,12 @@ System.register(['xhr'], function(exports_1, context_1) {
                 countDownInterval = setInterval(countDown, 1000);
                 counterdown = countDownSteps;
             };
+            RedIcon = L.Icon.Default.extend({
+                options: {
+                    iconUrl: 'images/marker-icon-red.png'
+                }
+            });
+            redIcon = new RedIcon();
             (function start() {
                 window.reCenterMap = reCenterMap;
                 setTimeout(function () {
@@ -130,6 +152,7 @@ System.register(['xhr'], function(exports_1, context_1) {
                 if ("geolocation" in navigator) {
                     navigator.geolocation.getCurrentPosition(function (position) {
                         startLoc = [position.coords.latitude, position.coords.longitude];
+                        myLocation = new L.LatLng(position.coords.latitude, position.coords.longitude);
                         if (!mapStarted) {
                             InitMapLoop(startLoc);
                         }

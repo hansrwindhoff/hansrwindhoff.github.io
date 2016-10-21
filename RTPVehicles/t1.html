@@ -6,7 +6,7 @@
   <title>RTD life vehicle positions</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <script src="kendo/js/jquery.min.js"></script>
+  <script src="jquery.min.js"></script>
 
   <link rel="stylesheet" href="leaflet.css" />
   <script src="leaflet.js"></script>
@@ -40,7 +40,7 @@
     </a>
   </div>
   <div style="position:absolute; left:50%;top:50%;">
-      <i style="z-index:1000;color:red;" class="fa fa-crosshairs" aria-hidden="true"></i>
+      <i id="mapcenter" style="z-index:1000;color:red;transform:translate(-50%,-50%)" class="fa fa-crosshairs" aria-hidden="true"></i>
   </div>
 
   <script type="text/javascript" src="jspm_packages/system.js"></script>
@@ -48,6 +48,9 @@
   <script type="text/javascript">
     System.import("t2");
   </script>
+
+  
+  
   <script>
     (function (i, s, o, g, r, a, m) {
       i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {

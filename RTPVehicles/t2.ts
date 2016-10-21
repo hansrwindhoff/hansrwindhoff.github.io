@@ -2,6 +2,7 @@
 "use strict";
 
 import xhr from 'xhr';
+
 var app = <any>{};
 app.positions = [];
 app.positions.ready = false;
@@ -29,10 +30,15 @@ var removePins = () => {
     }
 };
 
+var currentMeMarker:L.Marker ;
 var redrawPins = () => {
     if (!drawingPins && map) {
         drawingPins = true;
         var bounds = map.getBounds();
+        if (currentMeMarker){
+            map.removeLayer(currentMeMarker)
+        }
+        currentMeMarker = L.marker(myLocation, {icon: redIcon}).addTo(map);
         if (app.positions.ready) {
             app.positions.forEach(function(pos) {
                 if (bounds.contains(L.latLng(pos.lat, pos.long))) {
@@ -114,6 +120,7 @@ function InitMapLoop(startLoc) {
         map.on('dragend zoomend', function(e) {
             removePins();
             redrawPins();
+            $('#mapcenter').hide();
         });
     }
 }
@@ -122,8 +129,10 @@ function reCenterMap() {
         navigator.geolocation.getCurrentPosition(
             function(position) {
                 var curLoc = [position.coords.latitude, position.coords.longitude];
+                myLocation = new L.LatLng(position.coords.latitude, position.coords.longitude);
                 if (mapStarted) {
                     map.setView(curLoc);
+                    $('#mapcenter').show();
 
                 }
             },
@@ -143,6 +152,17 @@ function reCenterMap() {
 
 }
 
+
+//Extend the Default marker class
+var RedIcon = L.Icon.Default.extend({
+    options: {
+        iconUrl: 'images/marker-icon-red.png'
+    }
+});
+var redIcon = new RedIcon();
+var myLocation: L.LatLng ;
+
+
 (function start() {
     window.reCenterMap = reCenterMap;
 
@@ -155,6 +175,7 @@ function reCenterMap() {
         navigator.geolocation.getCurrentPosition(
             function(position) {
                 startLoc = [position.coords.latitude, position.coords.longitude];
+                myLocation = new L.LatLng(position.coords.latitude, position.coords.longitude);
                 if (!mapStarted) {
                     InitMapLoop(startLoc);
                 }
