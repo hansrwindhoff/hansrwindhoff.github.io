@@ -1,6 +1,9 @@
 module.exports = {
   staticFileGlobs: [
     './*.css',
+    './service-worker.js',
+    './service-worker-registration.js',
+    './fa/**/*.*',
     './*.png',
     './*.html',
     './images/**.*',
@@ -9,6 +12,6 @@ module.exports = {
   stripPrefix: '',
   runtimeCaching: [{
     urlPattern: /this\\.is\\.a\\.regex/,
-    handler: 'networkFirst'
+    handler: 'cacheFirst'
   }]
 };
