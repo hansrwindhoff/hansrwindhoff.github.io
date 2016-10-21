@@ -10,6 +10,6 @@ module.exports = {
   stripPrefix: '',
   runtimeCaching: [{
     urlPattern: /this\\.is\\.a\\.regex/,
-    handler: 'cacheFirst'
+    handler: 'networkFirst'
   }]
 };
