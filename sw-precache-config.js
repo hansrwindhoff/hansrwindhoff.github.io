@@ -3,6 +3,8 @@ module.exports = {
     './*.css',
     './*.png',
     './*.JPG',
+    './*.avi',  
+    './*.swf',
     './assets/**/*.*',
     './*.html',
   './jquery.min.js',
