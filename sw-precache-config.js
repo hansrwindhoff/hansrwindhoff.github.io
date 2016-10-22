@@ -3,6 +3,7 @@ module.exports = {
     './*.css',
     './*.png',
     './*.JPG',
+    './*.gif',
     './*.avi',  
     './*.swf',
     './assets/**/*.*',
