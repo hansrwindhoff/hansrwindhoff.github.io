@@ -1,7 +1,7 @@
 /* */ 
 (function(process) {
   var assert = require('assert');
-  var events = require('../events');
+  var events = require('../../events@1.0.2');
   var e = new events.EventEmitter();
   for (var i = 0; i < 10; i++) {
     e.on('default', function() {});
