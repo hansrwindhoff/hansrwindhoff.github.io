@@ -17,7 +17,7 @@ module realTimeRtdPos {
     const countDownSteps = polTime / 1000;
     let countDownInterval;
     let counterdown = countDownSteps;
-    let myLocation: L.LatLng;
+    let myLocation=  new L.LatLng(39.735, -104.99) ;
 
     interface Window {
         reCenterMap: () => void;

@@ -24,7 +24,7 @@ System.register(['xhr', 'leaflet'], function(exports_1, context_1) {
                 var countDownSteps = polTime / 1000;
                 var countDownInterval;
                 var counterdown = countDownSteps;
-                var myLocation;
+                var myLocation = new L.LatLng(39.735, -104.99);
                 var redIcon = L.icon({
                     iconUrl: 'marker-icon-red.png',
                     iconSize: [30, 50],
