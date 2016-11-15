@@ -1,11 +1,11 @@
 /* */ 
 module.exports = ForeverAgent;
 ForeverAgent.SSL = ForeverAgentSSL;
-var util = require('util'),
-    Agent = require('http').Agent,
-    net = require('net'),
-    tls = require('tls'),
-    AgentSSL = require('https').Agent;
+var util = require("util"),
+    Agent = require("http").Agent,
+    net = require("net"),
+    tls = require("tls"),
+    AgentSSL = require("https").Agent;
 function getConnectionName(host, port) {
   var name = '';
   if (typeof host === 'string') {

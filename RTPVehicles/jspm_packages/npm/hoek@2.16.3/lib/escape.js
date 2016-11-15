@@ -81,4 +81,4 @@
     }
     return safe;
   }());
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

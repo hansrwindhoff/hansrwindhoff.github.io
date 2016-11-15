@@ -1,6 +1,6 @@
 /* */ 
-var test = require('tape');
-var cryptoB = require('../../index');
+var test = require("tape");
+var cryptoB = require("../../index");
 var crypto = require('@empty');
 test('diffie-hellman mod groups', function(t) {
   ['modp1', 'modp2', 'modp5', 'modp14', 'modp15', 'modp16'].forEach(function(mod) {

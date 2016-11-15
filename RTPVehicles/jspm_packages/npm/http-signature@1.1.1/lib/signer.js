@@ -1,13 +1,13 @@
 /* */ 
 (function(Buffer) {
-  var assert = require('assert-plus');
-  var crypto = require('crypto');
-  var http = require('http');
-  var util = require('util');
-  var sshpk = require('sshpk');
-  var jsprim = require('jsprim');
-  var utils = require('./utils');
-  var sprintf = require('util').format;
+  var assert = require("assert-plus");
+  var crypto = require("crypto");
+  var http = require("http");
+  var util = require("util");
+  var sshpk = require("sshpk");
+  var jsprim = require("jsprim");
+  var utils = require("./utils");
+  var sprintf = require("util").format;
   var HASH_ALGOS = utils.HASH_ALGOS;
   var PK_ALGOS = utils.PK_ALGOS;
   var InvalidAlgorithmError = utils.InvalidAlgorithmError;
@@ -105,7 +105,7 @@
       this.rs_signFunc(data, function(err, sig) {
         if (err) {
           cb(err);
-          return;
+          return ;
         }
         try {
           assert.object(sig, 'signature');
@@ -116,7 +116,7 @@
           authz = sprintf(AUTHZ_FMT, sig.keyId, sig.algorithm, self.rs_headers.join(' '), sig.signature);
         } catch (e) {
           cb(e);
-          return;
+          return ;
         }
         cb(null, authz);
       });
@@ -125,7 +125,7 @@
         var sigObj = this.rs_signer.sign();
       } catch (e) {
         cb(e);
-        return;
+        return ;
       }
       alg = (this.rs_alg[0] || this.rs_key.type) + '-' + sigObj.hashAlgorithm;
       var signature = sigObj.toString();
@@ -219,4 +219,4 @@
       return true;
     }
   };
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

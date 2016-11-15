@@ -1,7 +1,7 @@
 /* */ 
-var mod_assert = require('assert');
-var mod_util = require('util');
-var mod_extsprintf = require('extsprintf');
+var mod_assert = require("assert");
+var mod_util = require("util");
+var mod_extsprintf = require("extsprintf");
 exports.VError = VError;
 exports.WError = WError;
 exports.MultiError = MultiError;

@@ -1,8 +1,8 @@
 /* */ 
 (function(Buffer) {
-  var assert = require('assert');
-  var ASN1 = require('./types');
-  var errors = require('./errors');
+  var assert = require("assert");
+  var ASN1 = require("./types");
+  var errors = require("./errors");
   var newInvalidAsn1Error = errors.newInvalidAsn1Error;
   var DEFAULT_OPTS = {
     size: 1024,
@@ -16,7 +16,7 @@
     var keys = Object.getOwnPropertyNames(from);
     keys.forEach(function(key) {
       if (to[key])
-        return;
+        return ;
       var value = Object.getOwnPropertyDescriptor(from, key);
       Object.defineProperty(to, key, value);
     });
@@ -234,4 +234,4 @@
     }
   };
   module.exports = Writer;
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

@@ -1,11 +1,11 @@
 /* */ 
 (function(Buffer) {
-  var createHmac = require('create-hmac');
-  var crt = require('browserify-rsa');
-  var curves = require('./curves');
-  var elliptic = require('elliptic');
-  var parseKeys = require('parse-asn1');
-  var BN = require('bn.js');
+  var createHmac = require("create-hmac");
+  var crt = require("browserify-rsa");
+  var curves = require("./curves");
+  var elliptic = require("elliptic");
+  var parseKeys = require("parse-asn1");
+  var BN = require("bn.js");
   var EC = elliptic.ec;
   function sign(hash, key, hashType, signType) {
     var priv = parseKeys(key);
@@ -142,4 +142,4 @@
   module.exports = sign;
   module.exports.getKey = getKey;
   module.exports.makeKey = makeKey;
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

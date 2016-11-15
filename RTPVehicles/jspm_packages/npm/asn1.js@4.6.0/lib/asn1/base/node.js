@@ -1,8 +1,8 @@
 /* */ 
-var Reporter = require('./index').Reporter;
-var EncoderBuffer = require('./index').EncoderBuffer;
-var DecoderBuffer = require('./index').DecoderBuffer;
-var assert = require('minimalistic-assert');
+var Reporter = require("./index").Reporter;
+var EncoderBuffer = require("./index").EncoderBuffer;
+var DecoderBuffer = require("./index").DecoderBuffer;
+var assert = require("minimalistic-assert");
 var tags = ['seq', 'seqof', 'set', 'setof', 'objid', 'bool', 'gentime', 'utctime', 'null_', 'enum', 'int', 'bitstr', 'bmpstr', 'charstr', 'genstr', 'graphstr', 'ia5str', 'iso646str', 'numstr', 'octstr', 'printstr', 't61str', 'unistr', 'utf8str', 'videostr'];
 var methods = ['key', 'obj', 'use', 'optional', 'explicit', 'implicit', 'def', 'choice', 'any', 'contains'].concat(tags);
 var overrided = ['_peekTag', '_decodeTag', '_use', '_decodeStr', '_decodeObjid', '_decodeTime', '_decodeNull', '_decodeInt', '_decodeBool', '_decodeList', '_encodeComposite', '_encodeStr', '_encodeObjid', '_encodeTime', '_encodeNull', '_encodeInt', '_encodeBool'];
@@ -322,12 +322,12 @@ Node.prototype._createEncoderBuffer = function createEncoderBuffer(data) {
 Node.prototype._encode = function encode(data, reporter, parent) {
   var state = this._baseState;
   if (state['default'] !== null && state['default'] === data)
-    return;
+    return ;
   var result = this._encodeValue(data, reporter, parent);
   if (result === undefined)
-    return;
+    return ;
   if (this._skipDefault(result, reporter, parent))
-    return;
+    return ;
   return result;
 };
 Node.prototype._encodeValue = function encode(data, reporter, parent) {
@@ -340,7 +340,7 @@ Node.prototype._encodeValue = function encode(data, reporter, parent) {
     if (state['default'] !== null)
       data = state['default'];
     else
-      return;
+      return ;
   }
   var content = null;
   var primitive = false;

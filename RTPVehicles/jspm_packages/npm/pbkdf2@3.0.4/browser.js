@@ -1,6 +1,6 @@
 /* */ 
 (function(Buffer) {
-  var createHmac = require('create-hmac');
+  var createHmac = require("create-hmac");
   var MAX_ALLOC = Math.pow(2, 30) - 1;
   exports.pbkdf2 = pbkdf2;
   function pbkdf2(password, salt, iterations, keylen, digest, callback) {
@@ -64,4 +64,4 @@
     }
     return DK;
   }
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

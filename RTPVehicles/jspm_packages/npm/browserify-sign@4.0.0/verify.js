@@ -1,9 +1,9 @@
 /* */ 
 (function(Buffer) {
-  var curves = require('./curves');
-  var elliptic = require('elliptic');
-  var parseKeys = require('parse-asn1');
-  var BN = require('bn.js');
+  var curves = require("./curves");
+  var elliptic = require("elliptic");
+  var parseKeys = require("parse-asn1");
+  var BN = require("bn.js");
   var EC = elliptic.ec;
   function verify(sig, hash, key, signType) {
     var pub = parseKeys(key);
@@ -85,4 +85,4 @@
     }
   }
   module.exports = verify;
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

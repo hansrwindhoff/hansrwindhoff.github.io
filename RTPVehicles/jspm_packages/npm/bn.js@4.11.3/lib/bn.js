@@ -79,7 +79,7 @@
       }
       this.strip();
       if (endian !== 'le')
-        return;
+        return ;
       this._initArray(this.toArray(), base, endian);
     };
     BN.prototype._initNumber = function _initNumber(number, base, endian) {
@@ -99,7 +99,7 @@
         this.length = 3;
       }
       if (endian !== 'le')
-        return;
+        return ;
       this._initArray(this.toArray(), base, endian);
     };
     BN.prototype._initArray = function _initArray(number, base, endian) {
@@ -1434,7 +1434,7 @@
     };
     FFTM.prototype.conjugate = function conjugate(rws, iws, N) {
       if (N <= 1)
-        return;
+        return ;
       for (var i = 0; i < N / 2; i++) {
         var t = rws[i];
         rws[i] = rws[N - i - 1];
@@ -2376,7 +2376,7 @@
       if (input.length <= 9) {
         input.words[0] = 0;
         input.length = 1;
-        return;
+        return ;
       }
       var prev = input.words[9];
       output.words[output.length++] = prev & mask;
@@ -2700,4 +2700,4 @@
       return res._forceRed(this);
     };
   })(typeof module === 'undefined' || module, this);
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

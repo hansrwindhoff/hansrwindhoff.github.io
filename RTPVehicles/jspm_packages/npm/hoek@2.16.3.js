@@ -1,1 +1,1 @@
-module.exports = require("npm:hoek@2.16.3/lib/index.js");
+module.exports = require("npm:hoek@2.16.3/lib/index");

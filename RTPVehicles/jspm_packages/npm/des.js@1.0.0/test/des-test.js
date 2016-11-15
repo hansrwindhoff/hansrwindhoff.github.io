@@ -1,11 +1,11 @@
 /* */ 
 (function(Buffer) {
   'use strict';
-  var assert = require('assert');
-  var crypto = require('crypto');
-  var Buffer = require('buffer').Buffer;
-  var des = require('../lib/des');
-  var fixtures = require('./fixtures');
+  var assert = require("assert");
+  var crypto = require("crypto");
+  var Buffer = require("buffer").Buffer;
+  var des = require("../lib/des");
+  var fixtures = require("./fixtures");
   var bin = fixtures.bin;
   describe('DES', function() {
     describe('Key Derivation', function() {
@@ -81,4 +81,4 @@
       });
     });
   });
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

@@ -8,13 +8,13 @@
     readECDSACurve: readECDSACurve,
     writeECDSACurve: writeECDSACurve
   };
-  var assert = require('assert-plus');
-  var asn1 = require('asn1');
-  var algs = require('../algs');
-  var utils = require('../utils');
-  var Key = require('../key');
-  var PrivateKey = require('../private-key');
-  var pem = require('./pem');
+  var assert = require("assert-plus");
+  var asn1 = require("asn1");
+  var algs = require("../algs");
+  var utils = require("../utils");
+  var Key = require("../key");
+  var PrivateKey = require("../private-key");
+  var pem = require("./pem");
   function read(buf, options) {
     return (pem.read(buf, options, 'pkcs8'));
   }
@@ -432,4 +432,4 @@
     der.endSequence();
     der.endSequence();
   }
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

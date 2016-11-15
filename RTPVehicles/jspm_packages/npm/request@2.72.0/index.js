@@ -1,8 +1,8 @@
 /* */ 
 'use strict';
-var extend = require('extend'),
-    cookies = require('./lib/cookies'),
-    helpers = require('./lib/helpers');
+var extend = require("extend"),
+    cookies = require("./lib/cookies"),
+    helpers = require("./lib/helpers");
 var isFunction = helpers.isFunction,
     paramsHaveRequestBody = helpers.paramsHaveRequestBody;
 function initParams(uri, options, callback) {
@@ -95,7 +95,7 @@ request.forever = function(agentOptions, optionsArg) {
   return request.defaults(options);
 };
 module.exports = request;
-request.Request = require('./request');
+request.Request = require("./request");
 request.initParams = initParams;
 Object.defineProperty(request, 'debug', {
   enumerable: true,

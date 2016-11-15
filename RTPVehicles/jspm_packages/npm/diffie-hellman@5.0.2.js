@@ -1,1 +1,1 @@
-module.exports = require("npm:diffie-hellman@5.0.2/browser.js");
+module.exports = require("npm:diffie-hellman@5.0.2/browser");

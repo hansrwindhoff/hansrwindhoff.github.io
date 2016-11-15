@@ -1,5 +1,5 @@
 /* */ 
-var util = require('util');
+var util = require("util");
 var INDENT_START = /[\{\[]/;
 var INDENT_END = /[\}\]]/;
 module.exports = function() {

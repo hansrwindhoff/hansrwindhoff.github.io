@@ -1,8 +1,8 @@
 /* */ 
-var window = require('global/window');
-var test = require('tape');
-var forEach = require('for-each');
-var xhr = require('../index');
+var window = require("global/window");
+var test = require("tape");
+var forEach = require("for-each");
+var xhr = require("../index");
 test("constructs and calls callback without throwing", function(assert) {
   xhr({}, function(err, resp, body) {
     assert.ok(true, "got here");

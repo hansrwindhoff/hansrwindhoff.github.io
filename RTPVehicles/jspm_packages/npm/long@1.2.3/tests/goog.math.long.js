@@ -398,4 +398,4 @@
     }
   };
   module.exports = goog.math.Long;
-})(require('process'));
+})(require("process"));

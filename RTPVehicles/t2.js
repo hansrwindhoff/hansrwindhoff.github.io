@@ -1,17 +1,17 @@
-System.register(['xhr', 'leaflet'], function(exports_1, context_1) {
+System.register(["xhr", "leaflet"], function (exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
-    var xhr_1, L;
-    var realTimeRtdPos;
+    var xhr_1, leaflet_1, realTimeRtdPos;
     return {
-        setters:[
+        setters: [
             function (xhr_1_1) {
                 xhr_1 = xhr_1_1;
             },
-            function (L_1) {
-                L = L_1;
-            }],
-        execute: function() {
+            function (leaflet_1_1) {
+                leaflet_1 = leaflet_1_1;
+            }
+        ],
+        execute: function () {
             (function (realTimeRtdPos) {
                 var app = {};
                 app.positions = [];
@@ -20,12 +20,13 @@ System.register(['xhr', 'leaflet'], function(exports_1, context_1) {
                 var markers = [];
                 var drawingPins = false;
                 var map;
-                var polTime = 33000;
+                var polTime = 4000;
+                var intervalID;
                 var countDownSteps = polTime / 1000;
                 var countDownInterval;
                 var counterdown = countDownSteps;
-                var myLocation = new L.LatLng(39.735, -104.99);
-                var redIcon = L.icon({
+                var myLocation = new leaflet_1.default.LatLng(39.735, -104.99);
+                var redIcon = leaflet_1.default.icon({
                     iconUrl: 'marker-icon-red.png',
                     iconSize: [30, 50],
                     iconAnchor: [15, 50],
@@ -50,11 +51,11 @@ System.register(['xhr', 'leaflet'], function(exports_1, context_1) {
                         if (currentMeMarker) {
                             map.removeLayer(currentMeMarker);
                         }
-                        currentMeMarker = L.marker(myLocation, { icon: redIcon }).addTo(map);
+                        currentMeMarker = leaflet_1.default.marker(myLocation, { icon: redIcon }).addTo(map);
                         if (app.positions.ready) {
                             app.positions.forEach(function (pos) {
-                                if (bounds_1.contains(L.latLng(pos.lat, pos.long))) {
-                                    var mtemp = L.marker([pos.lat, pos.long]);
+                                if (bounds_1.contains(leaflet_1.default.latLng(pos.lat, pos.long))) {
+                                    var mtemp = leaflet_1.default.marker([pos.lat, pos.long]);
                                     markers.push(mtemp);
                                     mtemp.addTo(map)
                                         .bindPopup(pos.line);
@@ -93,6 +94,11 @@ System.register(['xhr', 'leaflet'], function(exports_1, context_1) {
                                 feed.forEach(function (entity) {
                                     app.positions.push(entity);
                                 });
+                                clearInterval(intervalID);
+                                polTime = 33000;
+                                countDownSteps = polTime / 1000;
+                                counterdown = countDownSteps;
+                                intervalID = setInterval(getNewPositions, polTime);
                                 app.positions.ready = true;
                                 removePins();
                                 redrawPins();
@@ -117,12 +123,12 @@ System.register(['xhr', 'leaflet'], function(exports_1, context_1) {
                     if (!mapStarted) {
                         mapStarted = true;
                         document.getElementById("infotext").style.visibility = "hidden";
-                        map = L.map('map').setView(startLoc, 15);
-                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        map = leaflet_1.default.map('map').setView(startLoc, 15);
+                        leaflet_1.default.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                             attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
                         }).addTo(map);
                         getNewPositions();
-                        setInterval(getNewPositions, polTime);
+                        intervalID = setInterval(getNewPositions, polTime);
                         map.on('dragend zoomend', function (e) {
                             removePins();
                             redrawPins();
@@ -134,7 +140,7 @@ System.register(['xhr', 'leaflet'], function(exports_1, context_1) {
                     if ("geolocation" in navigator) {
                         navigator.geolocation.getCurrentPosition(function (position) {
                             var curLoc = [position.coords.latitude, position.coords.longitude];
-                            myLocation = new L.LatLng(position.coords.latitude, position.coords.longitude);
+                            myLocation = new leaflet_1.default.LatLng(position.coords.latitude, position.coords.longitude);
                             if (mapStarted) {
                                 map.setView(curLoc);
                                 document.getElementById("mapcenter").style.visibility = "visible";
@@ -161,7 +167,7 @@ System.register(['xhr', 'leaflet'], function(exports_1, context_1) {
                     if ("geolocation" in navigator) {
                         navigator.geolocation.getCurrentPosition(function (position) {
                             startLoc = [position.coords.latitude, position.coords.longitude];
-                            myLocation = new L.LatLng(position.coords.latitude, position.coords.longitude);
+                            myLocation = new leaflet_1.default.LatLng(position.coords.latitude, position.coords.longitude);
                             if (!mapStarted) {
                                 InitMapLoop(startLoc);
                             }
@@ -179,6 +185,6 @@ System.register(['xhr', 'leaflet'], function(exports_1, context_1) {
                 })();
             })(realTimeRtdPos || (realTimeRtdPos = {}));
         }
-    }
+    };
 });
 //# sourceMappingURL=t2.js.map

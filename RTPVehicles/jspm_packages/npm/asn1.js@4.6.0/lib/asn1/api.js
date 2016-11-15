@@ -1,6 +1,6 @@
 /* */ 
-var asn1 = require('../asn1');
-var inherits = require('inherits');
+var asn1 = require("../asn1");
+var inherits = require("inherits");
 var api = exports;
 api.define = function define(name, body) {
   return new Entity(name, body);
@@ -15,7 +15,7 @@ function Entity(name, body) {
 Entity.prototype._createNamed = function createNamed(base) {
   var named;
   try {
-    named = require('vm').runInThisContext('(function ' + this.name + '(entity) {\n' + '  this._initNamed(entity);\n' + '})');
+    named = require("vm").runInThisContext('(function ' + this.name + '(entity) {\n' + '  this._initNamed(entity);\n' + '})');
   } catch (e) {
     named = function(entity) {
       this._initNamed(entity);

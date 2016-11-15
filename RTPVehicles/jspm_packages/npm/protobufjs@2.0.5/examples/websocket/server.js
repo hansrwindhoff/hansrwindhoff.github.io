@@ -1,11 +1,11 @@
 /* */ 
 (function(process) {
-  var http = require('http'),
-      fs = require('fs'),
-      path = require('path'),
-      ws = require('ws'),
-      open = require('./node_modules/open/lib/open'),
-      ProtoBuf = require('../../ProtoBuf');
+  var http = require("http"),
+      fs = require("fs"),
+      path = require("path"),
+      ws = require("ws"),
+      open = require("./node_modules/open/lib/open"),
+      ProtoBuf = require("../../ProtoBuf");
   var deps = [["Long.min.js", "./node_modules/protobufjs/node_modules/bytebuffer/node_modules/long/Long.min.js"], ["ByteBuffer.min.js", "./node_modules/protobufjs/node_modules/bytebuffer/ByteBuffer.min.js"], ["ProtoBuf.min.js", "./node_modules/protobufjs/ProtoBuf.min.js"]];
   for (var i = 0,
       dep,
@@ -83,4 +83,4 @@
       }
     });
   });
-})(require('process'));
+})(require("process"));

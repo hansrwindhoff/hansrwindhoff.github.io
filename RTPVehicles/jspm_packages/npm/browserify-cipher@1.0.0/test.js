@@ -1,10 +1,10 @@
 /* */ 
 (function(Buffer) {
-  var test = require('tape');
-  var crypto = require('crypto');
-  var desModes = require('browserify-des/modes');
-  var aesModes = require('browserify-aes/modes');
-  var ourCrypto = require('./browser');
+  var test = require("tape");
+  var crypto = require("crypto");
+  var desModes = require("browserify-des/modes");
+  var aesModes = require("browserify-aes/modes");
+  var ourCrypto = require("./browser");
   function runIvTest(mode, keyLen, ivLen) {
     test('mode: ' + mode, function(t) {
       var i = 0;
@@ -54,4 +54,4 @@
     var mode = desModes[modeName];
     runIvTest(modeName, mode.key, mode.iv);
   });
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

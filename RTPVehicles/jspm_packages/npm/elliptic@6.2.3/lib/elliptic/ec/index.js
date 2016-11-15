@@ -1,11 +1,11 @@
 /* */ 
 'use strict';
-var BN = require('bn.js');
-var elliptic = require('../../elliptic');
+var BN = require("bn.js");
+var elliptic = require("../../elliptic");
 var utils = elliptic.utils;
 var assert = utils.assert;
-var KeyPair = require('./key');
-var Signature = require('./signature');
+var KeyPair = require("./key");
+var Signature = require("./signature");
 function EC(options) {
   if (!(this instanceof EC))
     return new EC(options);

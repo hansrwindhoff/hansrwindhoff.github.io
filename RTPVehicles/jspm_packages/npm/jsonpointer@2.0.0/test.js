@@ -1,6 +1,6 @@
 /* */ 
-var assert = require('assert');
-var jsonpointer = require('./jsonpointer');
+var assert = require("assert");
+var jsonpointer = require("./jsonpointer");
 var obj = {
   a: 1,
   b: {c: 2},

@@ -4,12 +4,12 @@
     read: read,
     write: write
   };
-  var assert = require('assert-plus');
-  var rfc4253 = require('./rfc4253');
-  var utils = require('../utils');
-  var Key = require('../key');
-  var PrivateKey = require('../private-key');
-  var sshpriv = require('./ssh-private');
+  var assert = require("assert-plus");
+  var rfc4253 = require("./rfc4253");
+  var utils = require("../utils");
+  var Key = require("../key");
+  var PrivateKey = require("../private-key");
+  var sshpriv = require("./ssh-private");
   var SSHKEY_RE = /^([a-z0-9-]+)[ \t]+([a-zA-Z0-9+\/]+[=]*)([\n \t]+([^\n]+))?$/;
   var SSHKEY_RE2 = /^([a-z0-9-]+)[ \t]+([a-zA-Z0-9+\/ \t\n]+[=]*)(.*)$/;
   function read(buf, options) {
@@ -70,4 +70,4 @@
       parts.push(key.comment);
     return (new Buffer(parts.join(' ')));
   }
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

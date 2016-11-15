@@ -1,9 +1,9 @@
 /* */ 
-var Url = require('url');
-var Hoek = require('hoek');
-var Cryptiles = require('cryptiles');
-var Crypto = require('./crypto');
-var Utils = require('./utils');
+var Url = require("url");
+var Hoek = require("hoek");
+var Cryptiles = require("cryptiles");
+var Crypto = require("./crypto");
+var Utils = require("./utils");
 var internals = {};
 exports.header = function(uri, method, options) {
   var result = {

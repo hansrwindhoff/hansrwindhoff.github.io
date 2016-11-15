@@ -10,4 +10,4 @@
   var console = {};
   console.log = function(s) {};
   var module = {};
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

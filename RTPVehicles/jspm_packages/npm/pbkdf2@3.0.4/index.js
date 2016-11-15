@@ -1,9 +1,9 @@
 /* */ 
 (function(Buffer) {
-  var compat = require('./browser');
-  var crypto = require('crypto');
-  var fork = require('child_process').fork;
-  var path = require('path');
+  var compat = require("./browser");
+  var crypto = require("crypto");
+  var fork = require("child_process").fork;
+  var path = require("path");
   var MAX_ALLOC = Math.pow(2, 30) - 1;
   function asyncPBKDF2(password, salt, iterations, keylen, digest, callback) {
     if (typeof iterations !== 'number') {
@@ -75,4 +75,4 @@
     }
     return isNode10Result;
   }
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

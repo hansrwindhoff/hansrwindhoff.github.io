@@ -1,1 +1,1 @@
-module.exports = require("npm:dashdash@1.13.1/lib/dashdash.js");
+module.exports = require("npm:dashdash@1.13.1/lib/dashdash");

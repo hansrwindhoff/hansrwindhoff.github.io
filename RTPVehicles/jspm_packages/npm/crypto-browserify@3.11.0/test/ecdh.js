@@ -1,9 +1,9 @@
 /* */ 
 var mods = ['secp256k1', 'secp224r1', 'prime256v1', 'prime192v1'];
-var test = require('tape');
-var _crypto = require('../index');
+var test = require("tape");
+var _crypto = require("../index");
 var createECDH1 = _crypto.createECDH;
-var createECDH2 = require('create-ecdh/browser');
+var createECDH2 = require("create-ecdh/browser");
 mods.forEach(function(mod) {
   test('createECDH: ' + mod + ' uncompressed', function(t) {
     t.plan(2);

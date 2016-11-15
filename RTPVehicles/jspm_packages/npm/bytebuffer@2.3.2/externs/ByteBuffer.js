@@ -111,4 +111,4 @@
   ByteBuffer.decodeBinary = function(str, littleEndian) {};
   ByteBuffer.MAX_VARINT32_BYTES = 5;
   ByteBuffer.MAX_VARINT64_BYTES = 10;
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

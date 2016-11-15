@@ -1,8 +1,8 @@
 /* */ 
 (function(Buffer) {
-  var util = require('util');
-  var Stream = require('stream');
-  var StringDecoder = require('string_decoder').StringDecoder;
+  var util = require("util");
+  var Stream = require("stream");
+  var StringDecoder = require("string_decoder").StringDecoder;
   module.exports = StringStream;
   module.exports.AlignedStringDecoder = AlignedStringDecoder;
   function StringStream(from, to) {
@@ -44,7 +44,7 @@
   };
   StringStream.prototype.end = function() {
     if (!this.writable && !this.readable)
-      return;
+      return ;
     this.flush();
     this.emit('end');
     this.writable = this.readable = false;
@@ -92,4 +92,4 @@
     this.alignedBytes = rem;
     return returnBuffer.toString(this.encoding);
   }
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

@@ -42,7 +42,7 @@
         callback = null;
       if (Util.IS_NODE) {
         if (callback) {
-          require('fs').readFile(path, function(err, data) {
+          require("fs").readFile(path, function(err, data) {
             if (err) {
               callback(null);
             } else
@@ -50,7 +50,7 @@
           });
         } else {
           try {
-            return require('fs').readFileSync(path);
+            return require("fs").readFileSync(path);
           } catch (e) {
             return null;
           }
@@ -64,7 +64,7 @@
         if (callback) {
           xhr.onreadystatechange = function() {
             if (xhr.readyState != 4)
-              return;
+              return ;
             if (xhr.status == 200 || (xhr.status == 0 && typeof xhr.responseText === 'string')) {
               callback(xhr.responseText);
             } else {
@@ -72,7 +72,7 @@
             }
           };
           if (xhr.readyState == 4)
-            return;
+            return ;
           xhr.send(null);
         } else {
           xhr.send(null);
@@ -94,4 +94,4 @@
     };
     return Util;
   })();
-})(require('process'));
+})(require("process"));

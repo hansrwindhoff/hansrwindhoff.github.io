@@ -1,10 +1,10 @@
 /* */ 
 (function(process) {
   'use strict';
-  var fs = require('fs');
-  var qs = require('querystring');
-  var validate = require('har-validator');
-  var extend = require('extend');
+  var fs = require("fs");
+  var qs = require("querystring");
+  var validate = require("har-validator");
+  var extend = require("extend");
   function Har(request) {
     this.request = request;
   }
@@ -117,7 +117,7 @@
         var attachment = {};
         if (!param.fileName && !param.fileName && !param.contentType) {
           options.formData[param.name] = param.value;
-          return;
+          return ;
         }
         if (param.fileName && !param.value) {
           attachment.value = fs.createReadStream(param.fileName);
@@ -140,4 +140,4 @@
     return options;
   };
   exports.Har = Har;
-})(require('process'));
+})(require("process"));

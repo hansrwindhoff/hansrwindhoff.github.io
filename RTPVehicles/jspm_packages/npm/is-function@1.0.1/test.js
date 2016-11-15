@@ -1,6 +1,6 @@
 /* */ 
-var test = require('tape');
-var isFunction = require('./index');
+var test = require("tape");
+var isFunction = require("./index");
 test('isFunction', function(t) {
   t.ok(!isFunction(), 'undefined is not a function');
   t.ok(!isFunction(null), 'null is not a function');

@@ -1,5 +1,5 @@
 /* */ 
-var ecc = require('./index');
+var ecc = require("./index");
 var key1 = new ecc.ECKey(ecc.ECCurves.secp160r1);
 var key2 = new ecc.ECKey(ecc.ECCurves.secp160r1);
 console.log(key1.deriveSharedSecret(key2));

@@ -1,11 +1,11 @@
 /* */ 
 (function(process) {
   'use strict';
-  var escapeStringRegexp = require('escape-string-regexp');
-  var ansiStyles = require('ansi-styles');
-  var stripAnsi = require('strip-ansi');
-  var hasAnsi = require('has-ansi');
-  var supportsColor = require('supports-color');
+  var escapeStringRegexp = require("escape-string-regexp");
+  var ansiStyles = require("ansi-styles");
+  var stripAnsi = require("strip-ansi");
+  var hasAnsi = require("has-ansi");
+  var supportsColor = require("supports-color");
   var defineProps = Object.defineProperties;
   var isSimpleWindowsTerm = process.platform === 'win32' && !/^xterm/i.test(process.env.TERM);
   function Chalk(options) {
@@ -74,4 +74,4 @@
   module.exports.hasColor = hasAnsi;
   module.exports.stripColor = stripAnsi;
   module.exports.supportsColor = supportsColor;
-})(require('process'));
+})(require("process"));

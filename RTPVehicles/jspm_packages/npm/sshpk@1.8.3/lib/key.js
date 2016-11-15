@@ -1,29 +1,29 @@
 /* */ 
 (function(Buffer) {
   module.exports = Key;
-  var assert = require('assert-plus');
-  var algs = require('./algs');
-  var crypto = require('crypto');
-  var Fingerprint = require('./fingerprint');
-  var Signature = require('./signature');
-  var DiffieHellman = require('./dhe');
-  var errs = require('./errors');
-  var utils = require('./utils');
-  var PrivateKey = require('./private-key');
+  var assert = require("assert-plus");
+  var algs = require("./algs");
+  var crypto = require("crypto");
+  var Fingerprint = require("./fingerprint");
+  var Signature = require("./signature");
+  var DiffieHellman = require("./dhe");
+  var errs = require("./errors");
+  var utils = require("./utils");
+  var PrivateKey = require("./private-key");
   var edCompat;
   try {
-    edCompat = require('./ed-compat');
+    edCompat = require("./ed-compat");
   } catch (e) {}
   var InvalidAlgorithmError = errs.InvalidAlgorithmError;
   var KeyParseError = errs.KeyParseError;
   var formats = {};
-  formats['auto'] = require('./formats/auto');
-  formats['pem'] = require('./formats/pem');
-  formats['pkcs1'] = require('./formats/pkcs1');
-  formats['pkcs8'] = require('./formats/pkcs8');
-  formats['rfc4253'] = require('./formats/rfc4253');
-  formats['ssh'] = require('./formats/ssh');
-  formats['ssh-private'] = require('./formats/ssh-private');
+  formats['auto'] = require("./formats/auto");
+  formats['pem'] = require("./formats/pem");
+  formats['pkcs1'] = require("./formats/pkcs1");
+  formats['pkcs8'] = require("./formats/pkcs8");
+  formats['rfc4253'] = require("./formats/rfc4253");
+  formats['ssh'] = require("./formats/ssh");
+  formats['ssh-private'] = require("./formats/ssh-private");
   formats['openssh'] = formats['ssh-private'];
   function Key(opts) {
     assert.object(opts, 'options');
@@ -211,4 +211,4 @@
       return ([1, 1]);
     return ([1, 0]);
   };
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

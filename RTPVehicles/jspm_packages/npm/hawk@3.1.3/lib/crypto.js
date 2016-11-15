@@ -1,7 +1,7 @@
 /* */ 
-var Crypto = require('crypto');
-var Url = require('url');
-var Utils = require('./utils');
+var Crypto = require("crypto");
+var Url = require("url");
+var Utils = require("./utils");
 var internals = {};
 exports.headerVersion = '1';
 exports.algorithms = ['sha1', 'sha256'];

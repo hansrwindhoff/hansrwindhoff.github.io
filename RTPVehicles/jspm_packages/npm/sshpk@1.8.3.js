@@ -1,1 +1,1 @@
-module.exports = require("npm:sshpk@1.8.3/lib/index.js");
+module.exports = require("npm:sshpk@1.8.3/lib/index");

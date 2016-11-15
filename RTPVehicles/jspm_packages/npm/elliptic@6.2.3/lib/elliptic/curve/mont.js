@@ -1,10 +1,10 @@
 /* */ 
 'use strict';
-var curve = require('./index');
-var BN = require('bn.js');
-var inherits = require('inherits');
+var curve = require("./index");
+var BN = require("bn.js");
+var inherits = require("inherits");
 var Base = curve.base;
-var elliptic = require('../../elliptic');
+var elliptic = require("../../elliptic");
 var utils = elliptic.utils;
 function MontCurve(conf) {
   Base.call(this, 'mont', conf);

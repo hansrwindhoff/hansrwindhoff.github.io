@@ -1,7 +1,7 @@
 /* */ 
 'use strict';
-var BN = require('bn.js');
-var elliptic = require('../../elliptic');
+var BN = require("bn.js");
+var elliptic = require("../../elliptic");
 var utils = elliptic.utils;
 var assert = utils.assert;
 var cachedProperty = utils.cachedProperty;

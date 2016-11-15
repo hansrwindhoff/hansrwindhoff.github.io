@@ -1,11 +1,11 @@
 /* */ 
 (function(Buffer) {
   'use strict';
-  var assert = require('assert');
-  var crypto = require('crypto');
-  var Buffer = require('buffer').Buffer;
-  var des = require('../lib/des');
-  var fixtures = require('./fixtures');
+  var assert = require("assert");
+  var crypto = require("crypto");
+  var Buffer = require("buffer").Buffer;
+  var des = require("../lib/des");
+  var fixtures = require("./fixtures");
   var bin = fixtures.bin;
   describe('DES-CBC', function() {
     var CBC = des.CBC.instantiate(des.DES);
@@ -55,4 +55,4 @@
       });
     });
   });
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

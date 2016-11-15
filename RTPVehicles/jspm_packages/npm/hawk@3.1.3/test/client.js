@@ -1,8 +1,8 @@
 /* */ 
-var Url = require('url');
-var Code = require('code');
-var Hawk = require('../lib/index');
-var Lab = require('lab');
+var Url = require("url");
+var Code = require("code");
+var Hawk = require("../lib/index");
+var Lab = require("lab");
 var internals = {};
 var lab = exports.lab = Lab.script();
 var describe = lab.experiment;

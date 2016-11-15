@@ -1,9 +1,9 @@
 /* */ 
 (function(Buffer) {
   "use strict";
-  var core = require('./core');
-  var utils = require('./utils');
-  var curve255 = require('./curve255');
+  var core = require("./core");
+  var utils = require("./utils");
+  var curve255 = require("./curve255");
   var ns = {};
   function _toString(vector) {
     var u = new Uint16Array(vector);
@@ -36,4 +36,4 @@
     return core.generateKey(true);
   };
   module.exports = ns;
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

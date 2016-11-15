@@ -1,10 +1,10 @@
 /* */ 
 (function(process) {
   "use strict";
-  var window = require('global/window');
-  var isFunction = require('is-function');
-  var parseHeaders = require('parse-headers');
-  var xtend = require('xtend');
+  var window = require("global/window");
+  var isFunction = require("is-function");
+  var parseHeaders = require("parse-headers");
+  var xtend = require("xtend");
   module.exports = createXHR;
   createXHR.XMLHttpRequest = window.XMLHttpRequest || noop;
   createXHR.XDomainRequest = "withCredentials" in (new createXHR.XMLHttpRequest()) ? createXHR.XMLHttpRequest : window.XDomainRequest;
@@ -92,7 +92,7 @@
     }
     function loadFunc() {
       if (aborted)
-        return;
+        return ;
       var status;
       clearTimeout(timeoutTimer);
       if (options.useXDR && xhr.status === undefined) {
@@ -191,4 +191,4 @@
     return null;
   }
   function noop() {}
-})(require('process'));
+})(require("process"));

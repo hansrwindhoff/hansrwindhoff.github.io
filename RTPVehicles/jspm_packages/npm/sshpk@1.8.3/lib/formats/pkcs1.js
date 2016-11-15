@@ -6,14 +6,14 @@
     write: write,
     writePkcs1: writePkcs1
   };
-  var assert = require('assert-plus');
-  var asn1 = require('asn1');
-  var algs = require('../algs');
-  var utils = require('../utils');
-  var Key = require('../key');
-  var PrivateKey = require('../private-key');
-  var pem = require('./pem');
-  var pkcs8 = require('./pkcs8');
+  var assert = require("assert-plus");
+  var asn1 = require("asn1");
+  var algs = require("../algs");
+  var utils = require("../utils");
+  var Key = require("../key");
+  var PrivateKey = require("../private-key");
+  var pem = require("./pem");
+  var pkcs8 = require("./pkcs8");
   var readECDSACurve = pkcs8.readECDSACurve;
   function read(buf, options) {
     return (pem.read(buf, options, 'pkcs1'));
@@ -301,4 +301,4 @@
     der.writeBuffer(Q, asn1.Ber.BitString);
     der.endSequence();
   }
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

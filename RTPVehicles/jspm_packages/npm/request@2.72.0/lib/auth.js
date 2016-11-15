@@ -1,8 +1,8 @@
 /* */ 
 'use strict';
-var caseless = require('caseless'),
-    uuid = require('node-uuid'),
-    helpers = require('./helpers');
+var caseless = require("caseless"),
+    uuid = require("node-uuid"),
+    helpers = require("./helpers");
 var md5 = helpers.md5,
     toBase64 = helpers.toBase64;
 function Auth(request) {

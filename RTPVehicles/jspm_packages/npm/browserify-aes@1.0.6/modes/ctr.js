@@ -1,6 +1,6 @@
 /* */ 
 (function(Buffer) {
-  var xor = require('buffer-xor');
+  var xor = require("buffer-xor");
   function incr32(iv) {
     var len = iv.length;
     var item;
@@ -28,4 +28,4 @@
     self._cache = self._cache.slice(chunk.length);
     return xor(chunk, pad);
   };
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

@@ -1,9 +1,9 @@
 /* */ 
 (function(Buffer) {
   'use strict';
-  var uuid = require('node-uuid'),
-      CombinedStream = require('combined-stream'),
-      isstream = require('isstream');
+  var uuid = require("node-uuid"),
+      CombinedStream = require("combined-stream"),
+      isstream = require("isstream");
   function Multipart(request) {
     this.request = request;
     this.boundary = uuid();
@@ -67,7 +67,7 @@
       var preamble = '--' + self.boundary + '\r\n';
       Object.keys(part).forEach(function(key) {
         if (key === 'body') {
-          return;
+          return ;
         }
         preamble += key + ': ' + part[key] + '\r\n';
       });
@@ -91,4 +91,4 @@
     self.body = self.build(parts, chunked);
   };
   exports.Multipart = Multipart;
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

@@ -1,8 +1,8 @@
 /* */ 
 (function(process) {
-  var Http = require('http');
-  var Request = require('request');
-  var Hawk = require('../lib/index');
+  var Http = require("http");
+  var Request = require("request");
+  var Hawk = require("../lib/index");
   var internals = {credentials: {dh37fgj492je: {
         id: 'dh37fgj492je',
         key: 'werxhqb98rpaxn39848xrunpaw3489ruxnpa98w4rxn',
@@ -46,4 +46,4 @@
       process.exit(0);
     });
   });
-})(require('process'));
+})(require("process"));

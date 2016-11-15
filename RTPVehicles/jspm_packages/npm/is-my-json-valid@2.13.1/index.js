@@ -1,9 +1,9 @@
 /* */ 
-var genobj = require('generate-object-property');
-var genfun = require('generate-function');
-var jsonpointer = require('jsonpointer');
-var xtend = require('xtend');
-var formats = require('./formats');
+var genobj = require("generate-object-property");
+var genfun = require("generate-function");
+var jsonpointer = require("jsonpointer");
+var xtend = require("xtend");
+var formats = require("./formats");
 var get = function(obj, additionalSchemas, ptr) {
   var visit = function(sub) {
     if (sub && sub.id === ptr)

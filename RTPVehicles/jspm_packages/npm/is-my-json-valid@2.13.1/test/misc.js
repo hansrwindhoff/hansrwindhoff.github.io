@@ -1,8 +1,8 @@
 /* */ 
-var tape = require('tape');
-var cosmic = require('./fixtures/cosmic');
-var validator = require('../index');
-var validatorRequire = require('../require');
+var tape = require("tape");
+var cosmic = require("./fixtures/cosmic");
+var validator = require("../index");
+var validatorRequire = require("../require");
 tape('simple', function(t) {
   var schema = {
     required: true,

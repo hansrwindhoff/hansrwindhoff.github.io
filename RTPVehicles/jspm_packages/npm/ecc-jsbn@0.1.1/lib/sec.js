@@ -1,6 +1,6 @@
 /* */ 
-var BigInteger = require('jsbn').BigInteger;
-var ECCurveFp = require('./ec').ECCurveFp;
+var BigInteger = require("jsbn").BigInteger;
+var ECCurveFp = require("./ec").ECCurveFp;
 function X9ECParameters(curve, g, n, h) {
   this.curve = curve;
   this.g = g;

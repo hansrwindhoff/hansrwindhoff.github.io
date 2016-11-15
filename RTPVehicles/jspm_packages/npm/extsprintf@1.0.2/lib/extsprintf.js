@@ -1,6 +1,6 @@
 /* */ 
-var mod_assert = require('assert');
-var mod_util = require('util');
+var mod_assert = require("assert");
+var mod_util = require("util");
 exports.sprintf = jsSprintf;
 function jsSprintf(fmt) {
   var regex = ['([^%]*)', '%', '([\'\\-+ #0]*?)', '([1-9]\\d*)?', '(\\.([1-9]\\d*))?', '[lhjztL]*?', '([diouxXfFeEgGaAcCsSp%jr])'].join('');

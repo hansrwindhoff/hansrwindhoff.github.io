@@ -457,7 +457,7 @@
           for (var i = 0; i < listeners.length; i += 1) {
             if (listeners[i] === fn) {
               listeners.splice(i, 1);
-              return;
+              return ;
             }
           }
         };
@@ -789,7 +789,7 @@
       var Buffer = null;
       if (typeof require !== 'undefined' && typeof process !== 'undefined') {
         try {
-          Buffer = require('buffer').Buffer;
+          Buffer = require("buffer").Buffer;
         } catch (e) {
           Buffer = null;
         }
@@ -1286,4 +1286,4 @@
     nodeunit.run = reporter.run;
     return nodeunit;
   })();
-})(require('buffer').Buffer, require('process'));
+})(require("buffer").Buffer, require("process"));

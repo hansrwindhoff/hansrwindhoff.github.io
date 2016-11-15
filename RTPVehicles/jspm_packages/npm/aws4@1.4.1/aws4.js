@@ -1,10 +1,10 @@
 /* */ 
 (function(Buffer, process) {
   var aws4 = exports,
-      url = require('url'),
-      querystring = require('querystring'),
-      crypto = require('crypto'),
-      lru = require('./lru'),
+      url = require("url"),
+      querystring = require("querystring"),
+      crypto = require("crypto"),
+      lru = require("./lru"),
       credentialsCache = lru(1000);
   function hmac(key, string, encoding) {
     return crypto.createHmac('sha256', key).update(string, 'utf8').digest(encoding);
@@ -233,4 +233,4 @@
   aws4.sign = function(request, credentials) {
     return new RequestSigner(request, credentials).sign();
   };
-})(require('buffer').Buffer, require('process'));
+})(require("buffer").Buffer, require("process"));

@@ -1,1 +1,1 @@
-module.exports = require("npm:stringstream@0.0.5/stringstream.js");
+module.exports = require("npm:stringstream@0.0.5/stringstream");

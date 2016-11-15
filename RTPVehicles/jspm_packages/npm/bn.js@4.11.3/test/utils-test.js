@@ -1,7 +1,7 @@
 /* */ 
 (function(Buffer) {
-  var assert = require('assert');
-  var BN = require('../lib/bn').BN;
+  var assert = require("assert");
+  var BN = require("../lib/bn").BN;
   describe('BN.js/Utils', function() {
     describe('.toString()', function() {
       describe('binary padding', function() {
@@ -291,4 +291,4 @@
       });
     });
   });
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

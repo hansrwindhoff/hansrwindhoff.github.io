@@ -1,10 +1,10 @@
 /* */ 
 (function(process) {
-  var mod_assert = require('assert');
-  var mod_util = require('util');
-  var mod_extsprintf = require('extsprintf');
-  var mod_verror = require('verror');
-  var mod_jsonschema = require('json-schema');
+  var mod_assert = require("assert");
+  var mod_util = require("util");
+  var mod_extsprintf = require("extsprintf");
+  var mod_verror = require("verror");
+  var mod_jsonschema = require("json-schema");
   exports.deepCopy = deepCopy;
   exports.deepEqual = deepEqual;
   exports.isEmpty = isEmpty;
@@ -113,7 +113,7 @@
       each = accum.slice(0);
       each.push(data);
       callback(each);
-      return;
+      return ;
     }
     mod_assert.ok(data !== null);
     mod_assert.equal(typeof(data), 'object');
@@ -264,4 +264,4 @@
     }
     return (rv);
   }
-})(require('process'));
+})(require("process"));

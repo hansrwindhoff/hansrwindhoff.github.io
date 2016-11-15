@@ -1,14 +1,14 @@
 /* */ 
 'use strict';
-var BN = require('bn.js');
-var elliptic = require('../../elliptic');
+var BN = require("bn.js");
+var elliptic = require("../../elliptic");
 var utils = elliptic.utils;
 var assert = utils.assert;
 function Signature(options, enc) {
   if (options instanceof Signature)
     return options;
   if (this._importDER(options, enc))
-    return;
+    return ;
   assert(options.r && options.s, 'Signature without r or s');
   this.r = new BN(options.r, 16);
   this.s = new BN(options.s, 16);
@@ -85,7 +85,7 @@ Signature.prototype._importDER = function _importDER(data, enc) {
 function constructLength(arr, len) {
   if (len < 0x80) {
     arr.push(len);
-    return;
+    return ;
   }
   var octets = 1 + (Math.log(len) / Math.LN2 >>> 3);
   arr.push(octets | 0x80);

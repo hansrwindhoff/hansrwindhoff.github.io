@@ -9,12 +9,12 @@
     keyTypeToAlg: keyTypeToAlg,
     algToKeyType: algToKeyType
   };
-  var assert = require('assert-plus');
-  var algs = require('../algs');
-  var utils = require('../utils');
-  var Key = require('../key');
-  var PrivateKey = require('../private-key');
-  var SSHBuffer = require('../ssh-buffer');
+  var assert = require("assert-plus");
+  var algs = require("../algs");
+  var utils = require("../utils");
+  var Key = require("../key");
+  var PrivateKey = require("../private-key");
+  var SSHBuffer = require("../ssh-buffer");
   function algToKeyType(alg) {
     assert.string(alg);
     if (alg === 'ssh-dss')
@@ -114,4 +114,4 @@
     }
     return (buf.toBuffer());
   }
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

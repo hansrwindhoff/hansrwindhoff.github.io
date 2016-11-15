@@ -1,9 +1,9 @@
 /* */ 
 'use strict';
-var assert = require('assert');
-var des = require('../lib/des');
+var assert = require("assert");
+var des = require("../lib/des");
 var utils = des.utils;
-var fixtures = require('./fixtures');
+var fixtures = require("./fixtures");
 var bin = fixtures.bin;
 describe('utils', function() {
   describe('IP', function() {

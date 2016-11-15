@@ -1,6 +1,6 @@
 /* */ 
-var tape = require('tape');
-var genfun = require('./index');
+var tape = require("tape");
+var genfun = require("./index");
 tape('generate add function', function(t) {
   var fn = genfun()('function add(n) {')('return n + %d', 42)('}');
   t.same(fn.toString(), 'function add(n) {\n  return n + 42\n}', 'code is indented');

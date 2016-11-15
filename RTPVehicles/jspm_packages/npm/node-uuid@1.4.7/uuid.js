@@ -40,7 +40,7 @@
     function setupNode() {
       if ('function' === typeof require) {
         try {
-          var _rb = require('crypto').randomBytes;
+          var _rb = require("crypto").randomBytes;
           _nodeRNG = _rng = _rb && function() {
             return _rb(16);
           };
@@ -165,4 +165,4 @@
       _window.uuid = uuid;
     }
   })('undefined' !== typeof window ? window : null);
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

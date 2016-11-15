@@ -1,11 +1,11 @@
 /* */ 
 (function(process) {
-  var concat = require('concat-stream');
-  var fs = require('fs');
-  var hyperquest = require('hyperquest');
-  var cp = require('child_process');
-  var split = require('split');
-  var through = require('through2');
+  var concat = require("concat-stream");
+  var fs = require("fs");
+  var hyperquest = require("hyperquest");
+  var cp = require("child_process");
+  var split = require("split");
+  var through = require("through2");
   var url = 'https://api.github.com/repos/nodejs/io.js/contents';
   var dirs = ['/test/parallel', '/test/pummel'];
   cp.execSync('rm -rf node/*.js', {cwd: __dirname + '/../test'});
@@ -23,12 +23,12 @@
   function downloadBufferTests(dir, files) {
     files.forEach(function(file) {
       if (!/test-buffer.*/.test(file.name))
-        return;
+        return ;
       var path;
       if (file.name === 'test-buffer-iterator.js' || file.name === 'test-buffer-arraybuffer.js') {
         path = __dirname + '/../test/node-es6/' + file.name;
       } else if (file.name === 'test-buffer-fakes.js') {
-        return;
+        return ;
       } else {
         path = __dirname + '/../test/node/' + file.name;
       }
@@ -71,4 +71,4 @@
       cb(null, line + '\n');
     });
   }
-})(require('process'));
+})(require("process"));

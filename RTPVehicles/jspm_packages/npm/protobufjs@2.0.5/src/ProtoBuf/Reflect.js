@@ -587,7 +587,7 @@
     };
     Field.prototype.encodeValue = function(value, buffer) {
       if (value === null)
-        return;
+        return ;
       if (this.type == ProtoBuf.TYPES["int32"] || this.type == ProtoBuf.TYPES["uint32"]) {
         buffer.writeVarint32(value);
       } else if (this.type == ProtoBuf.TYPES["sint32"]) {
@@ -781,14 +781,14 @@
                 this.rpcImpl(method.fqn(), req, function(err, res) {
                   if (err) {
                     callback(err);
-                    return;
+                    return ;
                   }
                   try {
                     res = method.resolvedResponseType.clazz.decode(res);
                   } catch (notABuffer) {}
                   if (!res || !(res instanceof method.resolvedResponseType.clazz)) {
                     callback(new Error("Illegal response type received in service method " + T.name + "#" + method.name));
-                    return;
+                    return ;
                   }
                   callback(null, res);
                 });
@@ -837,4 +837,4 @@
     Reflect.Service.RPCMethod = RPCMethod;
     return Reflect;
   })(ProtoBuf);
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

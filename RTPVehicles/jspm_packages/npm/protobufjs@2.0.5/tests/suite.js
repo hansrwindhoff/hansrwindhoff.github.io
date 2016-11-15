@@ -3,9 +3,9 @@
   var FILE = "ProtoBuf.js";
   var BROWSER = !!global.window;
   var ProtoBuf = BROWSER ? global.dcodeIO.ProtoBuf : require(__dirname + "/../" + FILE),
-      ByteBuffer = BROWSER ? global.dcodeIO.ByteBuffer : ByteBuffer || require('bytebuffer'),
-      util = BROWSER ? null : require('util'),
-      fs = BROWSER ? null : require('fs');
+      ByteBuffer = BROWSER ? global.dcodeIO.ByteBuffer : ByteBuffer || require("bytebuffer"),
+      util = BROWSER ? null : require("util"),
+      fs = BROWSER ? null : require("fs");
   if (typeof __dirname == 'undefined') {
     __dirname = document.location.href.replace(/[\/\\][^\/\\]*$/, "");
   }
@@ -1121,9 +1121,9 @@
     },
     "loaders": BROWSER ? {} : {
       "commonjs": function(test) {
-        var fs = require('fs'),
-            vm = require('vm'),
-            util = require('util');
+        var fs = require("fs"),
+            vm = require("vm"),
+            util = require("util");
         var code = fs.readFileSync(__dirname + "/../" + FILE);
         var sandbox = new Sandbox({
           module: {exports: {}},
@@ -1143,9 +1143,9 @@
         test.done();
       },
       "amd": function(test) {
-        var fs = require('fs'),
-            vm = require('vm'),
-            util = require('util');
+        var fs = require("fs"),
+            vm = require("vm"),
+            util = require("util");
         var code = fs.readFileSync(__dirname + "/../" + FILE);
         var sandbox = new Sandbox({define: (function() {
             function define() {
@@ -1160,9 +1160,9 @@
         test.done();
       },
       "shim": function(test) {
-        var fs = require('fs'),
-            vm = require('vm'),
-            util = require('util');
+        var fs = require("fs"),
+            vm = require("vm"),
+            util = require("util");
         var code = fs.readFileSync(__dirname + "/../" + FILE);
         var sandbox = new Sandbox({dcodeIO: {ByteBuffer: ByteBuffer}});
         vm.runInNewContext(code, sandbox, "ProtoBuf.js in shim-VM");

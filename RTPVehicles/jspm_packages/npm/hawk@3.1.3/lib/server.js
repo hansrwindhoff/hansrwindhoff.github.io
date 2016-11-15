@@ -1,10 +1,10 @@
 /* */ 
 (function(process) {
-  var Boom = require('boom');
-  var Hoek = require('hoek');
-  var Cryptiles = require('cryptiles');
-  var Crypto = require('./crypto');
-  var Utils = require('./utils');
+  var Boom = require("boom");
+  var Hoek = require("hoek");
+  var Cryptiles = require("cryptiles");
+  var Crypto = require("./crypto");
+  var Utils = require("./utils");
   var internals = {};
   exports.authenticate = function(req, credentialsFunc, options, callback) {
     callback = Hoek.nextTick(callback);
@@ -232,4 +232,4 @@
   internals.nonceFunc = function(key, nonce, ts, nonceCallback) {
     return nonceCallback();
   };
-})(require('process'));
+})(require("process"));

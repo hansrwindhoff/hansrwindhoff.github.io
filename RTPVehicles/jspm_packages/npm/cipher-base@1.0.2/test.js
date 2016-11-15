@@ -1,8 +1,8 @@
 /* */ 
 (function(Buffer) {
-  var test = require('tape');
-  var CipherBase = require('./index');
-  var inherits = require('inherits');
+  var test = require("tape");
+  var CipherBase = require("./index");
+  var inherits = require("inherits");
   test('basic version', function(t) {
     inherits(Cipher, CipherBase);
     function Cipher() {
@@ -98,4 +98,4 @@
       t.equals(txt, enc);
     });
   });
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

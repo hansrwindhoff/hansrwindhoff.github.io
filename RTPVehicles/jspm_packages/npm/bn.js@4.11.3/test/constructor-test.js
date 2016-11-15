@@ -1,7 +1,7 @@
 /* */ 
 (function(Buffer) {
-  var assert = require('assert');
-  var BN = require('../lib/bn').BN;
+  var assert = require("assert");
+  var BN = require("../lib/bn").BN;
   describe('BN.js/Constructor', function() {
     describe('with Smi input', function() {
       it('should accept one limb number', function() {
@@ -113,4 +113,4 @@
       });
     });
   });
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

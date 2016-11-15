@@ -1,9 +1,9 @@
 /* */ 
 (function(Buffer) {
-  var assert = require('assert');
-  var asn1 = require('../lib/asn1');
-  var BN = require('bn.js');
-  var Buffer = require('buffer').Buffer;
+  var assert = require("assert");
+  var asn1 = require("../lib/asn1");
+  var BN = require("bn.js");
+  var Buffer = require("buffer").Buffer;
   describe('asn1.js PEM encoder/decoder', function() {
     var model = asn1.define('Model', function() {
       this.seq().obj(this.key('a').int(), this.key('b').bitstr(), this.key('c').int());
@@ -30,4 +30,4 @@
       assert.equal(out.c.toString(), '456');
     });
   });
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

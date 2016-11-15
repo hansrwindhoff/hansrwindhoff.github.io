@@ -464,4 +464,4 @@
       global["dcodeIO"]["Long"] = Long;
     }
   })(this);
-})(require('process'));
+})(require("process"));

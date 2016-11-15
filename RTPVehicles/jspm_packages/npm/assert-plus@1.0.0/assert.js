@@ -1,8 +1,8 @@
 /* */ 
 (function(Buffer, process) {
-  var assert = require('assert');
-  var Stream = require('stream').Stream;
-  var util = require('util');
+  var assert = require("assert");
+  var Stream = require("stream").Stream;
+  var util = require("util");
   var UUID_REGEXP = /^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$/;
   function _capitalize(str) {
     return (str.charAt(0).toUpperCase() + str.slice(1));
@@ -94,7 +94,7 @@
     keys.forEach(function(k) {
       if (ndebug) {
         out[k] = noop;
-        return;
+        return ;
       }
       var type = types[k];
       out[k] = function(arg, msg) {
@@ -107,12 +107,12 @@
       var name = 'optional' + _capitalize(k);
       if (ndebug) {
         out[name] = noop;
-        return;
+        return ;
       }
       var type = types[k];
       out[name] = function(arg, msg) {
         if (arg === undefined || arg === null) {
-          return;
+          return ;
         }
         if (!type.check(arg)) {
           _toss(msg, k, type.operator, arg, type.actual);
@@ -123,7 +123,7 @@
       var name = 'arrayOf' + _capitalize(k);
       if (ndebug) {
         out[name] = noop;
-        return;
+        return ;
       }
       var type = types[k];
       var expected = '[' + k + ']';
@@ -143,13 +143,13 @@
       var name = 'optionalArrayOf' + _capitalize(k);
       if (ndebug) {
         out[name] = noop;
-        return;
+        return ;
       }
       var type = types[k];
       var expected = '[' + k + ']';
       out[name] = function(arg, msg) {
         if (arg === undefined || arg === null) {
-          return;
+          return ;
         }
         if (!Array.isArray(arg)) {
           _toss(msg, expected, type.operator, arg, type.actual);
@@ -165,11 +165,11 @@
     Object.keys(assert).forEach(function(k) {
       if (k === 'AssertionError') {
         out[k] = assert[k];
-        return;
+        return ;
       }
       if (ndebug) {
         out[k] = noop;
-        return;
+        return ;
       }
       out[k] = assert[k];
     });
@@ -177,4 +177,4 @@
     return out;
   }
   module.exports = _setExports(process.env.NODE_NDEBUG);
-})(require('buffer').Buffer, require('process'));
+})(require("buffer").Buffer, require("process"));

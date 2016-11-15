@@ -1,19 +1,22 @@
 System.config({
-  baseURL: ".",
-  defaultJSExtensions: true,
-  transpiler: "babel",
-  babelOptions: {
+  "baseURL": ".",
+  "transpiler": "babel",
+  "babelOptions": {
     "optional": [
       "runtime",
       "optimisation.modules.system"
     ]
   },
-  paths: {
-    "github:*": "jspm_packages/github/*",
-    "npm:*": "jspm_packages/npm/*"
+  "paths": {
+    "github:*": "jspm_packages/github/*.js",
+    "npm:*": "jspm_packages/npm/*.js",
+    "*": "*.js"
   },
+  "defaultJSExtensions": true
+});
 
-  map: {
+System.config({
+  "map": {
     "babel": "npm:babel-core@5.8.38",
     "babel-runtime": "npm:babel-runtime@5.8.38",
     "core-js": "npm:core-js@1.2.7",
@@ -392,6 +395,7 @@ System.config({
       "tty": "github:jspm/nodelibs-tty@0.1.0"
     },
     "npm:global@4.3.1": {
+      "min-document": "npm:min-document@2.19.0",
       "process": "npm:process@0.5.2"
     },
     "npm:graceful-readlink@1.0.1": {
@@ -495,6 +499,9 @@ System.config({
       "mime-db": "npm:mime-db@1.23.0",
       "path": "github:jspm/nodelibs-path@0.1.0"
     },
+    "npm:min-document@2.19.0": {
+      "dom-walk": "npm:dom-walk@0.1.1"
+    },
     "npm:node-uuid@1.4.7": {
       "buffer": "github:jspm/nodelibs-buffer@0.1.0",
       "crypto": "github:jspm/nodelibs-crypto@0.1.0"
@@ -540,9 +547,6 @@ System.config({
     },
     "npm:process-nextick-args@1.0.7": {
       "process": "github:jspm/nodelibs-process@0.1.2"
-    },
-    "npm:process@0.11.3": {
-      "assert": "github:jspm/nodelibs-assert@0.1.0"
     },
     "npm:process@0.11.9": {
       "assert": "github:jspm/nodelibs-assert@0.1.0",
@@ -686,7 +690,7 @@ System.config({
       "process": "github:jspm/nodelibs-process@0.1.2"
     },
     "npm:timers-browserify@1.4.2": {
-      "process": "npm:process@0.11.3"
+      "process": "npm:process@0.11.9"
     },
     "npm:tough-cookie@2.2.2": {
       "net": "github:jspm/nodelibs-net@0.1.2",
@@ -740,3 +744,4 @@ System.config({
     }
   }
 });
+

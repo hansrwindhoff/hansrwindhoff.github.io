@@ -1,13 +1,13 @@
 /* */ 
 (function(Buffer, process) {
   'use strict';
-  var net = require('net'),
-      tls = require('tls'),
-      http = require('http'),
-      https = require('https'),
-      events = require('events'),
-      assert = require('assert'),
-      util = require('util');
+  var net = require("net"),
+      tls = require("tls"),
+      http = require("http"),
+      https = require("https"),
+      events = require("events"),
+      assert = require("assert"),
+      util = require("util");
   ;
   exports.httpOverHttp = httpOverHttp;
   exports.httpsOverHttp = httpsOverHttp;
@@ -51,7 +51,7 @@
         if (pending.host === host && pending.port === port) {
           self.requests.splice(i, 1);
           pending.request.onSocket(socket);
-          return;
+          return ;
         }
       }
       socket.destroy();
@@ -74,7 +74,7 @@
         port: options.port,
         request: req
       });
-      return;
+      return ;
     }
     self.createConnection({
       host: options.host,
@@ -157,7 +157,7 @@
   TunnelingAgent.prototype.removeSocket = function removeSocket(socket) {
     var pos = this.sockets.indexOf(socket);
     if (pos === -1)
-      return;
+      return ;
     this.sockets.splice(pos, 1);
     var pending = this.requests.shift();
     if (pending) {
@@ -207,4 +207,4 @@
     debug = function() {};
   }
   exports.debug = debug;
-})(require('buffer').Buffer, require('process'));
+})(require("buffer").Buffer, require("process"));

@@ -1,6 +1,6 @@
 /* */ 
 var Long = require(__dirname + "/../index.js"),
-    gmLong = require('./goog.math.long');
+    gmLong = require("./goog.math.long");
 var suite = {
   "basic": function(test) {
     var longVal = new Long(0xFFFFFFFF, 0x7FFFFFFF);

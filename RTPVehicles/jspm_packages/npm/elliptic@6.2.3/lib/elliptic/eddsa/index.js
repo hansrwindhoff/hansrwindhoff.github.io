@@ -1,12 +1,12 @@
 /* */ 
 'use strict';
-var hash = require('hash.js');
-var elliptic = require('../../elliptic');
+var hash = require("hash.js");
+var elliptic = require("../../elliptic");
 var utils = elliptic.utils;
 var assert = utils.assert;
 var parseBytes = utils.parseBytes;
-var KeyPair = require('./key');
-var Signature = require('./signature');
+var KeyPair = require("./key");
+var Signature = require("./signature");
 function EDDSA(curve) {
   assert(curve === 'ed25519', 'only tested with ed25519 so far');
   if (!(this instanceof EDDSA))

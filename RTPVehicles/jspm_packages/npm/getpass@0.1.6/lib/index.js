@@ -1,9 +1,9 @@
 /* */ 
 (function(process) {
   module.exports = {getPass: getPass};
-  const mod_tty = require('tty');
-  const mod_fs = require('fs');
-  const mod_assert = require('assert-plus');
+  const mod_tty = require("tty");
+  const mod_fs = require("fs");
+  const mod_assert = require("assert-plus");
   var BACKSPACE = String.fromCharCode(127);
   var CTRLC = '\u0003';
   var CTRLD = '\u0004';
@@ -20,7 +20,7 @@
     openTTY(function(err, rfd, wfd, rtty, wtty) {
       if (err) {
         cb(err);
-        return;
+        return ;
       }
       wtty.write(opts.prompt + ':');
       rtty.resume();
@@ -39,11 +39,11 @@
             case CTRLD:
               cleanup();
               cb(null, pw);
-              return;
+              return ;
             case CTRLC:
               cleanup();
               cb(new Error('Aborted'));
-              return;
+              return ;
             case BACKSPACE:
               pw = pw.slice(0, pw.length - 1);
               break;
@@ -73,17 +73,17 @@
     mod_fs.open('/dev/tty', 'r+', function(err, rttyfd) {
       if ((err && (err.code === 'ENOENT' || err.code === 'EACCES')) || (process.version.match(/^v0[.][0-8][.]/))) {
         cb(null, undefined, undefined, process.stdin, process.stdout);
-        return;
+        return ;
       }
       var rtty = new mod_tty.ReadStream(rttyfd);
       mod_fs.open('/dev/tty', 'w+', function(err3, wttyfd) {
         var wtty = new mod_tty.WriteStream(wttyfd);
         if (err3) {
           cb(err3);
-          return;
+          return ;
         }
         cb(null, rttyfd, wttyfd, rtty, wtty);
       });
     });
   }
-})(require('process'));
+})(require("process"));

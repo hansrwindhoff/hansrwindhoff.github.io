@@ -1,7 +1,7 @@
 /* */ 
-var assert = require('assert-plus');
-var util = require('util');
-var utils = require('./utils');
+var assert = require("assert-plus");
+var util = require("util");
+var utils = require("./utils");
 var HASH_ALGOS = utils.HASH_ALGOS;
 var PK_ALGOS = utils.PK_ALGOS;
 var HttpSignatureError = utils.HttpSignatureError;

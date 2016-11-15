@@ -1,9 +1,9 @@
 /* */ 
 (function(Buffer) {
-  var test = require('tape');
-  var DES = require('./index');
-  var modes = require('./modes');
-  var crypto = require('crypto');
+  var test = require("tape");
+  var DES = require("./index");
+  var modes = require("./modes");
+  var crypto = require("crypto");
   Object.keys(modes).forEach(function(mode) {
     test(mode, function(t) {
       var i = 0;
@@ -47,4 +47,4 @@
       }
     });
   });
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

@@ -1,9 +1,9 @@
 /* */ 
 (function(Buffer) {
-  var assert = require('assert');
-  var asn1 = require('../lib/asn1');
-  var BN = require('bn.js');
-  var Buffer = require('buffer').Buffer;
+  var assert = require("assert");
+  var asn1 = require("../lib/asn1");
+  var BN = require("bn.js");
+  var Buffer = require("buffer").Buffer;
   describe('asn1.js DER encoder', function() {
     it('should code explicit tag as 0xA2', function() {
       var E = asn1.define('E', function() {
@@ -110,4 +110,4 @@
       assert.deepEqual(encoded, new Buffer('0101ff', 'hex'));
     });
   });
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

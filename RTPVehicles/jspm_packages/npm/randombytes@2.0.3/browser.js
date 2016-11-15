@@ -25,4 +25,4 @@
     }
     return bytes;
   }
-})(require('buffer').Buffer, require('process'));
+})(require("buffer").Buffer, require("process"));

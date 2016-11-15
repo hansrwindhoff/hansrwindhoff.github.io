@@ -1,6 +1,6 @@
 /* */ 
-var Preprocessor = require('preprocessor'),
-    fs = require('fs');
+var Preprocessor = require("preprocessor"),
+    fs = require("fs");
 var pkg = require(__dirname + "/package.json");
 var source = new Preprocessor(fs.readFileSync(__dirname + "/src/ProtoBuf.js"), __dirname + "/src").process({
   "NOPARSE": false,

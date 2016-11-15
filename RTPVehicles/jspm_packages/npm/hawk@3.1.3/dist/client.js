@@ -4,11 +4,11 @@
 var _typeof = function(obj) {
   return obj && typeof Symbol !== 'undefined' && obj.constructor === Symbol ? 'symbol' : typeof obj;
 };
-var Url = require('url');
-var Hoek = require('hoek');
-var Cryptiles = require('cryptiles');
-var Crypto = require('./crypto');
-var Utils = require('./utils');
+var Url = require("url");
+var Hoek = require("hoek");
+var Cryptiles = require("cryptiles");
+var Crypto = require("./crypto");
+var Utils = require("./utils");
 var internals = {};
 exports.header = function(uri, method, options) {
   var result = {

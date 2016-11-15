@@ -1,13 +1,13 @@
 /* */ 
 (function(Buffer) {
   module.exports = DiffieHellman;
-  var assert = require('assert-plus');
-  var crypto = require('crypto');
-  var algs = require('./algs');
-  var utils = require('./utils');
+  var assert = require("assert-plus");
+  var crypto = require("crypto");
+  var algs = require("./algs");
+  var utils = require("./utils");
   var ed;
-  var Key = require('./key');
-  var PrivateKey = require('./private-key');
+  var Key = require("./key");
+  var PrivateKey = require("./private-key");
   var CRYPTO_HAVE_ECDH = (crypto.createECDH !== undefined);
   var ecdh,
       ec,
@@ -31,16 +31,16 @@
     } else if (key.type === 'ecdsa') {
       if (!CRYPTO_HAVE_ECDH) {
         if (ecdh === undefined)
-          ecdh = require('ecc-jsbn');
+          ecdh = require("ecc-jsbn");
         if (ec === undefined)
-          ec = require('ecc-jsbn/lib/ec');
+          ec = require("ecc-jsbn/lib/ec");
         if (jsbn === undefined)
-          jsbn = require('jsbn').BigInteger;
+          jsbn = require("jsbn").BigInteger;
         this._ecParams = new X9ECParameters(this._curve);
         if (this._isPriv) {
           this._priv = new ECPrivate(this._ecParams, key.part.d.data);
         }
-        return;
+        return ;
       }
       var curve = {
         'nistp256': 'prime256v1',
@@ -51,14 +51,14 @@
       if (typeof(this._dh) !== 'object' || typeof(this._dh.setPrivateKey) !== 'function') {
         CRYPTO_HAVE_ECDH = false;
         DiffieHellman.call(this, key);
-        return;
+        return ;
       }
       if (this._isPriv)
         this._dh.setPrivateKey(key.part.d.data);
       this._dh.setPublicKey(key.part.Q.data);
     } else if (key.type === 'curve25519') {
       if (ed === undefined)
-        ed = require('jodid25519');
+        ed = require("jodid25519");
       if (this._isPriv) {
         this._priv = key.part.r.data;
         if (this._priv[0] === 0x00)
@@ -290,4 +290,4 @@
     var S = pubKey._pub.multiply(this._priv);
     return (new Buffer(S.getX().toBigInteger().toByteArray()));
   };
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

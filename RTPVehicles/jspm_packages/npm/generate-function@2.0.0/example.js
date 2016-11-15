@@ -1,5 +1,5 @@
 /* */ 
-var genfun = require('./index');
+var genfun = require("./index");
 var multiply = function(a, b) {
   return a * b;
 };

@@ -1,1 +1,1 @@
-module.exports = require("npm:protobufjs@2.0.5/ProtoBuf.js");
+module.exports = require("npm:protobufjs@2.0.5/ProtoBuf");

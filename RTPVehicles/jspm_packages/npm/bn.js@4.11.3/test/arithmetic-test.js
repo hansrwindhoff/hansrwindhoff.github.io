@@ -1,7 +1,7 @@
 /* */ 
-var assert = require('assert');
-var BN = require('../lib/bn').BN;
-var fixtures = require('./fixtures');
+var assert = require("assert");
+var BN = require("../lib/bn").BN;
+var fixtures = require("./fixtures");
 describe('BN.js/Arithmetic', function() {
   describe('.add()', function() {
     it('should add numbers', function() {

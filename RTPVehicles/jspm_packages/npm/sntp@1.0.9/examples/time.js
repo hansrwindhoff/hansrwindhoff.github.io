@@ -1,6 +1,6 @@
 /* */ 
 (function(process) {
-  var Sntp = require('../lib/index');
+  var Sntp = require("../lib/index");
   var options = {
     host: 'nist1-sj.ustiming.org',
     port: 123,
@@ -16,4 +16,4 @@
     console.log('Local clock is off by: ' + time.t + ' milliseconds');
     process.exit(0);
   });
-})(require('process'));
+})(require("process"));

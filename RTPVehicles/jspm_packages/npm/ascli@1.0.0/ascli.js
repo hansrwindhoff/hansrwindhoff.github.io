@@ -1,8 +1,8 @@
 /* */ 
 (function(process) {
-  var util = require('util'),
-      path = require('path'),
-      colour = require('colour');
+  var util = require("util"),
+      path = require("path"),
+      colour = require("colour");
   var alphabet = require(path.join(__dirname, "alphabet", "straight.json"));
   module.exports = function(appName) {
     ascli.appName = appName;
@@ -66,11 +66,11 @@
     if (typeof code !== 'undefined')
       process.exit(code);
   };
-  ascli.optjs = require('optjs');
+  ascli.optjs = require("optjs");
   var opt = ascli.optjs();
   ascli.node = opt.node;
   ascli.script = opt.script;
   ascli.argv = opt.argv;
   ascli.opt = opt.opt;
   ascli.colour = ascli.colors = colour;
-})(require('process'));
+})(require("process"));

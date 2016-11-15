@@ -1,2 +1,2 @@
 /* */ 
-console.log(require('./opt')());
+console.log(require("./opt")());

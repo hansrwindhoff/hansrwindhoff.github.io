@@ -1,2 +1,2 @@
 /* */ 
-module.exports = require('./dist/Long');
+module.exports = require("./dist/Long");

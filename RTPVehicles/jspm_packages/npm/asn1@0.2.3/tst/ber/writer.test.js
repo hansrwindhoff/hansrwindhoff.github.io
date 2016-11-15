@@ -1,11 +1,11 @@
 /* */ 
 (function(Buffer) {
-  var test = require('tap').test;
-  var sys = require('sys');
+  var test = require("tap").test;
+  var sys = require("sys");
   var BerWriter;
   var BerReader;
   test('load library', function(t) {
-    BerWriter = require('../../lib/index').BerWriter;
+    BerWriter = require("../../lib/index").BerWriter;
     t.ok(BerWriter);
     t.ok(new BerWriter());
     t.end();
@@ -267,8 +267,8 @@
     writer.writeOID(oid);
     var ber = writer.buffer;
     t.ok(ber);
-    console.log(require('util').inspect(ber));
-    console.log(require('util').inspect(new Buffer([0x06, 0x09, 0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x01, 0x01])));
+    console.log(require("util").inspect(ber));
+    console.log(require("util").inspect(new Buffer([0x06, 0x09, 0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x01, 0x01])));
     t.end();
   });
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

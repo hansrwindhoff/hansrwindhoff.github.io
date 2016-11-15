@@ -1,8 +1,8 @@
 /* */ 
 'use strict';
-var assert = require('minimalistic-assert');
-var inherits = require('inherits');
-var des = require('../des');
+var assert = require("minimalistic-assert");
+var inherits = require("inherits");
+var des = require("../des");
 var utils = des.utils;
 var Cipher = des.Cipher;
 function DESState() {

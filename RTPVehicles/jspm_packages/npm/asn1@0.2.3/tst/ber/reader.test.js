@@ -1,9 +1,9 @@
 /* */ 
 (function(Buffer) {
-  var test = require('tap').test;
+  var test = require("tap").test;
   var BerReader;
   test('load library', function(t) {
-    BerReader = require('../../lib/index').BerReader;
+    BerReader = require("../../lib/index").BerReader;
     t.ok(BerReader);
     try {
       new BerReader();
@@ -159,4 +159,4 @@
     t.equal(ber.readString(), s);
     t.end();
   });
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

@@ -1,11 +1,11 @@
 /* */ 
 (function(Buffer) {
-  var _algos = require('./algos');
-  var createHash = require('create-hash');
-  var inherits = require('inherits');
-  var sign = require('./sign');
-  var stream = require('stream');
-  var verify = require('./verify');
+  var _algos = require("./algos");
+  var createHash = require("create-hash");
+  var inherits = require("inherits");
+  var sign = require("./sign");
+  var stream = require("stream");
+  var verify = require("./verify");
   var algos = {};
   Object.keys(_algos).forEach(function(key) {
     algos[key] = algos[key.toLowerCase()] = _algos[key];
@@ -81,4 +81,4 @@
     createSign: createSign,
     createVerify: createVerify
   };
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

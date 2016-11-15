@@ -1,34 +1,34 @@
 /* */ 
 (function(Buffer, process) {
   'use strict';
-  var http = require('http'),
-      https = require('https'),
-      url = require('url'),
-      util = require('util'),
-      stream = require('stream'),
-      zlib = require('zlib'),
-      bl = require('bl'),
-      hawk = require('hawk'),
-      aws2 = require('aws-sign2'),
-      httpSignature = require('http-signature'),
-      mime = require('mime-types'),
-      stringstream = require('stringstream'),
-      caseless = require('caseless'),
-      ForeverAgent = require('forever-agent'),
-      FormData = require('form-data'),
-      extend = require('extend'),
-      isstream = require('isstream'),
-      isTypedArray = require('is-typedarray').strict,
-      helpers = require('./lib/helpers'),
-      cookies = require('./lib/cookies'),
-      getProxyFromURI = require('./lib/getProxyFromURI'),
-      Querystring = require('./lib/querystring').Querystring,
-      Har = require('./lib/har').Har,
-      Auth = require('./lib/auth').Auth,
-      OAuth = require('./lib/oauth').OAuth,
-      Multipart = require('./lib/multipart').Multipart,
-      Redirect = require('./lib/redirect').Redirect,
-      Tunnel = require('./lib/tunnel').Tunnel;
+  var http = require("http"),
+      https = require("https"),
+      url = require("url"),
+      util = require("util"),
+      stream = require("stream"),
+      zlib = require("zlib"),
+      bl = require("bl"),
+      hawk = require("hawk"),
+      aws2 = require("aws-sign2"),
+      httpSignature = require("http-signature"),
+      mime = require("mime-types"),
+      stringstream = require("stringstream"),
+      caseless = require("caseless"),
+      ForeverAgent = require("forever-agent"),
+      FormData = require("form-data"),
+      extend = require("extend"),
+      isstream = require("isstream"),
+      isTypedArray = require("is-typedarray").strict,
+      helpers = require("./lib/helpers"),
+      cookies = require("./lib/cookies"),
+      getProxyFromURI = require("./lib/getProxyFromURI"),
+      Querystring = require("./lib/querystring").Querystring,
+      Har = require("./lib/har").Har,
+      Auth = require("./lib/auth").Auth,
+      OAuth = require("./lib/oauth").OAuth,
+      Multipart = require("./lib/multipart").Multipart,
+      Redirect = require("./lib/redirect").Redirect,
+      Tunnel = require("./lib/tunnel").Tunnel;
   var safeStringify = helpers.safeStringify,
       isReadStream = helpers.isReadStream,
       toBase64 = helpers.toBase64,
@@ -148,7 +148,7 @@
       self._callback = self.callback;
       self.callback = function() {
         if (self._callbackCalled) {
-          return;
+          return ;
         }
         self._callbackCalled = true;
         self._callback.apply(self, arguments);
@@ -425,7 +425,7 @@
     });
     defer(function() {
       if (self._aborted) {
-        return;
+        return ;
       }
       var end = function() {
         if (self._form) {
@@ -458,7 +458,7 @@
         } else if (!self.src) {
           if (self._auth.hasAuth && !self._auth.sentAuth) {
             self.end();
-            return;
+            return ;
           }
           if (self.method !== 'GET' && typeof self.method !== 'undefined') {
             self.setHeader('content-length', 0);
@@ -582,7 +582,7 @@
   Request.prototype.start = function() {
     var self = this;
     if (self._aborted) {
-      return;
+      return ;
     }
     self._started = true;
     self.method = self.method || 'GET';
@@ -600,7 +600,7 @@
       self.req = self.httpModule.request(reqOptions);
     } catch (err) {
       self.emit('error', err);
-      return;
+      return ;
     }
     if (self.timing) {
       self.startTime = new Date().getTime();
@@ -645,13 +645,13 @@
   Request.prototype.onRequestError = function(error) {
     var self = this;
     if (self._aborted) {
-      return;
+      return ;
     }
     if (self.req && self.req._reusedSocket && error.code === 'ECONNRESET' && self.agent.addRequestNoreuse) {
       self.agent = {addRequest: self.agent.addRequestNoreuse.bind(self.agent)};
       self.start();
       self.req.end();
-      return;
+      return ;
     }
     if (self.timeout && self.timeoutTimer) {
       clearTimeout(self.timeoutTimer);
@@ -677,7 +677,7 @@
     if (self._aborted) {
       debug('aborted', self.uri.href);
       response.resume();
-      return;
+      return ;
     }
     self.response = response;
     response.request = self;
@@ -686,7 +686,7 @@
       debug('strict ssl error', self.uri.href);
       var sslErr = response.hasOwnProperty('socket') ? response.socket.authorizationError : self.uri.href + ' does not support SSL';
       self.emit('error', new Error('SSL Error: ' + sslErr));
-      return;
+      return ;
     }
     self.originalHost = self.getHeader('host');
     if (!self.originalHostHeaderName) {
@@ -717,7 +717,7 @@
       }
     }
     if (self._redirect.onResponse(response)) {
-      return;
+      return ;
     } else {
       response.on('close', function() {
         if (!self._ended) {
@@ -785,7 +785,7 @@
         self.on('end', function() {
           if (self._aborted) {
             debug('aborted', self.uri.href);
-            return;
+            return ;
           }
           self.emit('complete', response);
         });
@@ -810,7 +810,7 @@
       if (self._aborted) {
         debug('aborted', self.uri.href);
         buffer.destroy();
-        return;
+        return ;
       }
       if (buffer.length) {
         debug('has body', self.uri.href, buffer.length);
@@ -972,7 +972,7 @@
     }
     Object.keys(headers).forEach(function(key) {
       if (key.length !== name.length) {
-        return;
+        return ;
       }
       re = new RegExp(name, 'i');
       match = key.match(re);
@@ -1005,7 +1005,7 @@
       return self;
     }
     if (opts.sign_version == 4 || opts.sign_version == '4') {
-      var aws4 = require('aws4');
+      var aws4 = require("aws4");
       var options = {
         host: self.uri.host,
         path: self.uri.path,
@@ -1117,7 +1117,7 @@
   Request.prototype.write = function() {
     var self = this;
     if (self._aborted) {
-      return;
+      return ;
     }
     if (!self._started) {
       self.start();
@@ -1129,7 +1129,7 @@
   Request.prototype.end = function(chunk) {
     var self = this;
     if (self._aborted) {
-      return;
+      return ;
     }
     if (chunk) {
       self.write(chunk);
@@ -1169,4 +1169,4 @@
   Request.defaultProxyHeaderExclusiveList = Tunnel.defaultProxyHeaderExclusiveList.slice();
   Request.prototype.toJSON = requestToJSON;
   module.exports = Request;
-})(require('buffer').Buffer, require('process'));
+})(require("buffer").Buffer, require("process"));

@@ -1,5 +1,5 @@
 /* */ 
-var cli = require('../ascli')("myapp");
+var cli = require("../ascli")("myapp");
 cli.banner("staying straight".green.bold, "v1.0.0 through ascli");
 cli.log("Hello world!".white.bold);
 cli.log("...of ascli\n");

@@ -1,7 +1,7 @@
 /* */ 
-var Code = require('code');
-var Hoek = require('../lib/index');
-var Lab = require('lab');
+var Code = require("code");
+var Hoek = require("../lib/index");
+var Lab = require("lab");
 var internals = {};
 var lab = exports.lab = Lab.script();
 var describe = lab.experiment;

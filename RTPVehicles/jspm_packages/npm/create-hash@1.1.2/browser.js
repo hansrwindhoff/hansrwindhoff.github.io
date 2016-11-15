@@ -1,11 +1,11 @@
 /* */ 
 (function(Buffer) {
   'use strict';
-  var inherits = require('inherits');
-  var md5 = require('./md5');
-  var rmd160 = require('ripemd160');
-  var sha = require('sha.js');
-  var Base = require('cipher-base');
+  var inherits = require("inherits");
+  var md5 = require("./md5");
+  var rmd160 = require("ripemd160");
+  var sha = require("sha.js");
+  var Base = require("cipher-base");
   function HashNoConstructor(hash) {
     Base.call(this, 'digest');
     this._hash = hash;
@@ -40,4 +40,4 @@
       return new HashNoConstructor(rmd160);
     return new Hash(sha(alg));
   };
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

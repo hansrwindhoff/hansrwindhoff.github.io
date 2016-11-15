@@ -1,6 +1,6 @@
 /* */ 
 "use strict";
-var pubsuffix = require('./pubsuffix');
+var pubsuffix = require("./pubsuffix");
 function permuteDomain(domain) {
   var pubSuf = pubsuffix.getPublicSuffix(domain);
   if (!pubSuf) {

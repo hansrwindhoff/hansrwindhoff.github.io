@@ -18,4 +18,4 @@
     }
     return opt.opt = opt;
   })();
-})(require('process'));
+})(require("process"));

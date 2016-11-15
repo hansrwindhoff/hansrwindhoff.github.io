@@ -50,11 +50,11 @@
     })({
       1: [function(require, module, exports) {
         'use strict';
-        var zlib_deflate = require('./zlib/deflate');
-        var utils = require('./utils/common');
-        var strings = require('./utils/strings');
-        var msg = require('./zlib/messages');
-        var zstream = require('./zlib/zstream');
+        var zlib_deflate = require("./zlib/deflate");
+        var utils = require("./utils/common");
+        var strings = require("./utils/strings");
+        var msg = require("./zlib/messages");
+        var zstream = require("./zlib/zstream");
         var toString = Object.prototype.toString;
         var Z_NO_FLUSH = 0;
         var Z_FINISH = 4;
@@ -191,13 +191,13 @@
       }],
       2: [function(require, module, exports) {
         'use strict';
-        var zlib_inflate = require('./zlib/inflate');
-        var utils = require('./utils/common');
-        var strings = require('./utils/strings');
-        var c = require('./zlib/constants');
-        var msg = require('./zlib/messages');
-        var zstream = require('./zlib/zstream');
-        var gzheader = require('./zlib/gzheader');
+        var zlib_inflate = require("./zlib/inflate");
+        var utils = require("./utils/common");
+        var strings = require("./utils/strings");
+        var c = require("./zlib/constants");
+        var msg = require("./zlib/messages");
+        var zstream = require("./zlib/zstream");
+        var gzheader = require("./zlib/gzheader");
         var toString = Object.prototype.toString;
         var Inflate = function(options) {
           this.options = utils.assign({
@@ -384,7 +384,7 @@
           arraySet: function(dest, src, src_offs, len, dest_offs) {
             if (src.subarray && dest.subarray) {
               dest.set(src.subarray(src_offs, src_offs + len), dest_offs);
-              return;
+              return ;
             }
             for (var i = 0; i < len; i++) {
               dest[dest_offs + i] = src[src_offs + i];
@@ -438,7 +438,7 @@
       }, {}],
       4: [function(require, module, exports) {
         'use strict';
-        var utils = require('./common');
+        var utils = require("./common");
         var STR_APPLY_OK = true;
         var STR_APPLY_UIA_OK = true;
         try {
@@ -662,11 +662,11 @@
       }, {}],
       8: [function(require, module, exports) {
         'use strict';
-        var utils = require('../utils/common');
-        var trees = require('./trees');
-        var adler32 = require('./adler32');
-        var crc32 = require('./crc32');
-        var msg = require('./messages');
+        var utils = require("../utils/common");
+        var trees = require("./trees");
+        var adler32 = require("./adler32");
+        var crc32 = require("./crc32");
+        var msg = require("./messages");
         var Z_NO_FLUSH = 0;
         var Z_PARTIAL_FLUSH = 1;
         var Z_FULL_FLUSH = 3;
@@ -731,7 +731,7 @@
             len = strm.avail_out;
           }
           if (len === 0) {
-            return;
+            return ;
           }
           utils.arraySet(strm.output, s.pending_buf, s.pending_out, len, strm.next_out);
           strm.next_out += len;
@@ -1861,16 +1861,16 @@
           strm.avail_out = (_out < end ? 257 + (end - _out) : 257 - (_out - end));
           state.hold = hold;
           state.bits = bits;
-          return;
+          return ;
         };
       }, {}],
       11: [function(require, module, exports) {
         'use strict';
-        var utils = require('../utils/common');
-        var adler32 = require('./adler32');
-        var crc32 = require('./crc32');
-        var inflate_fast = require('./inffast');
-        var inflate_table = require('./inftrees');
+        var utils = require("../utils/common");
+        var adler32 = require("./adler32");
+        var crc32 = require("./crc32");
+        var inflate_fast = require("./inffast");
+        var inflate_table = require("./inftrees");
         var CODES = 0;
         var LENS = 1;
         var DISTS = 2;
@@ -3047,7 +3047,7 @@
       }],
       12: [function(require, module, exports) {
         'use strict';
-        var utils = require('../utils/common');
+        var utils = require("../utils/common");
         var MAXBITS = 15;
         var ENOUGH_LENS = 852;
         var ENOUGH_DISTS = 592;
@@ -3244,7 +3244,7 @@
       }, {}],
       14: [function(require, module, exports) {
         'use strict';
-        var utils = require('../utils/common');
+        var utils = require("../utils/common");
         var Z_FIXED = 4;
         var Z_BINARY = 0;
         var Z_TEXT = 1;
@@ -3389,7 +3389,7 @@
             }
           }
           if (overflow === 0) {
-            return;
+            return ;
           }
           do {
             bits = max_length - 1;
@@ -3864,10 +3864,10 @@
       }, {}],
       "/": [function(require, module, exports) {
         'use strict';
-        var assign = require('./lib/utils/common').assign;
-        var deflate = require('./lib/deflate');
-        var inflate = require('./lib/inflate');
-        var constants = require('./lib/zlib/constants');
+        var assign = require("./lib/utils/common").assign;
+        var deflate = require("./lib/deflate");
+        var inflate = require("./lib/inflate");
+        var constants = require("./lib/zlib/constants");
         var pako = {};
         assign(pako, deflate, inflate, constants);
         module.exports = pako;
@@ -3879,4 +3879,4 @@
       }]
     }, {}, [])("/");
   });
-})(require('buffer').Buffer, require('process'));
+})(require("buffer").Buffer, require("process"));

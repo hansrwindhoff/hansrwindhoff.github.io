@@ -1,9 +1,9 @@
 /* */ 
 (function(process) {
-  var assert = require('assert-plus');
-  var format = require('util').format;
-  var fs = require('fs');
-  var path = require('path');
+  var assert = require("assert-plus");
+  var format = require("util").format;
+  var fs = require("fs");
+  var path = require("path");
   var DEBUG = true;
   if (DEBUG) {
     var debug = console.warn;
@@ -368,10 +368,10 @@
     Object.keys(this.optionFromEnv).forEach(function(envname) {
       var val = env[envname];
       if (val === undefined)
-        return;
+        return ;
       var option = self.optionFromEnv[envname];
       if (opts[option.key] !== undefined)
-        return;
+        return ;
       var takesArg = self.optionTakesArg(option);
       if (takesArg) {
         addOpt(option, envname, option.key, val, 'env');
@@ -414,11 +414,11 @@
     var maxWidth = 0;
     this.options.forEach(function(o) {
       if (o.hidden) {
-        return;
+        return ;
       }
       if (o.group !== undefined && o.group !== null) {
         lines.push(null);
-        return;
+        return ;
       }
       var type = optionTypes[o.type];
       var arg = o.helpArg || type.helpArg || 'ARG';
@@ -458,7 +458,7 @@
     var i = -1;
     this.options.forEach(function(o) {
       if (o.hidden) {
-        return;
+        return ;
       }
       i++;
       if (o.group !== undefined && o.group !== null) {
@@ -467,7 +467,7 @@
         } else {
           lines[i] = (i === 0 ? '' : '\n') + headingIndent + o.group + ':';
         }
-        return;
+        return ;
       }
       var helpDefault;
       if (config.includeDefault) {
@@ -479,7 +479,7 @@
       }
       var line = lines[i] = indent + lines[i];
       if (!o.help && !(config.includeEnv && o.env) && !helpDefault) {
-        return;
+        return ;
       }
       var n = helpCol - line.length;
       if (n >= 0) {
@@ -564,7 +564,7 @@
     var optargs = [];
     (args.options || []).forEach(function(o) {
       if (o.group !== undefined && o.group !== null) {
-        return;
+        return ;
       }
       var optNames = o.names || [o.name];
       var optType = getOptionType(o.type);
@@ -680,4 +680,4 @@
     parsePositiveInteger: parsePositiveInteger,
     parseDate: parseDate
   };
-})(require('process'));
+})(require("process"));

@@ -1,12 +1,12 @@
 /* */ 
 (function(Buffer) {
   'use strict';
-  var url = require('url'),
-      qs = require('qs'),
-      caseless = require('caseless'),
-      uuid = require('node-uuid'),
-      oauth = require('oauth-sign'),
-      crypto = require('crypto');
+  var url = require("url"),
+      qs = require("qs"),
+      caseless = require("caseless"),
+      uuid = require("node-uuid"),
+      oauth = require("oauth-sign"),
+      crypto = require("crypto");
   function OAuth(request) {
     this.request = request;
     this.params = null;
@@ -110,4 +110,4 @@
     }
   };
   exports.OAuth = OAuth;
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

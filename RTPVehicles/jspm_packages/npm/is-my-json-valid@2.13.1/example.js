@@ -1,5 +1,5 @@
 /* */ 
-var validator = require('./index');
+var validator = require("./index");
 var validate = validator({
   type: 'object',
   properties: {hello: {

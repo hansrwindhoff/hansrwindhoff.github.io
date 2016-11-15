@@ -75,4 +75,4 @@
     hashAlgs: hashAlgs,
     curves: curves
   };
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

@@ -4,18 +4,18 @@
     read: read,
     write: write
   };
-  var assert = require('assert-plus');
-  var asn1 = require('asn1');
-  var crypto = require('crypto');
-  var algs = require('../algs');
-  var utils = require('../utils');
-  var Key = require('../key');
-  var PrivateKey = require('../private-key');
-  var pkcs1 = require('./pkcs1');
-  var pkcs8 = require('./pkcs8');
-  var sshpriv = require('./ssh-private');
-  var rfc4253 = require('./rfc4253');
-  var errors = require('../errors');
+  var assert = require("assert-plus");
+  var asn1 = require("asn1");
+  var crypto = require("crypto");
+  var algs = require("../algs");
+  var utils = require("../utils");
+  var Key = require("../key");
+  var PrivateKey = require("../private-key");
+  var pkcs1 = require("./pkcs1");
+  var pkcs8 = require("./pkcs8");
+  var sshpriv = require("./ssh-private");
+  var rfc4253 = require("./rfc4253");
+  var errors = require("../errors");
   function read(buf, options, forceType) {
     var input = buf;
     if (typeof(buf) !== 'string') {
@@ -145,4 +145,4 @@
     o += buf.write('-----END ' + header + '-----\n', o);
     return (buf.slice(0, o));
   }
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

@@ -1,8 +1,8 @@
 /* */ 
-var errors = require('./errors');
-var types = require('./types');
-var Reader = require('./reader');
-var Writer = require('./writer');
+var errors = require("./errors");
+var types = require("./types");
+var Reader = require("./reader");
+var Writer = require("./writer");
 module.exports = {
   Reader: Reader,
   Writer: Writer

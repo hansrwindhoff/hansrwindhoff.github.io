@@ -1,9 +1,9 @@
 /* */ 
-var Key = require('./key');
-var Fingerprint = require('./fingerprint');
-var Signature = require('./signature');
-var PrivateKey = require('./private-key');
-var errs = require('./errors');
+var Key = require("./key");
+var Fingerprint = require("./fingerprint");
+var Signature = require("./signature");
+var PrivateKey = require("./private-key");
+var errs = require("./errors");
 module.exports = {
   Key: Key,
   parseKey: Key.parse,

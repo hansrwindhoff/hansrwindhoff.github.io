@@ -1,1 +1,1 @@
-module.exports = require("npm:asn1@0.2.3/lib/index.js");
+module.exports = require("npm:asn1@0.2.3/lib/index");

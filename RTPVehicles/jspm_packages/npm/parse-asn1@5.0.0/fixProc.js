@@ -3,8 +3,8 @@
   var findProc = /Proc-Type: 4,ENCRYPTED\r?\nDEK-Info: AES-((?:128)|(?:192)|(?:256))-CBC,([0-9A-H]+)\r?\n\r?\n([0-9A-z\n\r\+\/\=]+)\r?\n/m;
   var startRegex = /^-----BEGIN (.*) KEY-----\r?\n/m;
   var fullRegex = /^-----BEGIN (.*) KEY-----\r?\n([0-9A-z\n\r\+\/\=]+)\r?\n-----END \1 KEY-----$/m;
-  var evp = require('evp_bytestokey');
-  var ciphers = require('browserify-aes');
+  var evp = require("evp_bytestokey");
+  var ciphers = require("browserify-aes");
   module.exports = function(okey, password) {
     var key = okey.toString();
     var match = key.match(findProc);
@@ -29,4 +29,4 @@
       data: decrypted
     };
   };
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

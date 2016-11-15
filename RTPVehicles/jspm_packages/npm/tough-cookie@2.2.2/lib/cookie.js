@@ -1,15 +1,15 @@
 /* */ 
 'use strict';
-var net = require('net');
-var urlParse = require('url').parse;
-var pubsuffix = require('./pubsuffix');
-var Store = require('./store').Store;
-var MemoryCookieStore = require('./memstore').MemoryCookieStore;
-var pathMatch = require('./pathMatch').pathMatch;
-var VERSION = require('../package.json!systemjs-json').version;
+var net = require("net");
+var urlParse = require("url").parse;
+var pubsuffix = require("./pubsuffix");
+var Store = require("./store").Store;
+var MemoryCookieStore = require("./memstore").MemoryCookieStore;
+var pathMatch = require("./pathMatch").pathMatch;
+var VERSION = require("../package.json!systemjs-json").version;
 var punycode;
 try {
-  punycode = require('punycode');
+  punycode = require("punycode");
 } catch (e) {
   console.warn("cookie: can't load punycode; won't use punycode for domain normalization");
 }
@@ -45,11 +45,11 @@ var MAX_TIME = 2147483647000;
 var MIN_TIME = 0;
 function parseDate(str) {
   if (!str) {
-    return;
+    return ;
   }
   var tokens = str.split(DATE_DELIM);
   if (!tokens) {
-    return;
+    return ;
   }
   var hour = null;
   var minutes = null;
@@ -70,7 +70,7 @@ function parseDate(str) {
         minutes = parseInt(result[2], 10);
         seconds = parseInt(result[3], 10);
         if (hour > 23 || minutes > 59 || seconds > 59) {
-          return;
+          return ;
         }
         continue;
       }
@@ -80,7 +80,7 @@ function parseDate(str) {
       if (result) {
         day = parseInt(result, 10);
         if (day < 1 || day > 31) {
-          return;
+          return ;
         }
         continue;
       }
@@ -102,13 +102,13 @@ function parseDate(str) {
           year += 2000;
         }
         if (year < 1601) {
-          return;
+          return ;
         }
       }
     }
   }
   if (seconds === null || day === null || month === null || year === null) {
-    return;
+    return ;
   }
   return new Date(Date.UTC(year, month, day, hour, minutes, seconds));
 }
@@ -185,7 +185,7 @@ function parse(str, options) {
   var pairRe = options.loose ? LOOSE_COOKIE_PAIR : COOKIE_PAIR;
   var result = pairRe.exec(firstSemi === -1 ? str : str.substr(0, firstSemi));
   if (!result) {
-    return;
+    return ;
   }
   var c = new Cookie();
   if (result[1]) {
@@ -195,7 +195,7 @@ function parse(str, options) {
   }
   c.value = result[3].trim();
   if (CONTROL_CHARS.test(c.key) || CONTROL_CHARS.test(c.value)) {
-    return;
+    return ;
   }
   if (firstSemi === -1) {
     return c;
@@ -880,7 +880,7 @@ module.exports = {
   pathMatch: pathMatch,
   getPublicSuffix: pubsuffix.getPublicSuffix,
   cookieCompare: cookieCompare,
-  permuteDomain: require('./permuteDomain').permuteDomain,
+  permuteDomain: require("./permuteDomain").permuteDomain,
   permutePath: permutePath,
   canonicalDomain: canonicalDomain
 };

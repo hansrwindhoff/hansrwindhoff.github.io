@@ -4,13 +4,13 @@
     read: read,
     write: write
   };
-  var assert = require('assert-plus');
-  var utils = require('../utils');
-  var Key = require('../key');
-  var PrivateKey = require('../private-key');
-  var pem = require('./pem');
-  var ssh = require('./ssh');
-  var rfc4253 = require('./rfc4253');
+  var assert = require("assert-plus");
+  var utils = require("../utils");
+  var Key = require("../key");
+  var PrivateKey = require("../private-key");
+  var pem = require("./pem");
+  var ssh = require("./ssh");
+  var rfc4253 = require("./rfc4253");
   function read(buf, options) {
     if (typeof(buf) === 'string') {
       if (buf.trim().match(/^[-]+[ ]*BEGIN/))
@@ -58,4 +58,4 @@
   function write(key, options) {
     throw (new Error('"auto" format cannot be used for writing'));
   }
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

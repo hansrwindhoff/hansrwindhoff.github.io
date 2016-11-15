@@ -127,7 +127,7 @@
             callback = null;
           if (Util.IS_NODE) {
             if (callback) {
-              require('fs').readFile(path, function(err, data) {
+              require("fs").readFile(path, function(err, data) {
                 if (err) {
                   callback(null);
                 } else
@@ -135,7 +135,7 @@
               });
             } else {
               try {
-                return require('fs').readFileSync(path);
+                return require("fs").readFileSync(path);
               } catch (e) {
                 return null;
               }
@@ -149,7 +149,7 @@
             if (callback) {
               xhr.onreadystatechange = function() {
                 if (xhr.readyState != 4)
-                  return;
+                  return ;
                 if (xhr.status == 200 || (xhr.status == 0 && typeof xhr.responseText === 'string')) {
                   callback(xhr.responseText);
                 } else {
@@ -157,7 +157,7 @@
                 }
               };
               if (xhr.readyState == 4)
-                return;
+                return ;
               xhr.send(null);
             } else {
               xhr.send(null);
@@ -804,7 +804,7 @@
         };
         Field.prototype.encodeValue = function(value, buffer) {
           if (value === null)
-            return;
+            return ;
           if (this.type == ProtoBuf.TYPES["int32"] || this.type == ProtoBuf.TYPES["uint32"]) {
             buffer.writeVarint32(value);
           } else if (this.type == ProtoBuf.TYPES["sint32"]) {
@@ -998,14 +998,14 @@
                     this.rpcImpl(method.fqn(), req, function(err, res) {
                       if (err) {
                         callback(err);
-                        return;
+                        return ;
                       }
                       try {
                         res = method.resolvedResponseType.clazz.decode(res);
                       } catch (notABuffer) {}
                       if (!res || !(res instanceof method.resolvedResponseType.clazz)) {
                         callback(new Error("Illegal response type received in service method " + T.name + "#" + method.name));
-                        return;
+                        return ;
                       }
                       callback(null, res);
                     });
@@ -1181,12 +1181,12 @@
         };
         Builder.prototype.create = function(defs) {
           if (!defs)
-            return;
+            return ;
           if (!ProtoBuf.Util.isArray(defs)) {
             defs = [defs];
           }
           if (defs.length == 0)
-            return;
+            return ;
           var stack = [],
               def,
               obj,
@@ -1306,7 +1306,7 @@
         Builder.prototype["import"] = function(json, filename) {
           if (typeof filename === 'string') {
             if (ProtoBuf.Util.IS_NODE) {
-              var path = require('path');
+              var path = require("path");
               filename = path.resolve(filename);
             }
             if (!!this.files[filename]) {
@@ -1440,7 +1440,7 @@
         Builder.prototype.resolveAll = function() {
           var res;
           if (this.ptr == null || typeof this.ptr.type === 'object')
-            return;
+            return ;
           if (this.ptr instanceof Reflect.Namespace) {
             var children = this.ptr.getChildren();
             for (var i = 0; i < children.length; i++) {
@@ -1567,7 +1567,7 @@
       return ProtoBuf;
     }
     if (typeof module != 'undefined' && module["exports"]) {
-      module["exports"] = loadProtoBuf(require('bytebuffer'));
+      module["exports"] = loadProtoBuf(require("bytebuffer"));
     } else if (typeof define != 'undefined' && define["amd"]) {
       define("ProtoBuf", ["ByteBuffer"], loadProtoBuf);
     } else {
@@ -1577,4 +1577,4 @@
       global["dcodeIO"]["ProtoBuf"] = loadProtoBuf(global["dcodeIO"]["ByteBuffer"]);
     }
   })(this);
-})(require('buffer').Buffer, require('process'));
+})(require("buffer").Buffer, require("process"));

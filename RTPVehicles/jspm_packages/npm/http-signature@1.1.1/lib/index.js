@@ -1,8 +1,8 @@
 /* */ 
-var parser = require('./parser');
-var signer = require('./signer');
-var verify = require('./verify');
-var utils = require('./utils');
+var parser = require("./parser");
+var signer = require("./signer");
+var verify = require("./verify");
+var utils = require("./utils");
 module.exports = {
   parse: parser.parseRequest,
   parseRequest: parser.parseRequest,

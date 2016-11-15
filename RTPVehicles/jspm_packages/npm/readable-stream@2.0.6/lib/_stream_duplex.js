@@ -9,11 +9,11 @@
     return keys;
   };
   module.exports = Duplex;
-  var processNextTick = require('process-nextick-args');
-  var util = require('core-util-is');
-  util.inherits = require('inherits');
-  var Readable = require('./_stream_readable');
-  var Writable = require('./_stream_writable');
+  var processNextTick = require("process-nextick-args");
+  var util = require("core-util-is");
+  util.inherits = require("inherits");
+  var Readable = require("./_stream_readable");
+  var Writable = require("./_stream_writable");
   util.inherits(Duplex, Readable);
   var keys = objectKeys(Writable.prototype);
   for (var v = 0; v < keys.length; v++) {
@@ -37,7 +37,7 @@
   }
   function onend() {
     if (this.allowHalfOpen || this._writableState.ended)
-      return;
+      return ;
     processNextTick(onEndNT, this);
   }
   function onEndNT(self) {
@@ -49,4 +49,4 @@
       f(xs[i], i);
     }
   }
-})(require('process'));
+})(require("process"));

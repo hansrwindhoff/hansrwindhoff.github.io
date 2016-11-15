@@ -127,12 +127,12 @@
     };
     Builder.prototype.create = function(defs) {
       if (!defs)
-        return;
+        return ;
       if (!ProtoBuf.Util.isArray(defs)) {
         defs = [defs];
       }
       if (defs.length == 0)
-        return;
+        return ;
       var stack = [],
           def,
           obj,
@@ -252,7 +252,7 @@
     Builder.prototype["import"] = function(json, filename) {
       if (typeof filename === 'string') {
         if (ProtoBuf.Util.IS_NODE) {
-          var path = require('path');
+          var path = require("path");
           filename = path.resolve(filename);
         }
         if (!!this.files[filename]) {
@@ -386,7 +386,7 @@
     Builder.prototype.resolveAll = function() {
       var res;
       if (this.ptr == null || typeof this.ptr.type === 'object')
-        return;
+        return ;
       if (this.ptr instanceof Reflect.Namespace) {
         var children = this.ptr.getChildren();
         for (var i = 0; i < children.length; i++) {
@@ -469,4 +469,4 @@
     Builder.Service = function() {};
     return Builder;
   })(ProtoBuf, ProtoBuf.Lang, ProtoBuf.Reflect);
-})(require('process'));
+})(require("process"));

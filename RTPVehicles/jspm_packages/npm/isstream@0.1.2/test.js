@@ -1,14 +1,14 @@
 /* */ 
-var tape = require('tape'),
-    EE = require('events').EventEmitter,
-    util = require('util'),
-    isStream = require('./isstream'),
-    isReadable = require('./isstream').isReadable,
-    isWritable = require('./isstream').isWritable,
-    isDuplex = require('./isstream').isDuplex,
-    CoreStreams = require('stream'),
-    ReadableStream10 = require('./readable-stream-1.0'),
-    ReadableStream11 = require('./readable-stream-1.1');
+var tape = require("tape"),
+    EE = require("events").EventEmitter,
+    util = require("util"),
+    isStream = require("./isstream"),
+    isReadable = require("./isstream").isReadable,
+    isWritable = require("./isstream").isWritable,
+    isDuplex = require("./isstream").isDuplex,
+    CoreStreams = require("stream"),
+    ReadableStream10 = require("./readable-stream-1.0"),
+    ReadableStream11 = require("./readable-stream-1.1");
 function test(pass, type, stream) {
   tape('isStream(' + type + ')', function(t) {
     t.plan(1);
@@ -115,7 +115,7 @@ testDuplex(true, 'ReadableStream11.PassThrough', new (ReadableStream11.PassThrou
 [CoreStreams, ReadableStream10, ReadableStream11].forEach(function(p) {
   ['Stream', 'Readable', 'Writable', 'Duplex', 'Transform', 'PassThrough'].forEach(function(k) {
     if (!p[k])
-      return;
+      return ;
     function SubStream() {
       p[k].call(this);
     }

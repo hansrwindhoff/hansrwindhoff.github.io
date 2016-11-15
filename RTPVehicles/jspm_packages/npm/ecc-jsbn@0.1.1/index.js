@@ -1,9 +1,9 @@
 /* */ 
 (function(Buffer) {
-  var crypto = require('crypto');
-  var BigInteger = require('jsbn').BigInteger;
-  var ECPointFp = require('./lib/ec').ECPointFp;
-  exports.ECCurves = require('./lib/sec');
+  var crypto = require("crypto");
+  var BigInteger = require("jsbn").BigInteger;
+  var ECPointFp = require("./lib/ec").ECPointFp;
+  exports.ECCurves = require("./lib/sec");
   function unstupid(hex, len) {
     return (hex.length >= len) ? hex : unstupid("0" + hex, len);
   }
@@ -40,4 +40,4 @@
       };
     }
   };
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

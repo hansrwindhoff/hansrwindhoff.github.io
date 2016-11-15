@@ -174,4 +174,4 @@
   ProtoBuf.Util.XHR = function() {};
   ProtoBuf.Util.fetch = function(path, callback) {};
   ProtoBuf.Util.isArray = function(obj) {};
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

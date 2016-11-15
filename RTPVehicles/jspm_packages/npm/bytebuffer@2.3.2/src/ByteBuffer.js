@@ -7,7 +7,7 @@
       var Buffer = null;
       if (typeof require === 'function') {
         try {
-          var nodeBuffer = require('buffer');
+          var nodeBuffer = require("buffer");
           Buffer = nodeBuffer && typeof nodeBuffer['Buffer'] === 'function' && typeof nodeBuffer['Buffer']['isBuffer'] === 'function' ? nodeBuffer['Buffer'] : null;
         } catch (e) {}
       }
@@ -1325,7 +1325,7 @@
       return ByteBuffer;
     }
     if (typeof module !== 'undefined' && module["exports"]) {
-      module["exports"] = loadByteBuffer(require('long'));
+      module["exports"] = loadByteBuffer(require("long"));
     } else if (typeof define !== 'undefined' && define["amd"]) {
       define("ByteBuffer", ["Math/Long"], function(Long) {
         return loadByteBuffer(Long);
@@ -1336,4 +1336,4 @@
       global["dcodeIO"]["ByteBuffer"] = loadByteBuffer(global["dcodeIO"]["Long"]);
     }
   })(this);
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

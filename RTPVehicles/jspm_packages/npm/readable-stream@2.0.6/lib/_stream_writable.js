@@ -2,23 +2,23 @@
 (function(Buffer, process) {
   'use strict';
   module.exports = Writable;
-  var processNextTick = require('process-nextick-args');
+  var processNextTick = require("process-nextick-args");
   var asyncWrite = !process.browser && ['v0.10', 'v0.9.'].indexOf(process.version.slice(0, 5)) > -1 ? setImmediate : processNextTick;
-  var Buffer = require('buffer').Buffer;
+  var Buffer = require("buffer").Buffer;
   Writable.WritableState = WritableState;
-  var util = require('core-util-is');
-  util.inherits = require('inherits');
-  var internalUtil = {deprecate: require('util-deprecate')};
+  var util = require("core-util-is");
+  util.inherits = require("inherits");
+  var internalUtil = {deprecate: require("util-deprecate")};
   var Stream;
   (function() {
     try {
       Stream = require('st' + 'ream');
     } catch (_) {} finally {
       if (!Stream)
-        Stream = require('events').EventEmitter;
+        Stream = require("events").EventEmitter;
     }
   })();
-  var Buffer = require('buffer').Buffer;
+  var Buffer = require("buffer").Buffer;
   util.inherits(Writable, Stream);
   function nop() {}
   function WriteReq(chunk, encoding, cb) {
@@ -29,7 +29,7 @@
   }
   var Duplex;
   function WritableState(options, stream) {
-    Duplex = Duplex || require('./_stream_duplex');
+    Duplex = Duplex || require("./_stream_duplex");
     options = options || {};
     this.objectMode = !!options.objectMode;
     if (stream instanceof Duplex)
@@ -82,7 +82,7 @@
   })();
   var Duplex;
   function Writable(options) {
-    Duplex = Duplex || require('./_stream_duplex');
+    Duplex = Duplex || require("./_stream_duplex");
     if (!(this instanceof Writable) && !(this instanceof Duplex))
       return new Writable(options);
     this._writableState = new WritableState(options, this);
@@ -355,4 +355,4 @@
       }
     };
   }
-})(require('buffer').Buffer, require('process'));
+})(require("buffer").Buffer, require("process"));

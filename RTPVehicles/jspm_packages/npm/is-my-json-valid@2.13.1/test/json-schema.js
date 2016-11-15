@@ -1,7 +1,7 @@
 /* */ 
-var tape = require('tape');
-var fs = require('fs');
-var validator = require('../index');
+var tape = require("tape");
+var fs = require("fs");
+var validator = require("../index");
 var files = fs.readdirSync(__dirname + '/json-schema-draft4').map(function(file) {
   if (file === 'definitions.json')
     return null;

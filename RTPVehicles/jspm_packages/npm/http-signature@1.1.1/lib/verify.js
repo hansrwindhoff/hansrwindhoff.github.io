@@ -1,9 +1,9 @@
 /* */ 
 (function(Buffer) {
-  var assert = require('assert-plus');
-  var crypto = require('crypto');
-  var sshpk = require('sshpk');
-  var utils = require('./utils');
+  var assert = require("assert-plus");
+  var crypto = require("crypto");
+  var sshpk = require("sshpk");
+  var utils = require("./utils");
   var HASH_ALGOS = utils.HASH_ALGOS;
   var PK_ALGOS = utils.PK_ALGOS;
   var InvalidAlgorithmError = utils.InvalidAlgorithmError;
@@ -44,4 +44,4 @@
       return (h1.equals(h2));
     }
   };
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

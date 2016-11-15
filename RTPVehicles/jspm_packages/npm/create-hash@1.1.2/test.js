@@ -1,14 +1,14 @@
 /* */ 
 (function(Buffer) {
-  var fs = require('fs');
-  var test = require('tape');
+  var fs = require("fs");
+  var test = require("tape");
   var algorithms = ['sha1', 'sha224', 'sha256', 'sha384', 'sha512', 'md5', 'rmd160', 'ripemd160'];
   var encodings = ['hex', 'base64'];
-  var vectors = require('hash-test-vectors');
+  var vectors = require("hash-test-vectors");
   vectors.forEach(function(vector) {
     vector.ripemd160 = vector.rmd160;
   });
-  var createHash = require('./browser');
+  var createHash = require("./browser");
   algorithms.forEach(function(algorithm) {
     test('test ' + algorithm + ' against test vectors', function(t) {
       vectors.forEach(function(obj, i) {
@@ -36,4 +36,4 @@
       t.end();
     });
   });
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

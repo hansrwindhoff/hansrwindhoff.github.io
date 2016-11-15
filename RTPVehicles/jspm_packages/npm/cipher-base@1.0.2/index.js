@@ -1,8 +1,8 @@
 /* */ 
 (function(Buffer) {
-  var Transform = require('stream').Transform;
-  var inherits = require('inherits');
-  var StringDecoder = require('string_decoder').StringDecoder;
+  var Transform = require("stream").Transform;
+  var inherits = require("inherits");
+  var StringDecoder = require("string_decoder").StringDecoder;
   module.exports = CipherBase;
   inherits(CipherBase, Transform);
   function CipherBase(hashMode) {
@@ -84,4 +84,4 @@
     }
     return out;
   };
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

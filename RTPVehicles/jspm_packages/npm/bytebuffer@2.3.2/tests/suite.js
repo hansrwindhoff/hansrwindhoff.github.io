@@ -668,9 +668,9 @@
       test.done();
     },
     "commonjs": function(test) {
-      var fs = require('fs'),
-          vm = require('vm'),
-          util = require('util');
+      var fs = require("fs"),
+          vm = require("vm"),
+          util = require("util");
       var code = fs.readFileSync(__dirname + "/../" + FILE);
       var Long = ByteBuffer.Long;
       var sandbox = new Sandbox({
@@ -687,9 +687,9 @@
       test.done();
     },
     "amd": function(test) {
-      var fs = require('fs'),
-          vm = require('vm'),
-          util = require('util');
+      var fs = require("fs"),
+          vm = require("vm"),
+          util = require("util");
       var code = fs.readFileSync(__dirname + "/../" + FILE);
       var sandbox = new Sandbox({
         require: function() {},
@@ -707,9 +707,9 @@
       test.done();
     },
     "shim": function(test) {
-      var fs = require('fs'),
-          vm = require('vm'),
-          util = require('util');
+      var fs = require("fs"),
+          vm = require("vm"),
+          util = require("util");
       var code = fs.readFileSync(__dirname + "/../" + FILE);
       var sandbox = new Sandbox({dcodeIO: {Long: ByteBuffer.Long}});
       vm.runInNewContext(code, sandbox, "ByteBuffer.js in shim-VM");
@@ -727,4 +727,4 @@
     }
   };
   module.exports = suite;
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

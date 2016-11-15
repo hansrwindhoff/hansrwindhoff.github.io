@@ -11,9 +11,9 @@
     isCompatible: isCompatible,
     opensslKeyDeriv: opensslKeyDeriv
   };
-  var assert = require('assert-plus');
-  var PrivateKey = require('./private-key');
-  var crypto = require('crypto');
+  var assert = require("assert-plus");
+  var PrivateKey = require("./private-key");
+  var crypto = require("crypto");
   var MAX_CLASS_DEPTH = 3;
   function isCompatible(obj, klass, needVer) {
     if (obj === null || typeof(obj) !== 'object')
@@ -46,7 +46,7 @@
     if (needVer === undefined)
       needVer = klass.prototype._sshpkApiVersion;
     if (obj instanceof klass && klass.prototype._sshpkApiVersion[0] == needVer[0])
-      return;
+      return ;
     var proto = Object.getPrototypeOf(obj);
     var depth = 0;
     while (proto.constructor.name !== klass.name) {
@@ -183,7 +183,7 @@
     assert.buffer(p);
     assert.buffer(x);
     try {
-      var bigInt = require('jsbn').BigInteger;
+      var bigInt = require("jsbn").BigInteger;
     } catch (e) {
       throw (new Error('To load a PKCS#8 format DSA private key, ' + 'the node jsbn library is required.'));
     }
@@ -198,7 +198,7 @@
     assert.object(key);
     assertCompatible(key, PrivateKey, [1, 1]);
     try {
-      var bigInt = require('jsbn').BigInteger;
+      var bigInt = require("jsbn").BigInteger;
     } catch (e) {
       throw (new Error('To write a PEM private key from ' + 'this source, the node jsbn lib is required.'));
     }
@@ -225,4 +225,4 @@
       key.parts.push(key.part.dmodq);
     }
   }
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

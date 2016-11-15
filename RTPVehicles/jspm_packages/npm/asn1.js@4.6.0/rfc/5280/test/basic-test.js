@@ -1,10 +1,10 @@
 /* */ 
 (function(Buffer) {
-  var assert = require('assert');
-  var fs = require('fs');
-  var asn1 = require('../../../lib/asn1');
-  var rfc5280 = require('../index');
-  var Buffer = require('buffer').Buffer;
+  var assert = require("assert");
+  var fs = require("fs");
+  var asn1 = require("../../../lib/asn1");
+  var rfc5280 = require("../index");
+  var Buffer = require("buffer").Buffer;
   describe('asn1.js RFC5280', function() {
     it('should decode Certificate', function() {
       var data = fs.readFileSync(__dirname + '/fixtures/cert1.crt');
@@ -70,4 +70,4 @@
       assert.equal(extensions.basicConstraints.extnValue.cA, true);
     });
   });
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

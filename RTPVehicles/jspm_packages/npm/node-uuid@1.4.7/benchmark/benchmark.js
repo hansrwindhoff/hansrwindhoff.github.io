@@ -1,16 +1,16 @@
 /* */ 
 try {
-  var nodeuuid = require('../uuid');
+  var nodeuuid = require("../uuid");
 } catch (e) {
   console.error('node-uuid require failed - skipping tests');
 }
 try {
-  var uuid = require('uuid');
+  var uuid = require("uuid");
 } catch (e) {
   console.error('uuid require failed - skipping tests');
 }
 try {
-  var uuidjs = require('uuid-js');
+  var uuidjs = require("uuid-js");
 } catch (e) {
   console.error('uuid-js require failed - skipping tests');
 }

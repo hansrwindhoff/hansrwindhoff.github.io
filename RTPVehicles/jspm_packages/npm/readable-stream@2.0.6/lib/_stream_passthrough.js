@@ -1,9 +1,9 @@
 /* */ 
 'use strict';
 module.exports = PassThrough;
-var Transform = require('./_stream_transform');
-var util = require('core-util-is');
-util.inherits = require('inherits');
+var Transform = require("./_stream_transform");
+var util = require("core-util-is");
+util.inherits = require("inherits");
 util.inherits(PassThrough, Transform);
 function PassThrough(options) {
   if (!(this instanceof PassThrough))

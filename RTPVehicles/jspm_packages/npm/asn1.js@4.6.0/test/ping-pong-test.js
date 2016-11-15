@@ -1,10 +1,10 @@
 /* */ 
 (function(Buffer) {
-  var assert = require('assert');
-  var asn1 = require('../lib/asn1');
-  var fixtures = require('./fixtures');
+  var assert = require("assert");
+  var asn1 = require("../lib/asn1");
+  var fixtures = require("./fixtures");
   var jsonEqual = fixtures.jsonEqual;
-  var Buffer = require('buffer').Buffer;
+  var Buffer = require("buffer").Buffer;
   describe('asn1.js ping/pong', function() {
     function test(name, model, input, expected) {
       it('should support ' + name, function() {
@@ -157,4 +157,4 @@
       });
     });
   });
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

@@ -1,7 +1,7 @@
 /* */ 
 (function(Buffer) {
   module.exports = SSHBuffer;
-  var assert = require('assert-plus');
+  var assert = require("assert-plus");
   function SSHBuffer(opts) {
     assert.object(opts, 'options');
     if (opts.buffer !== undefined)
@@ -98,4 +98,4 @@
     buf.copy(this._buffer, this._offset);
     this._offset += buf.length;
   };
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

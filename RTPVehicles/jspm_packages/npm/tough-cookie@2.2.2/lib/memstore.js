@@ -1,9 +1,9 @@
 /* */ 
 'use strict';
-var Store = require('./store').Store;
-var permuteDomain = require('./permuteDomain').permuteDomain;
-var pathMatch = require('./pathMatch').pathMatch;
-var util = require('util');
+var Store = require("./store").Store;
+var permuteDomain = require("./permuteDomain").permuteDomain;
+var pathMatch = require("./pathMatch").pathMatch;
+var util = require("util");
 function MemoryCookieStore() {
   Store.call(this);
   this.idx = {};
@@ -56,7 +56,7 @@ MemoryCookieStore.prototype.findCookies = function(domain, path, cb) {
   domains.forEach(function(curDomain) {
     var domainIndex = idx[curDomain];
     if (!domainIndex) {
-      return;
+      return ;
     }
     pathMatcher(domainIndex);
   });

@@ -71,4 +71,4 @@
     hash: 'md5',
     id: new Buffer('3020300c06082a864886f70d020505000410', 'hex')
   };
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

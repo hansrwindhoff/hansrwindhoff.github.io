@@ -5,16 +5,16 @@
     readSSHPrivate: readSSHPrivate,
     write: write
   };
-  var assert = require('assert-plus');
-  var asn1 = require('asn1');
-  var algs = require('../algs');
-  var utils = require('../utils');
-  var crypto = require('crypto');
-  var Key = require('../key');
-  var PrivateKey = require('../private-key');
-  var pem = require('./pem');
-  var rfc4253 = require('./rfc4253');
-  var SSHBuffer = require('../ssh-buffer');
+  var assert = require("assert-plus");
+  var asn1 = require("asn1");
+  var algs = require("../algs");
+  var utils = require("../utils");
+  var crypto = require("crypto");
+  var Key = require("../key");
+  var PrivateKey = require("../private-key");
+  var pem = require("./pem");
+  var rfc4253 = require("./rfc4253");
+  var SSHBuffer = require("../ssh-buffer");
   function read(buf, options) {
     return (pem.read(buf, options));
   }
@@ -100,4 +100,4 @@
     o += buf.write('-----END ' + header + '-----\n', o);
     return (buf.slice(0, o));
   }
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

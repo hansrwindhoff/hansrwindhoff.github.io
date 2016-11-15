@@ -1,10 +1,10 @@
 /* */ 
 (function(Buffer, process) {
-  var Fs = require('fs');
-  var Path = require('path');
-  var Code = require('code');
-  var Hoek = require('../lib/index');
-  var Lab = require('lab');
+  var Fs = require("fs");
+  var Path = require("path");
+  var Code = require("code");
+  var Hoek = require("../lib/index");
+  var Lab = require("lab");
   var internals = {};
   var lab = exports.lab = Lab.script();
   var describe = lab.experiment;
@@ -1955,4 +1955,4 @@
       done();
     });
   });
-})(require('buffer').Buffer, require('process'));
+})(require("buffer").Buffer, require("process"));

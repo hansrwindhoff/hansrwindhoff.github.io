@@ -1,6 +1,6 @@
 /* */ 
 (function(Buffer) {
-  var xor = require('buffer-xor');
+  var xor = require("buffer-xor");
   function getBlock(self) {
     self._prev = self._cipher.encryptBlock(self._prev);
     return self._prev;
@@ -13,4 +13,4 @@
     self._cache = self._cache.slice(chunk.length);
     return xor(chunk, pad);
   };
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

@@ -2,7 +2,7 @@
 "use strict";
 
 import xhr from 'xhr';
-import * as L from 'leaflet';
+import {default as L }  from 'leaflet';
 
 module realTimeRtdPos {
 
@@ -13,11 +13,12 @@ module realTimeRtdPos {
     let markers = [];
     let drawingPins = false;
     let map: L.Map;
-    const polTime = 33000;
-    const countDownSteps = polTime / 1000;
+    let polTime = 4000;
+    let intervalID;
+    let countDownSteps = polTime / 1000;
     let countDownInterval;
     let counterdown = countDownSteps;
-    let myLocation=  new L.LatLng(39.735, -104.99) ;
+    let myLocation = new L.LatLng(39.735, -104.99);
 
     interface Window {
         reCenterMap: () => void;
@@ -43,7 +44,7 @@ module realTimeRtdPos {
             // let curZoom = map.getZoom();
 
             if (app.positions.ready) {
-                markers.forEach(function(m) {
+                markers.forEach(function (m) {
                     map.removeLayer(m);
                 });
                 markers = [];
@@ -63,7 +64,7 @@ module realTimeRtdPos {
 
             currentMeMarker = L.marker(myLocation, { icon: redIcon }).addTo(map);
             if (app.positions.ready) {
-                app.positions.forEach(function(pos) {
+                app.positions.forEach(function (pos) {
                     if (bounds.contains(L.latLng(pos.lat, pos.long))) {
                         let mtemp = L.marker([pos.lat, pos.long]);
                         markers.push(mtemp);
@@ -82,7 +83,7 @@ module realTimeRtdPos {
         //$('#countdown').text(counterdown.toString() + 's')
     };
 
-    let getNewPositions = function() {
+    let getNewPositions = function () {
         app.positions = [];
         app.positions.ready = false;
 
@@ -90,14 +91,15 @@ module realTimeRtdPos {
             url: 'https://rtdrelay2.azurewebsites.net/rtdpos',
             method: 'get'
         },
-            function(error, response, body) {
+            function (error, response, body) {
                 if (!error && response.statusCode == 200) {
                     let feed;
+
                     try {
                         feed = JSON.parse(body);
                     } catch (error) {
                         var el = document.getElementById("infotext");
-                        el.textContent= body;
+                        el.textContent = body;
                         el.style.visibility = "visible";
                         el.style.color = "red";
                         el.style.fontSize = "large";
@@ -114,9 +116,16 @@ module realTimeRtdPos {
                         document.getElementById("infotext").style.visibility = "hidden";
 
                         // $('#infotext').hide();
-                        feed.forEach(function(entity) {
+                        feed.forEach(function (entity) {
                             app.positions.push(entity);
                         });
+
+                        clearInterval(intervalID);
+                        polTime = 33000;// once we have the first payload we reduce the poltime
+                        countDownSteps = polTime / 1000;
+                        counterdown = countDownSteps;
+                        intervalID = setInterval(getNewPositions, polTime);
+
                         app.positions.ready = true;
                         removePins();
                         redrawPins();
@@ -150,9 +159,9 @@ module realTimeRtdPos {
             }).addTo(map);
 
             getNewPositions();
-            setInterval(getNewPositions, polTime);
+            intervalID = setInterval(getNewPositions, polTime);
 
-            map.on('dragend zoomend', function(e) {
+            map.on('dragend zoomend', function (e) {
                 removePins();
                 redrawPins();
                 document.getElementById("mapcenter").style.visibility = "hidden";
@@ -163,7 +172,7 @@ module realTimeRtdPos {
     function reCenterMap() {
         if ("geolocation" in navigator) {
             navigator.geolocation.getCurrentPosition(
-                function(position) {
+                function (position) {
                     let curLoc = [position.coords.latitude, position.coords.longitude];
                     myLocation = new L.LatLng(position.coords.latitude, position.coords.longitude);
                     if (mapStarted) {
@@ -173,8 +182,8 @@ module realTimeRtdPos {
 
                     }
                 },
-                function(err) {
-                    var el = document.getElementById("infotext"); 
+                function (err) {
+                    var el = document.getElementById("infotext");
                     el.style.visibility = "visible";
                     el.style.color = "red";
                     el.style.fontSize = "large"
@@ -202,21 +211,21 @@ module realTimeRtdPos {
     (function start() {
         window.reCenterMap = reCenterMap;
 
-        setTimeout(function() {
+        setTimeout(function () {
             InitMapLoop(startLoc);
         }, 10000);
 
         var startLoc = [39.735, -104.99];
         if ("geolocation" in navigator) {
             navigator.geolocation.getCurrentPosition(
-                function(position) {
+                function (position) {
                     startLoc = [position.coords.latitude, position.coords.longitude];
                     myLocation = new L.LatLng(position.coords.latitude, position.coords.longitude);
                     if (!mapStarted) {
                         InitMapLoop(startLoc);
                     }
                 },
-                function(err) {
+                function (err) {
                     if (!mapStarted) {
                         InitMapLoop(startLoc);
                     }

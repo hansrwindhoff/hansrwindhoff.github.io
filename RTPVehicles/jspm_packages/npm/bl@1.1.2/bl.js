@@ -1,7 +1,7 @@
 /* */ 
 (function(Buffer) {
-  var DuplexStream = require('readable-stream/duplex'),
-      util = require('util');
+  var DuplexStream = require("readable-stream/duplex"),
+      util = require("util");
   function BufferList(callback) {
     if (!(this instanceof BufferList))
       return new BufferList(callback);
@@ -183,4 +183,4 @@
     }
   }());
   module.exports = BufferList;
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

@@ -1,5 +1,5 @@
 /* */ 
-var Ber = require('./ber/index');
+var Ber = require("./ber/index");
 module.exports = {
   Ber: Ber,
   BerReader: Ber.Reader,

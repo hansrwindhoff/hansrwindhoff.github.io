@@ -68,4 +68,4 @@
     }
     grunt.registerTask('test', ['connect', 'saucelabs-mocha']);
   };
-})(require('process'));
+})(require("process"));

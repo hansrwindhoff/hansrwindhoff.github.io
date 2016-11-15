@@ -1,6 +1,6 @@
 /* */ 
-var mod_fs = require('fs');
-var mod_verror = require('../lib/verror');
+var mod_fs = require("fs");
+var mod_verror = require("../lib/verror");
 var filename = '/nonexistent';
 mod_fs.stat(filename, function(err1) {
   var err2 = new mod_verror.WError(err1, 'failed to stat "%s"', filename);

@@ -1,1 +1,1 @@
-module.exports = require("npm:extsprintf@1.0.2/lib/extsprintf.js");
+module.exports = require("npm:extsprintf@1.0.2/lib/extsprintf");

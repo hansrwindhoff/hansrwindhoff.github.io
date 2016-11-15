@@ -1,22 +1,22 @@
 /* */ 
 (function(process) {
   'use strict';
-  var $ = require('./$'),
-      LIBRARY = require('./$.library'),
-      global = require('./$.global'),
-      ctx = require('./$.ctx'),
-      classof = require('./$.classof'),
-      $export = require('./$.export'),
-      isObject = require('./$.is-object'),
-      anObject = require('./$.an-object'),
-      aFunction = require('./$.a-function'),
-      strictNew = require('./$.strict-new'),
-      forOf = require('./$.for-of'),
-      setProto = require('./$.set-proto').set,
-      same = require('./$.same-value'),
-      SPECIES = require('./$.wks')('species'),
-      speciesConstructor = require('./$.species-constructor'),
-      asap = require('./$.microtask'),
+  var $ = require("./$"),
+      LIBRARY = require("./$.library"),
+      global = require("./$.global"),
+      ctx = require("./$.ctx"),
+      classof = require("./$.classof"),
+      $export = require("./$.export"),
+      isObject = require("./$.is-object"),
+      anObject = require("./$.an-object"),
+      aFunction = require("./$.a-function"),
+      strictNew = require("./$.strict-new"),
+      forOf = require("./$.for-of"),
+      setProto = require("./$.set-proto").set,
+      same = require("./$.same-value"),
+      SPECIES = require("./$.wks")('species'),
+      speciesConstructor = require("./$.species-constructor"),
+      asap = require("./$.microtask"),
       PROMISE = 'Promise',
       process = global.process,
       isNode = classof(process) == 'process',
@@ -47,7 +47,7 @@
       if (!(P2.resolve(5).then(function() {}) instanceof P2)) {
         works = false;
       }
-      if (works && require('./$.descriptors')) {
+      if (works && require("./$.descriptors")) {
         var thenableThenGotten = false;
         P.resolve($.setDesc({}, 'then', {get: function() {
             thenableThenGotten = true;
@@ -92,7 +92,7 @@
   };
   var notify = function(record, isReject) {
     if (record.n)
-      return;
+      return ;
     record.n = true;
     var chain = record.c;
     asap(function() {
@@ -164,7 +164,7 @@
   var $reject = function(value) {
     var record = this;
     if (record.d)
-      return;
+      return ;
     record.d = true;
     record = record.r || record;
     record.v = value;
@@ -176,7 +176,7 @@
     var record = this,
         then;
     if (record.d)
-      return;
+      return ;
     record.d = true;
     record = record.r || record;
     try {
@@ -225,7 +225,7 @@
         $reject.call(record, err);
       }
     };
-    require('./$.redefine-all')(P.prototype, {
+    require("./$.redefine-all")(P.prototype, {
       then: function then(onFulfilled, onRejected) {
         var reaction = new PromiseCapability(speciesConstructor(this, P)),
             promise = reaction.promise,
@@ -245,9 +245,9 @@
     });
   }
   $export($export.G + $export.W + $export.F * !USE_NATIVE, {Promise: P});
-  require('./$.set-to-string-tag')(P, PROMISE);
-  require('./$.set-species')(PROMISE);
-  Wrapper = require('./$.core')[PROMISE];
+  require("./$.set-to-string-tag")(P, PROMISE);
+  require("./$.set-species")(PROMISE);
+  Wrapper = require("./$.core")[PROMISE];
   $export($export.S + $export.F * !USE_NATIVE, PROMISE, {reject: function reject(r) {
       var capability = new PromiseCapability(this),
           $$reject = capability.reject;
@@ -262,7 +262,7 @@
       $$resolve(x);
       return capability.promise;
     }});
-  $export($export.S + $export.F * !(USE_NATIVE && require('./$.iter-detect')(function(iter) {
+  $export($export.S + $export.F * !(USE_NATIVE && require("./$.iter-detect")(function(iter) {
     P.all(iter)['catch'](function() {});
   })), PROMISE, {
     all: function all(iterable) {
@@ -280,7 +280,7 @@
             var alreadyCalled = false;
             C.resolve(promise).then(function(value) {
               if (alreadyCalled)
-                return;
+                return ;
               alreadyCalled = true;
               results[index] = value;
               --remaining || resolve(results);
@@ -307,4 +307,4 @@
       return capability.promise;
     }
   });
-})(require('process'));
+})(require("process"));

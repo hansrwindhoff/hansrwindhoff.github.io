@@ -1,6 +1,6 @@
 /* */ 
-var mod_assert = require('assert');
-var mod_verror = require('../lib/verror');
+var mod_assert = require("assert");
+var mod_verror = require("../lib/verror");
 var VError = mod_verror.VError;
 var WError = mod_verror.WError;
 var err,

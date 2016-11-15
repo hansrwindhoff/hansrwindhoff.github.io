@@ -1,7 +1,7 @@
 /* */ 
-var extsprintf = require('extsprintf');
-var fs = require('fs');
-var verror = require('../lib/verror');
+var extsprintf = require("extsprintf");
+var fs = require("fs");
+var verror = require("../lib/verror");
 function checkFile(filename, callback) {
   fs.stat(filename, function(err) {
     if (err)

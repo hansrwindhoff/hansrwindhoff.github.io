@@ -2,11 +2,11 @@
 (function(Buffer, process) {
   'use strict';
   module.exports = Readable;
-  var processNextTick = require('process-nextick-args');
-  var isArray = require('isarray');
-  var Buffer = require('buffer').Buffer;
+  var processNextTick = require("process-nextick-args");
+  var isArray = require("isarray");
+  var Buffer = require("buffer").Buffer;
   Readable.ReadableState = ReadableState;
-  var EE = require('events');
+  var EE = require("events");
   var EElistenerCount = function(emitter, type) {
     return emitter.listeners(type).length;
   };
@@ -16,12 +16,12 @@
       Stream = require('st' + 'ream');
     } catch (_) {} finally {
       if (!Stream)
-        Stream = require('events').EventEmitter;
+        Stream = require("events").EventEmitter;
     }
   })();
-  var Buffer = require('buffer').Buffer;
-  var util = require('core-util-is');
-  util.inherits = require('inherits');
+  var Buffer = require("buffer").Buffer;
+  var util = require("core-util-is");
+  util.inherits = require("inherits");
   var debugUtil = require('@empty');
   var debug = undefined;
   if (debugUtil && debugUtil.debuglog) {
@@ -33,7 +33,7 @@
   util.inherits(Readable, Stream);
   var Duplex;
   function ReadableState(options, stream) {
-    Duplex = Duplex || require('./_stream_duplex');
+    Duplex = Duplex || require("./_stream_duplex");
     options = options || {};
     this.objectMode = !!options.objectMode;
     if (stream instanceof Duplex)
@@ -63,14 +63,14 @@
     this.encoding = null;
     if (options.encoding) {
       if (!StringDecoder)
-        StringDecoder = require('string_decoder').StringDecoder;
+        StringDecoder = require("string_decoder").StringDecoder;
       this.decoder = new StringDecoder(options.encoding);
       this.encoding = options.encoding;
     }
   }
   var Duplex;
   function Readable(options) {
-    Duplex = Duplex || require('./_stream_duplex');
+    Duplex = Duplex || require("./_stream_duplex");
     if (!(this instanceof Readable))
       return new Readable(options);
     this._readableState = new ReadableState(options, this);
@@ -145,7 +145,7 @@
   }
   Readable.prototype.setEncoding = function(enc) {
     if (!StringDecoder)
-      StringDecoder = require('string_decoder').StringDecoder;
+      StringDecoder = require("string_decoder").StringDecoder;
     this._readableState.decoder = new StringDecoder(enc);
     this._readableState.encoding = enc;
     return this;
@@ -258,7 +258,7 @@
   }
   function onEofChunk(stream, state) {
     if (state.ended)
-      return;
+      return ;
     if (state.decoder) {
       var chunk = state.decoder.end();
       if (chunk && chunk.length) {
@@ -540,9 +540,9 @@
       if (state.decoder)
         chunk = state.decoder.write(chunk);
       if (state.objectMode && (chunk === null || chunk === undefined))
-        return;
+        return ;
       else if (!state.objectMode && (!chunk || !chunk.length))
-        return;
+        return ;
       var ret = self.push(chunk);
       if (!ret) {
         paused = true;
@@ -653,4 +653,4 @@
     }
     return -1;
   }
-})(require('buffer').Buffer, require('process'));
+})(require("buffer").Buffer, require("process"));

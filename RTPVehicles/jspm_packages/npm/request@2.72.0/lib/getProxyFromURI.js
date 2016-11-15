@@ -46,4 +46,4 @@
     return null;
   }
   module.exports = getProxyFromURI;
-})(require('process'));
+})(require("process"));

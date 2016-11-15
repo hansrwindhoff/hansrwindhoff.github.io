@@ -1,9 +1,9 @@
 /* */ 
 'use strict';
-var curve = require('./index');
-var elliptic = require('../../elliptic');
-var BN = require('bn.js');
-var inherits = require('inherits');
+var curve = require("./index");
+var elliptic = require("../../elliptic");
+var BN = require("bn.js");
+var inherits = require("inherits");
 var Base = curve.base;
 var assert = elliptic.utils.assert;
 function EdwardsCurve(conf) {

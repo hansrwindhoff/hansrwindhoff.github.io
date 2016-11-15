@@ -1,9 +1,9 @@
 /* */ 
 'use strict';
-var curve = require('./index');
-var elliptic = require('../../elliptic');
-var BN = require('bn.js');
-var inherits = require('inherits');
+var curve = require("./index");
+var elliptic = require("../../elliptic");
+var BN = require("bn.js");
+var inherits = require("inherits");
 var Base = curve.base;
 var assert = elliptic.utils.assert;
 function ShortCurve(conf) {
@@ -21,7 +21,7 @@ inherits(ShortCurve, Base);
 module.exports = ShortCurve;
 ShortCurve.prototype._getEndomorphism = function _getEndomorphism(conf) {
   if (!this.zeroA || !this.g || !this.n || this.p.modn(3) !== 1)
-    return;
+    return ;
   var beta;
   var lambda;
   if (conf.beta) {
@@ -226,7 +226,7 @@ ShortCurve.prototype.pointFromJSON = function pointFromJSON(obj, red) {
 };
 Point.prototype._getBeta = function _getBeta() {
   if (!this.curve.endo)
-    return;
+    return ;
   var pre = this.precomputed;
   if (pre && pre.beta)
     return pre.beta;

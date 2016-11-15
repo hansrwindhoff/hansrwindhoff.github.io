@@ -35,4 +35,4 @@
     }
     return false;
   })();
-})(require('process'));
+})(require("process"));

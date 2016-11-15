@@ -1,14 +1,14 @@
-System.register(['xhr'], function(exports_1, context_1) {
+System.register(["xhr"], function (exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
-    var xhr_1;
-    var getNewPositions;
+    var xhr_1, getNewPositions;
     return {
-        setters:[
+        setters: [
             function (xhr_1_1) {
                 xhr_1 = xhr_1_1;
-            }],
-        execute: function() {
+            }
+        ],
+        execute: function () {
             app.positions = [];
             app.positions.ready = false;
             getNewPositions = function () {
@@ -38,6 +38,6 @@ System.register(['xhr'], function(exports_1, context_1) {
             getNewPositions();
             setInterval(getNewPositions, 5000);
         }
-    }
+    };
 });
 //# sourceMappingURL=t1.js.map

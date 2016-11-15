@@ -1,8 +1,8 @@
 /* */ 
 (function(Buffer) {
-  var assert = require('assert');
-  var ASN1 = require('./types');
-  var errors = require('./errors');
+  var assert = require("assert");
+  var ASN1 = require("./types");
+  var errors = require("./errors");
   var newInvalidAsn1Error = errors.newInvalidAsn1Error;
   function Reader(data) {
     if (!data || !Buffer.isBuffer(data))
@@ -154,4 +154,4 @@
     return value >> 0;
   };
   module.exports = Reader;
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

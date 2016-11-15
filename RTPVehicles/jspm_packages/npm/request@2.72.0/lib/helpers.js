@@ -1,8 +1,8 @@
 /* */ 
 (function(Buffer, process) {
   'use strict';
-  var jsonSafeStringify = require('json-stringify-safe'),
-      crypto = require('crypto');
+  var jsonSafeStringify = require("json-stringify-safe"),
+      crypto = require("crypto");
   function deferMethod() {
     if (typeof setImmediate === 'undefined') {
       return process.nextTick;
@@ -57,4 +57,4 @@
   exports.copy = copy;
   exports.version = version;
   exports.defer = deferMethod();
-})(require('buffer').Buffer, require('process'));
+})(require("buffer").Buffer, require("process"));

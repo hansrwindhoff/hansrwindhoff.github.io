@@ -1,9 +1,9 @@
 /* */ 
 (function(Buffer) {
-  var test = require('tape');
-  var crypto = require('../index');
+  var test = require("tape");
+  var crypto = require("../index");
   var randomBytesFunctions = {
-    randomBytes: require('randombytes'),
+    randomBytes: require("randombytes"),
     pseudoRandomBytes: crypto.pseudoRandomBytes
   };
   for (var randomBytesName in randomBytesFunctions) {
@@ -43,4 +43,4 @@
       t.end();
     });
   }
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

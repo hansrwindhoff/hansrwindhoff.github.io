@@ -1,6 +1,6 @@
 /* */ 
-var Preprocessor = require('preprocessor'),
-    fs = require('fs'),
+var Preprocessor = require("preprocessor"),
+    fs = require("fs"),
     pkg = require(__dirname + "/package.json");
 var pp = new Preprocessor(fs.readFileSync(__dirname + "/src/ByteBuffer.js"), __dirname + "/src");
 fs.writeFileSync(__dirname + "/ByteBuffer.js", pp.process({"VERSION": pkg.version}));

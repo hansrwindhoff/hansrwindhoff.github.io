@@ -1,7 +1,7 @@
 /* */ 
-var fs = require('fs');
-var path = require('path');
-var compile = require('./index');
+var fs = require("fs");
+var path = require("path");
+var compile = require("./index");
 delete require.cache[require.resolve(__filename)];
 module.exports = function(file, opts) {
   file = path.join(path.dirname(module.parent.filename), file);

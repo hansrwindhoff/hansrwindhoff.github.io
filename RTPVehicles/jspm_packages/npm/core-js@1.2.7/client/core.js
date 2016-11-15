@@ -867,7 +867,7 @@
       };
       var $stringify = function stringify(it) {
         if (it === undefined || isSymbol(it))
-          return;
+          return ;
         var args = [it],
             i = 1,
             $$ = arguments,
@@ -2262,7 +2262,7 @@
       };
       var notify = function(record, isReject) {
         if (record.n)
-          return;
+          return ;
         record.n = true;
         var chain = record.c;
         asap(function() {
@@ -2334,7 +2334,7 @@
       var $reject = function(value) {
         var record = this;
         if (record.d)
-          return;
+          return ;
         record.d = true;
         record = record.r || record;
         record.v = value;
@@ -2346,7 +2346,7 @@
         var record = this,
             then;
         if (record.d)
-          return;
+          return ;
         record.d = true;
         record = record.r || record;
         try {
@@ -2450,7 +2450,7 @@
                 var alreadyCalled = false;
                 C.resolve(promise).then(function(value) {
                   if (alreadyCalled)
-                    return;
+                    return ;
                   alreadyCalled = true;
                   results[index] = value;
                   --remaining || resolve(results);
@@ -3808,4 +3808,4 @@
     else
       __g.core = __e;
   }(1, 1);
-})(require('process'));
+})(require("process"));

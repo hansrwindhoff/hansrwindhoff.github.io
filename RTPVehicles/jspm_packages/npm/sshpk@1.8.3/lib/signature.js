@@ -1,13 +1,13 @@
 /* */ 
 (function(Buffer) {
   module.exports = Signature;
-  var assert = require('assert-plus');
-  var algs = require('./algs');
-  var crypto = require('crypto');
-  var errs = require('./errors');
-  var utils = require('./utils');
-  var asn1 = require('asn1');
-  var SSHBuffer = require('./ssh-buffer');
+  var assert = require("assert-plus");
+  var algs = require("./algs");
+  var crypto = require("crypto");
+  var errs = require("./errors");
+  var utils = require("./utils");
+  var asn1 = require("asn1");
+  var SSHBuffer = require("./ssh-buffer");
   var InvalidAlgorithmError = errs.InvalidAlgorithmError;
   var SignatureParseError = errs.SignatureParseError;
   function Signature(opts) {
@@ -210,4 +210,4 @@
       return ([2, 0]);
     return ([1, 0]);
   };
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

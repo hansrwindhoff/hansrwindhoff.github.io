@@ -1,8 +1,8 @@
 /* */ 
 (function(Buffer) {
-  var util = require('util');
-  var Stream = require('stream').Stream;
-  var DelayedStream = require('delayed-stream');
+  var util = require("util");
+  var Stream = require("stream").Stream;
+  var DelayedStream = require("delayed-stream");
   module.exports = CombinedStream;
   function CombinedStream() {
     this.writable = false;
@@ -55,11 +55,11 @@
     var stream = this._streams.shift();
     if (typeof stream == 'undefined') {
       this.end();
-      return;
+      return ;
     }
     if (typeof stream !== 'function') {
       this._pipeNext(stream);
-      return;
+      return ;
     }
     var getStream = stream;
     getStream(function(stream) {
@@ -77,7 +77,7 @@
     if (isStreamLike) {
       stream.on('end', this._getNext.bind(this));
       stream.pipe(this, {end: false});
-      return;
+      return ;
     }
     var value = stream;
     this.write(value);
@@ -94,7 +94,7 @@
   };
   CombinedStream.prototype.pause = function() {
     if (!this.pauseStreams) {
-      return;
+      return ;
     }
     if (this.pauseStreams && this._currentStream && typeof(this._currentStream.pause) == 'function')
       this._currentStream.pause();
@@ -126,7 +126,7 @@
   CombinedStream.prototype._checkDataSize = function() {
     this._updateDataSize();
     if (this.dataSize <= this.maxDataSize) {
-      return;
+      return ;
     }
     var message = 'DelayedStream#maxDataSize of ' + this.maxDataSize + ' bytes exceeded.';
     this._emitError(new Error(message));
@@ -136,7 +136,7 @@
     var self = this;
     this._streams.forEach(function(stream) {
       if (!stream.dataSize) {
-        return;
+        return ;
       }
       self.dataSize += stream.dataSize;
     });
@@ -148,4 +148,4 @@
     this._reset();
     this.emit('error', err);
   };
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

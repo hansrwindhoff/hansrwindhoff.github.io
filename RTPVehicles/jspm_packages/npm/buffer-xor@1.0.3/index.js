@@ -8,4 +8,4 @@
     }
     return buffer;
   };
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

@@ -1,7 +1,7 @@
 /* */ 
 (function(Buffer) {
-  var assert = require('assert');
-  var BN = require('../lib/bn').BN;
+  var assert = require("assert");
+  var BN = require("../lib/bn").BN;
   describe('BN.js/Reduction context', function() {
     function testMethod(name, fn) {
       describe(name + ' method', function() {
@@ -170,4 +170,4 @@
       assert.equal(input.cmp(output), 0);
     });
   });
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

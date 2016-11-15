@@ -1,10 +1,10 @@
 /* */ 
 (function(Buffer, process) {
-  var tape = require('tape'),
-      crypto = require('crypto'),
-      fs = require('fs'),
-      hash = require('hash_file'),
-      BufferList = require('../bl'),
+  var tape = require("tape"),
+      crypto = require("crypto"),
+      fs = require("fs"),
+      hash = require("hash_file"),
+      BufferList = require("../bl"),
       encodings = ('hex utf8 utf-8 ascii binary base64' + (process.browser ? '' : ' ucs2 ucs-2 utf16le utf-16le')).split(' ');
   tape('single bytes from single buffer', function(t) {
     var bl = new BufferList();
@@ -481,4 +481,4 @@
       t.notOk(data, 'no data');
     }));
   });
-})(require('buffer').Buffer, require('process'));
+})(require("buffer").Buffer, require("process"));

@@ -1,8 +1,8 @@
 /* */ 
 (function(Buffer) {
-  var CipherBase = require('cipher-base');
-  var des = require('des.js');
-  var inherits = require('inherits');
+  var CipherBase = require("cipher-base");
+  var des = require("des.js");
+  var inherits = require("inherits");
   var modes = {
     'des-ede3-cbc': des.CBC.instantiate(des.EDE),
     'des-ede3': des.EDE,
@@ -42,4 +42,4 @@
   DES.prototype._final = function() {
     return new Buffer(this._des.final());
   };
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

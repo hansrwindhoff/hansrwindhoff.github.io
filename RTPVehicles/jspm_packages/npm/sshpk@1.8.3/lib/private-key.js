@@ -1,30 +1,30 @@
 /* */ 
 (function(Buffer) {
   module.exports = PrivateKey;
-  var assert = require('assert-plus');
-  var algs = require('./algs');
-  var crypto = require('crypto');
-  var Fingerprint = require('./fingerprint');
-  var Signature = require('./signature');
-  var errs = require('./errors');
-  var util = require('util');
-  var utils = require('./utils');
+  var assert = require("assert-plus");
+  var algs = require("./algs");
+  var crypto = require("crypto");
+  var Fingerprint = require("./fingerprint");
+  var Signature = require("./signature");
+  var errs = require("./errors");
+  var util = require("util");
+  var utils = require("./utils");
   var edCompat;
   var ed;
   try {
-    edCompat = require('./ed-compat');
+    edCompat = require("./ed-compat");
   } catch (e) {}
-  var Key = require('./key');
+  var Key = require("./key");
   var InvalidAlgorithmError = errs.InvalidAlgorithmError;
   var KeyParseError = errs.KeyParseError;
   var KeyEncryptedError = errs.KeyEncryptedError;
   var formats = {};
-  formats['auto'] = require('./formats/auto');
-  formats['pem'] = require('./formats/pem');
-  formats['pkcs1'] = require('./formats/pkcs1');
-  formats['pkcs8'] = require('./formats/pkcs8');
-  formats['rfc4253'] = require('./formats/rfc4253');
-  formats['ssh-private'] = require('./formats/ssh-private');
+  formats['auto'] = require("./formats/auto");
+  formats['pem'] = require("./formats/pem");
+  formats['pkcs1'] = require("./formats/pkcs1");
+  formats['pkcs8'] = require("./formats/pkcs8");
+  formats['rfc4253'] = require("./formats/rfc4253");
+  formats['ssh-private'] = require("./formats/ssh-private");
   formats['openssh'] = formats['ssh-private'];
   formats['ssh'] = formats['ssh-private'];
   function PrivateKey(opts) {
@@ -70,7 +70,7 @@
         pub;
     if (this.type === 'ed25519' && newType === 'curve25519') {
       if (ed === undefined)
-        ed = require('jodid25519');
+        ed = require("jodid25519");
       priv = this.part.r.data;
       if (priv[0] === 0x00)
         priv = priv.slice(1);
@@ -89,7 +89,7 @@
       }));
     } else if (this.type === 'curve25519' && newType === 'ed25519') {
       if (ed === undefined)
-        ed = require('jodid25519');
+        ed = require("jodid25519");
       priv = this.part.r.data;
       if (priv[0] === 0x00)
         priv = priv.slice(1);
@@ -191,4 +191,4 @@
       return ([1, 1]);
     return ([1, 0]);
   };
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

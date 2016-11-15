@@ -1,4 +1,3 @@
-"format global";
 (function(global) {
 
   var defined = {};
@@ -11,62 +10,51 @@
     return -1;
   }
 
-  var getOwnPropertyDescriptor = true;
-  try {
-    Object.getOwnPropertyDescriptor({ a: 0 }, 'a');
-  }
-  catch(e) {
-    getOwnPropertyDescriptor = false;
+  function dedupe(deps) {
+    var newDeps = [];
+    for (var i = 0, l = deps.length; i < l; i++)
+      if (indexOf.call(newDeps, deps[i]) == -1)
+        newDeps.push(deps[i])
+    return newDeps;
   }
 
-  var defineProperty;
-  (function () {
-    try {
-      if (!!Object.defineProperty({}, 'a', {}))
-        defineProperty = Object.defineProperty;
+  function register(name, deps, declare, execute) {
+    if (typeof name != 'string')
+      throw "System.register provided no module name";
+
+    var entry;
+
+    // dynamic
+    if (typeof declare == 'boolean') {
+      entry = {
+        declarative: false,
+        deps: deps,
+        execute: execute,
+        executingRequire: declare
+      };
     }
-    catch (e) {
-      defineProperty = function(obj, prop, opt) {
-        try {
-          obj[prop] = opt.value || opt.get.call(obj);
-        }
-        catch(e) {}
-      }
+    else {
+      // ES6 declarative
+      entry = {
+        declarative: true,
+        deps: deps,
+        declare: declare
+      };
     }
-  })();
 
-  function register(name, deps, declare) {
-    if (arguments.length === 4)
-      return registerDynamic.apply(this, arguments);
-    doRegister(name, {
-      declarative: true,
-      deps: deps,
-      declare: declare
-    });
-  }
-
-  function registerDynamic(name, deps, executingRequire, execute) {
-    doRegister(name, {
-      declarative: false,
-      deps: deps,
-      executingRequire: executingRequire,
-      execute: execute
-    });
-  }
-
-  function doRegister(name, entry) {
     entry.name = name;
 
     // we never overwrite an existing define
     if (!(name in defined))
-      defined[name] = entry;
+      defined[name] = entry; 
+
+    entry.deps = dedupe(entry.deps);
 
     // we have to normalize dependencies
     // (assume dependencies are normalized for now)
     // entry.normalizedDeps = entry.deps.map(normalize);
     entry.normalizedDeps = entry.deps;
   }
-
 
   function buildGroups(entry, groups) {
     groups[entry.groupIndex] = groups[entry.groupIndex] || [];
@@ -152,23 +140,13 @@
 
     var declaration = entry.declare.call(global, function(name, value) {
       module.locked = true;
-
-      if (typeof name == 'object') {
-        for (var p in name)
-          exports[p] = name[p];
-      }
-      else {
-        exports[name] = value;
-      }
+      exports[name] = value;
 
       for (var i = 0, l = module.importers.length; i < l; i++) {
         var importerModule = module.importers[i];
         if (!importerModule.locked) {
-          for (var j = 0; j < importerModule.dependencies.length; ++j) {
-            if (importerModule.dependencies[j] === module) {
-              importerModule.setters[j](exports);
-            }
-          }
+          var importerIndex = indexOf.call(importerModule.dependencies, module);
+          importerModule.setters[importerIndex](exports);
         }
       }
 
@@ -178,6 +156,9 @@
 
     module.setters = declaration.setters;
     module.execute = declaration.execute;
+
+    if (!module.setters || !module.execute)
+      throw new TypeError("Invalid System.register form for " + entry.name);
 
     // now link all the module dependencies
     for (var i = 0, l = entry.normalizedDeps.length; i < l; i++) {
@@ -192,7 +173,10 @@
         depExports = depModule.exports;
       }
       else if (depEntry && !depEntry.declarative) {
-        depExports = depEntry.esModule;
+        if (depEntry.module.exports && depEntry.module.exports.__esModule)
+          depExports = depEntry.module.exports;
+        else
+          depExports = { 'default': depEntry.module.exports, __useDefault: true };
       }
       // in the module registry
       else if (!depEntry) {
@@ -277,37 +261,6 @@
 
     if (output)
       module.exports = output;
-
-    // create the esModule object, which allows ES6 named imports of dynamics
-    exports = module.exports;
- 
-    if (exports && exports.__esModule) {
-      entry.esModule = exports;
-    }
-    else {
-      entry.esModule = {};
-      
-      // don't trigger getters/setters in environments that support them
-      if (typeof exports == 'object' || typeof exports == 'function') {
-        if (getOwnPropertyDescriptor) {
-          var d;
-          for (var p in exports)
-            if (d = Object.getOwnPropertyDescriptor(exports, p))
-              defineProperty(entry.esModule, p, d);
-        }
-        else {
-          var hasOwnProperty = exports && exports.hasOwnProperty;
-          for (var p in exports) {
-            if (!hasOwnProperty || exports.hasOwnProperty(p))
-              entry.esModule[p] = exports[p];
-          }
-         }
-       }
-      entry.esModule['default'] = exports;
-      defineProperty(entry.esModule, '__useDefault', {
-        value: true
-      });
-    }
   }
 
   /*
@@ -353,10 +306,6 @@
     if (modules[name])
       return modules[name];
 
-    // node core modules
-    if (name.substr(0, 6) == '@node/')
-      return require(name.substr(6));
-
     var entry = defined[name];
 
     // first we check if this module has already been defined in the registry
@@ -373,305 +322,46 @@
     // remove from the registry
     defined[name] = undefined;
 
-    // exported modules get __esModule defined for interop
-    if (entry.declarative)
-      defineProperty(entry.module.exports, '__esModule', { value: true });
+    var module = entry.module.exports;
+
+    if (!module || !entry.declarative && module.__esModule !== true)
+      module = { 'default': module, __useDefault: true };
 
     // return the defined module object
-    return modules[name] = entry.declarative ? entry.module.exports : entry.esModule;
+    return modules[name] = module;
   };
 
-  return function(mains, depNames, declare) {
-    return function(formatDetect) {
-      formatDetect(function(deps) {
-        var System = {
-          _nodeRequire: typeof require != 'undefined' && require.resolve && typeof process != 'undefined' && require,
-          register: register,
-          registerDynamic: registerDynamic,
-          get: load, 
-          set: function(name, module) {
-            modules[name] = module; 
-          },
-          newModule: function(module) {
-            return module;
-          }
-        };
-        System.set('@empty', {});
+  return function(mains, declare) {
 
-        // register external dependencies
-        for (var i = 0; i < depNames.length; i++) (function(depName, dep) {
-          if (dep && dep.__esModule)
-            System.register(depName, [], function(_export) {
-              return {
-                setters: [],
-                execute: function() {
-                  for (var p in dep)
-                    if (p != '__esModule' && !(typeof p == 'object' && p + '' == 'Module'))
-                      _export(p, dep[p]);
-                }
-              };
-            });
-          else
-            System.registerDynamic(depName, [], false, function() {
-              return dep;
-            });
-        })(depNames[i], arguments[i]);
-
-        // register modules in this bundle
-        declare(System);
-
-        // load mains
-        var firstLoad = load(mains[0]);
-        if (mains.length > 1)
-          for (var i = 1; i < mains.length; i++)
-            load(mains[i]);
-
-        if (firstLoad.__useDefault)
-          return firstLoad['default'];
-        else
-          return firstLoad;
-      });
+    var System;
+    var System = {
+      register: register, 
+      get: load, 
+      set: function(name, module) {
+        modules[name] = module; 
+      },
+      newModule: function(module) {
+        return module;
+      },
+      global: global 
     };
-  };
+    System.set('@empty', {});
 
-})(typeof self != 'undefined' ? self : global)
-/* (['mainModule'], ['external-dep'], function($__System) {
+    declare(System);
+
+    for (var i = 0; i < mains.length; i++)
+      load(mains[i]);
+  }
+
+})(typeof window != 'undefined' ? window : global)
+/* (['mainModule'], function(System) {
   System.register(...);
-})
-(function(factory) {
-  if (typeof define && define.amd)
-    define(['external-dep'], factory);
-  // etc UMD / module pattern
-})*/
+}); */
 
-(['1'], [], function($__System) {
+(['t2'], function(System) {
 
-(function(__global) {
-  var loader = $__System;
-  var indexOf = Array.prototype.indexOf || function(item) {
-    for (var i = 0, l = this.length; i < l; i++)
-      if (this[i] === item)
-        return i;
-    return -1;
-  }
-
-  var commentRegEx = /(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg;
-  var cjsRequirePre = "(?:^|[^$_a-zA-Z\\xA0-\\uFFFF.])";
-  var cjsRequirePost = "\\s*\\(\\s*(\"([^\"]+)\"|'([^']+)')\\s*\\)";
-  var fnBracketRegEx = /\(([^\)]*)\)/;
-  var wsRegEx = /^\s+|\s+$/g;
-  
-  var requireRegExs = {};
-
-  function getCJSDeps(source, requireIndex) {
-
-    // remove comments
-    source = source.replace(commentRegEx, '');
-
-    // determine the require alias
-    var params = source.match(fnBracketRegEx);
-    var requireAlias = (params[1].split(',')[requireIndex] || 'require').replace(wsRegEx, '');
-
-    // find or generate the regex for this requireAlias
-    var requireRegEx = requireRegExs[requireAlias] || (requireRegExs[requireAlias] = new RegExp(cjsRequirePre + requireAlias + cjsRequirePost, 'g'));
-
-    requireRegEx.lastIndex = 0;
-
-    var deps = [];
-
-    var match;
-    while (match = requireRegEx.exec(source))
-      deps.push(match[2] || match[3]);
-
-    return deps;
-  }
-
-  /*
-    AMD-compatible require
-    To copy RequireJS, set window.require = window.requirejs = loader.amdRequire
-  */
-  function require(names, callback, errback, referer) {
-    // in amd, first arg can be a config object... we just ignore
-    if (typeof names == 'object' && !(names instanceof Array))
-      return require.apply(null, Array.prototype.splice.call(arguments, 1, arguments.length - 1));
-
-    // amd require
-    if (typeof names == 'string' && typeof callback == 'function')
-      names = [names];
-    if (names instanceof Array) {
-      var dynamicRequires = [];
-      for (var i = 0; i < names.length; i++)
-        dynamicRequires.push(loader['import'](names[i], referer));
-      Promise.all(dynamicRequires).then(function(modules) {
-        if (callback)
-          callback.apply(null, modules);
-      }, errback);
-    }
-
-    // commonjs require
-    else if (typeof names == 'string') {
-      var module = loader.get(names);
-      return module.__useDefault ? module['default'] : module;
-    }
-
-    else
-      throw new TypeError('Invalid require');
-  }
-
-  function define(name, deps, factory) {
-    if (typeof name != 'string') {
-      factory = deps;
-      deps = name;
-      name = null;
-    }
-    if (!(deps instanceof Array)) {
-      factory = deps;
-      deps = ['require', 'exports', 'module'].splice(0, factory.length);
-    }
-
-    if (typeof factory != 'function')
-      factory = (function(factory) {
-        return function() { return factory; }
-      })(factory);
-
-    // in IE8, a trailing comma becomes a trailing undefined entry
-    if (deps[deps.length - 1] === undefined)
-      deps.pop();
-
-    // remove system dependencies
-    var requireIndex, exportsIndex, moduleIndex;
-    
-    if ((requireIndex = indexOf.call(deps, 'require')) != -1) {
-      
-      deps.splice(requireIndex, 1);
-
-      // only trace cjs requires for non-named
-      // named defines assume the trace has already been done
-      if (!name)
-        deps = deps.concat(getCJSDeps(factory.toString(), requireIndex));
-    }
-
-    if ((exportsIndex = indexOf.call(deps, 'exports')) != -1)
-      deps.splice(exportsIndex, 1);
-    
-    if ((moduleIndex = indexOf.call(deps, 'module')) != -1)
-      deps.splice(moduleIndex, 1);
-
-    var define = {
-      name: name,
-      deps: deps,
-      execute: function(req, exports, module) {
-
-        var depValues = [];
-        for (var i = 0; i < deps.length; i++)
-          depValues.push(req(deps[i]));
-
-        module.uri = module.id;
-
-        module.config = function() {};
-
-        // add back in system dependencies
-        if (moduleIndex != -1)
-          depValues.splice(moduleIndex, 0, module);
-        
-        if (exportsIndex != -1)
-          depValues.splice(exportsIndex, 0, exports);
-        
-        if (requireIndex != -1) 
-          depValues.splice(requireIndex, 0, function(names, callback, errback) {
-            if (typeof names == 'string' && typeof callback != 'function')
-              return req(names);
-            return require.call(loader, names, callback, errback, module.id);
-          });
-
-        var output = factory.apply(exportsIndex == -1 ? __global : exports, depValues);
-
-        if (typeof output == 'undefined' && module)
-          output = module.exports;
-
-        if (typeof output != 'undefined')
-          return output;
-      }
-    };
-
-    // anonymous define
-    if (!name) {
-      // already defined anonymously -> throw
-      if (lastModule.anonDefine)
-        throw new TypeError('Multiple defines for anonymous module');
-      lastModule.anonDefine = define;
-    }
-    // named define
-    else {
-      // if we don't have any other defines,
-      // then let this be an anonymous define
-      // this is just to support single modules of the form:
-      // define('jquery')
-      // still loading anonymously
-      // because it is done widely enough to be useful
-      if (!lastModule.anonDefine && !lastModule.isBundle) {
-        lastModule.anonDefine = define;
-      }
-      // otherwise its a bundle only
-      else {
-        // if there is an anonDefine already (we thought it could have had a single named define)
-        // then we define it now
-        // this is to avoid defining named defines when they are actually anonymous
-        if (lastModule.anonDefine && lastModule.anonDefine.name)
-          loader.registerDynamic(lastModule.anonDefine.name, lastModule.anonDefine.deps, false, lastModule.anonDefine.execute);
-
-        lastModule.anonDefine = null;
-      }
-
-      // note this is now a bundle
-      lastModule.isBundle = true;
-
-      // define the module through the register registry
-      loader.registerDynamic(name, define.deps, false, define.execute);
-    }
-  }
-  define.amd = {};
-
-  // adds define as a global (potentially just temporarily)
-  function createDefine(loader) {
-    lastModule.anonDefine = null;
-    lastModule.isBundle = false;
-
-    // ensure no NodeJS environment detection
-    var oldModule = __global.module;
-    var oldExports = __global.exports;
-    var oldDefine = __global.define;
-
-    __global.module = undefined;
-    __global.exports = undefined;
-    __global.define = define;
-
-    return function() {
-      __global.define = oldDefine;
-      __global.module = oldModule;
-      __global.exports = oldExports;
-    };
-  }
-
-  var lastModule = {
-    isBundle: false,
-    anonDefine: null
-  };
-
-  loader.set('@@amd-helpers', loader.newModule({
-    createDefine: createDefine,
-    require: require,
-    define: define,
-    lastModule: lastModule
-  }));
-  loader.amdDefine = define;
-  loader.amdRequire = require;
-})(typeof self != 'undefined' ? self : global);
-
-"bundle";
-$__System.registerDynamic("2", [], true, function(req, exports, module) {
-  ;
-  var global = this,
+System.register("npm:global@4.3.1/window", [], true, function(require, exports, module) {
+  var global = System.global,
       __define = global.define;
   global.define = undefined;
   if (typeof window !== "undefined") {
@@ -687,9 +377,8 @@ $__System.registerDynamic("2", [], true, function(req, exports, module) {
   return module.exports;
 });
 
-$__System.registerDynamic("3", [], true, function(req, exports, module) {
-  ;
-  var global = this,
+System.register("npm:is-function@1.0.1/index", [], true, function(require, exports, module) {
+  var global = System.global,
       __define = global.define;
   global.define = undefined;
   module.exports = isFunction;
@@ -703,19 +392,8 @@ $__System.registerDynamic("3", [], true, function(req, exports, module) {
   return module.exports;
 });
 
-$__System.registerDynamic("4", ["3"], true, function(req, exports, module) {
-  ;
-  var global = this,
-      __define = global.define;
-  global.define = undefined;
-  module.exports = req('3');
-  global.define = __define;
-  return module.exports;
-});
-
-$__System.registerDynamic("5", [], true, function(req, exports, module) {
-  ;
-  var global = this,
+System.register("npm:trim@0.0.1/index", [], true, function(require, exports, module) {
+  var global = System.global,
       __define = global.define;
   global.define = undefined;
   exports = module.exports = trim;
@@ -732,22 +410,11 @@ $__System.registerDynamic("5", [], true, function(req, exports, module) {
   return module.exports;
 });
 
-$__System.registerDynamic("6", ["5"], true, function(req, exports, module) {
-  ;
-  var global = this,
+System.register("npm:for-each@0.3.2/index", ["npm:is-function@1.0.1"], true, function(require, exports, module) {
+  var global = System.global,
       __define = global.define;
   global.define = undefined;
-  module.exports = req('5');
-  global.define = __define;
-  return module.exports;
-});
-
-$__System.registerDynamic("7", ["4"], true, function(req, exports, module) {
-  ;
-  var global = this,
-      __define = global.define;
-  global.define = undefined;
-  var isFunction = req('4');
+  var isFunction = require("npm:is-function@1.0.1");
   module.exports = forEach;
   var toString = Object.prototype.toString;
   var hasOwnProperty = Object.prototype.hasOwnProperty;
@@ -790,61 +457,8 @@ $__System.registerDynamic("7", ["4"], true, function(req, exports, module) {
   return module.exports;
 });
 
-$__System.registerDynamic("8", ["7"], true, function(req, exports, module) {
-  ;
-  var global = this,
-      __define = global.define;
-  global.define = undefined;
-  module.exports = req('7');
-  global.define = __define;
-  return module.exports;
-});
-
-$__System.registerDynamic("9", ["6", "8"], true, function(req, exports, module) {
-  ;
-  var global = this,
-      __define = global.define;
-  global.define = undefined;
-  var trim = req('6'),
-      forEach = req('8'),
-      isArray = function(arg) {
-        return Object.prototype.toString.call(arg) === '[object Array]';
-      };
-  module.exports = function(headers) {
-    if (!headers)
-      return {};
-    var result = {};
-    forEach(trim(headers).split('\n'), function(row) {
-      var index = row.indexOf(':'),
-          key = trim(row.slice(0, index)).toLowerCase(),
-          value = trim(row.slice(index + 1));
-      if (typeof(result[key]) === 'undefined') {
-        result[key] = value;
-      } else if (isArray(result[key])) {
-        result[key].push(value);
-      } else {
-        result[key] = [result[key], value];
-      }
-    });
-    return result;
-  };
-  global.define = __define;
-  return module.exports;
-});
-
-$__System.registerDynamic("a", ["9"], true, function(req, exports, module) {
-  ;
-  var global = this,
-      __define = global.define;
-  global.define = undefined;
-  module.exports = req('9');
-  global.define = __define;
-  return module.exports;
-});
-
-$__System.registerDynamic("b", [], true, function(req, exports, module) {
-  ;
-  var global = this,
+System.register("npm:xtend@4.0.1/immutable", [], true, function(require, exports, module) {
+  var global = System.global,
       __define = global.define;
   global.define = undefined;
   module.exports = extend;
@@ -865,19 +479,8 @@ $__System.registerDynamic("b", [], true, function(req, exports, module) {
   return module.exports;
 });
 
-$__System.registerDynamic("c", ["b"], true, function(req, exports, module) {
-  ;
-  var global = this,
-      __define = global.define;
-  global.define = undefined;
-  module.exports = req('b');
-  global.define = __define;
-  return module.exports;
-});
-
-$__System.registerDynamic("d", [], true, function(req, exports, module) {
-  ;
-  var global = this,
+System.register("npm:process@0.11.9/browser", [], true, function(require, exports, module) {
+  var global = System.global,
       __define = global.define;
   global.define = undefined;
   var process = module.exports = {};
@@ -951,7 +554,7 @@ $__System.registerDynamic("d", [], true, function(req, exports, module) {
   var queueIndex = -1;
   function cleanUpNextTick() {
     if (!draining || !currentQueue) {
-      return;
+      return ;
     }
     draining = false;
     if (currentQueue.length) {
@@ -965,7 +568,7 @@ $__System.registerDynamic("d", [], true, function(req, exports, module) {
   }
   function drainQueue() {
     if (draining) {
-      return;
+      return ;
     }
     var timeout = runTimeout(cleanUpNextTick);
     draining = true;
@@ -1034,250 +637,8 @@ $__System.registerDynamic("d", [], true, function(req, exports, module) {
   return module.exports;
 });
 
-$__System.registerDynamic("e", ["d"], true, function(req, exports, module) {
-  ;
-  var global = this,
-      __define = global.define;
-  global.define = undefined;
-  module.exports = req('d');
-  global.define = __define;
-  return module.exports;
-});
-
-$__System.registerDynamic("f", ["e"], true, function(req, exports, module) {
-  ;
-  var global = this,
-      __define = global.define;
-  global.define = undefined;
-  module.exports = $__System._nodeRequire ? process : req('e');
-  global.define = __define;
-  return module.exports;
-});
-
-$__System.registerDynamic("10", ["f"], true, function(req, exports, module) {
-  ;
-  var global = this,
-      __define = global.define;
-  global.define = undefined;
-  module.exports = req('f');
-  global.define = __define;
-  return module.exports;
-});
-
-$__System.registerDynamic("11", ["2", "4", "a", "c", "10"], true, function(req, exports, module) {
-  ;
-  var global = this,
-      __define = global.define;
-  global.define = undefined;
-  (function(process) {
-    "use strict";
-    var window = req('2');
-    var isFunction = req('4');
-    var parseHeaders = req('a');
-    var xtend = req('c');
-    module.exports = createXHR;
-    createXHR.XMLHttpRequest = window.XMLHttpRequest || noop;
-    createXHR.XDomainRequest = "withCredentials" in (new createXHR.XMLHttpRequest()) ? createXHR.XMLHttpRequest : window.XDomainRequest;
-    forEachArray(["get", "put", "post", "patch", "head", "delete"], function(method) {
-      createXHR[method === "delete" ? "del" : method] = function(uri, options, callback) {
-        options = initParams(uri, options, callback);
-        options.method = method.toUpperCase();
-        return _createXHR(options);
-      };
-    });
-    function forEachArray(array, iterator) {
-      for (var i = 0; i < array.length; i++) {
-        iterator(array[i]);
-      }
-    }
-    function isEmpty(obj) {
-      for (var i in obj) {
-        if (obj.hasOwnProperty(i))
-          return false;
-      }
-      return true;
-    }
-    function initParams(uri, options, callback) {
-      var params = uri;
-      if (isFunction(options)) {
-        callback = options;
-        if (typeof uri === "string") {
-          params = {uri: uri};
-        }
-      } else {
-        params = xtend(options, {uri: uri});
-      }
-      params.callback = callback;
-      return params;
-    }
-    function createXHR(uri, options, callback) {
-      options = initParams(uri, options, callback);
-      return _createXHR(options);
-    }
-    function _createXHR(options) {
-      if (typeof options.callback === "undefined") {
-        throw new Error("callback argument missing");
-      }
-      var called = false;
-      var callback = function cbOnce(err, response, body) {
-        if (!called) {
-          called = true;
-          options.callback(err, response, body);
-        }
-      };
-      function readystatechange() {
-        if (xhr.readyState === 4) {
-          loadFunc();
-        }
-      }
-      function getBody() {
-        var body = undefined;
-        if (xhr.response) {
-          body = xhr.response;
-        } else {
-          body = xhr.responseText || getXml(xhr);
-        }
-        if (isJson) {
-          try {
-            body = JSON.parse(body);
-          } catch (e) {}
-        }
-        return body;
-      }
-      var failureResponse = {
-        body: undefined,
-        headers: {},
-        statusCode: 0,
-        method: method,
-        url: uri,
-        rawRequest: xhr
-      };
-      function errorFunc(evt) {
-        clearTimeout(timeoutTimer);
-        if (!(evt instanceof Error)) {
-          evt = new Error("" + (evt || "Unknown XMLHttpRequest Error"));
-        }
-        evt.statusCode = 0;
-        return callback(evt, failureResponse);
-      }
-      function loadFunc() {
-        if (aborted)
-          return;
-        var status;
-        clearTimeout(timeoutTimer);
-        if (options.useXDR && xhr.status === undefined) {
-          status = 200;
-        } else {
-          status = (xhr.status === 1223 ? 204 : xhr.status);
-        }
-        var response = failureResponse;
-        var err = null;
-        if (status !== 0) {
-          response = {
-            body: getBody(),
-            statusCode: status,
-            method: method,
-            headers: {},
-            url: uri,
-            rawRequest: xhr
-          };
-          if (xhr.getAllResponseHeaders) {
-            response.headers = parseHeaders(xhr.getAllResponseHeaders());
-          }
-        } else {
-          err = new Error("Internal XMLHttpRequest Error");
-        }
-        return callback(err, response, response.body);
-      }
-      var xhr = options.xhr || null;
-      if (!xhr) {
-        if (options.cors || options.useXDR) {
-          xhr = new createXHR.XDomainRequest();
-        } else {
-          xhr = new createXHR.XMLHttpRequest();
-        }
-      }
-      var key;
-      var aborted;
-      var uri = xhr.url = options.uri || options.url;
-      var method = xhr.method = options.method || "GET";
-      var body = options.body || options.data || null;
-      var headers = xhr.headers = options.headers || {};
-      var sync = !!options.sync;
-      var isJson = false;
-      var timeoutTimer;
-      if ("json" in options) {
-        isJson = true;
-        headers["accept"] || headers["Accept"] || (headers["Accept"] = "application/json");
-        if (method !== "GET" && method !== "HEAD") {
-          headers["content-type"] || headers["Content-Type"] || (headers["Content-Type"] = "application/json");
-          body = JSON.stringify(options.json);
-        }
-      }
-      xhr.onreadystatechange = readystatechange;
-      xhr.onload = loadFunc;
-      xhr.onerror = errorFunc;
-      xhr.onprogress = function() {};
-      xhr.ontimeout = errorFunc;
-      xhr.open(method, uri, !sync, options.username, options.password);
-      if (!sync) {
-        xhr.withCredentials = !!options.withCredentials;
-      }
-      if (!sync && options.timeout > 0) {
-        timeoutTimer = setTimeout(function() {
-          aborted = true;
-          xhr.abort("timeout");
-          var e = new Error("XMLHttpRequest timeout");
-          e.code = "ETIMEDOUT";
-          errorFunc(e);
-        }, options.timeout);
-      }
-      if (xhr.setRequestHeader) {
-        for (key in headers) {
-          if (headers.hasOwnProperty(key)) {
-            xhr.setRequestHeader(key, headers[key]);
-          }
-        }
-      } else if (options.headers && !isEmpty(options.headers)) {
-        throw new Error("Headers cannot be set on an XDomainRequest object");
-      }
-      if ("responseType" in options) {
-        xhr.responseType = options.responseType;
-      }
-      if ("beforeSend" in options && typeof options.beforeSend === "function") {
-        options.beforeSend(xhr);
-      }
-      xhr.send(body);
-      return xhr;
-    }
-    function getXml(xhr) {
-      if (xhr.responseType === "document") {
-        return xhr.responseXML;
-      }
-      var firefoxBugTakenEffect = xhr.status === 204 && xhr.responseXML && xhr.responseXML.documentElement.nodeName === "parsererror";
-      if (xhr.responseType === "" && !firefoxBugTakenEffect) {
-        return xhr.responseXML;
-      }
-      return null;
-    }
-    function noop() {}
-  })(req('10'));
-  global.define = __define;
-  return module.exports;
-});
-
-$__System.registerDynamic("12", ["11"], true, function(req, exports, module) {
-  ;
-  var global = this,
-      __define = global.define;
-  global.define = undefined;
-  module.exports = req('11');
-  global.define = __define;
-  return module.exports;
-});
-
 (function() {
-var _removeDefine = $__System.get("@@amd-helpers").createDefine();
+function define(){};  define.amd = {};
 (function(window, document, undefined) {
   var L = {version: "1.0.1"};
   function expose() {
@@ -1291,7 +652,9 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
   if (typeof module === 'object' && typeof module.exports === 'object') {
     module.exports = L;
   } else if (typeof define === 'function' && define.amd) {
-    define("13", [], L);
+    System.register("github:Leaflet/Leaflet@1.0.1/dist/leaflet-src", [], false, typeof L == "function" ? L : function() {
+      return L;
+    });
   }
   if (typeof window !== 'undefined') {
     expose();
@@ -1479,7 +842,7 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
     proto._initHooks = [];
     proto.callInitHooks = function() {
       if (this._initHooksCalled) {
-        return;
+        return ;
       }
       if (parentProto.callInitHooks) {
         parentProto.callInitHooks.call(this);
@@ -1558,7 +921,7 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
       for (var i = 0,
           len = listeners.length; i < len; i++) {
         if (listeners[i].fn === fn && listeners[i].ctx === context) {
-          return;
+          return ;
         }
       }
       listeners.push(newListener);
@@ -1569,18 +932,18 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
           i,
           len;
       if (!this._events) {
-        return;
+        return ;
       }
       listeners = this._events[type];
       if (!listeners) {
-        return;
+        return ;
       }
       if (!fn) {
         for (i = 0, len = listeners.length; i < len; i++) {
           listeners[i].fn = L.Util.falseFn;
         }
         delete this._events[type];
-        return;
+        return ;
       }
       if (context === this) {
         context = undefined;
@@ -1597,7 +960,7 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
               this._events[type] = listeners = listeners.slice();
             }
             listeners.splice(i, 1);
-            return;
+            return ;
           }
         }
       }
@@ -1827,7 +1190,7 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
   };
   L.Bounds = function(a, b) {
     if (!a) {
-      return;
+      return ;
     }
     var points = b ? [a, b] : a;
     for (var i = 0,
@@ -2016,7 +1379,7 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
         filter = el.filters.item(filterName);
       } catch (e) {
         if (value === 1) {
-          return;
+          return ;
         }
       }
       value = Math.round(value * 100);
@@ -2091,7 +1454,7 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
         element = element.parentNode;
       }
       if (!element || !element.style) {
-        return;
+        return ;
       }
       L.DomUtil.restoreOutline();
       this._outlineElement = element;
@@ -2101,7 +1464,7 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
     };
     L.DomUtil.restoreOutline = function() {
       if (!this._outlineElement) {
-        return;
+        return ;
       }
       this._outlineElement.style.outline = this._outlineStyle;
       delete this._outlineElement;
@@ -2172,7 +1535,7 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
   };
   L.LatLngBounds = function(southWest, northEast) {
     if (!southWest) {
-      return;
+      return ;
     }
     var latlngs = northEast ? [southWest, northEast] : southWest;
     for (var i = 0,
@@ -2866,7 +2229,7 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
     },
     _initEvents: function(remove) {
       if (!L.DomEvent) {
-        return;
+        return ;
       }
       this._targets = {};
       this._targets[L.stamp(this._container)] = this;
@@ -2928,7 +2291,7 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
     },
     _handleDOMEvent: function(e) {
       if (!this._loaded || L.DomEvent._skipped(e)) {
-        return;
+        return ;
       }
       var type = e.type === 'keypress' && e.keyCode === 13 ? 'click' : e.type;
       if (type === 'mousedown') {
@@ -2943,11 +2306,11 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
         this._fireDOMEvent(synth, synth.type, targets);
       }
       if (e._stopped) {
-        return;
+        return ;
       }
       targets = (targets || []).concat(this._findEventTargets(e, type));
       if (!targets.length) {
-        return;
+        return ;
       }
       var target = targets[0];
       if (type === 'contextmenu' && target.listens(type, true)) {
@@ -2963,7 +2326,7 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
       for (var i = 0; i < targets.length; i++) {
         targets[i].fire(type, data, true);
         if (data.originalEvent._stopped || (targets[i].options.nonBubblingEvents && L.Util.indexOf(targets[i].options.nonBubblingEvents, type) !== -1)) {
-          return;
+          return ;
         }
       }
     },
@@ -3087,7 +2450,7 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
     _layerAdd: function(e) {
       var map = e.target;
       if (!map.hasLayer(this)) {
-        return;
+        return ;
       }
       this._map = map;
       this._zoomAnimated = map._zoomAnimated;
@@ -3350,10 +2713,10 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
     },
     _updateOpacity: function() {
       if (!this._map) {
-        return;
+        return ;
       }
       if (L.Browser.ielt9) {
-        return;
+        return ;
       }
       L.DomUtil.setOpacity(this._container, this.options.opacity);
       var now = +new Date(),
@@ -3385,7 +2748,7 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
     },
     _initContainer: function() {
       if (this._container) {
-        return;
+        return ;
       }
       this._container = L.DomUtil.create('div', 'leaflet-layer ' + (this.options.className || ''));
       this._updateZIndex();
@@ -3425,14 +2788,14 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
     },
     _pruneTiles: function() {
       if (!this._map) {
-        return;
+        return ;
       }
       var key,
           tile;
       var zoom = this._map.getZoom();
       if (zoom > this.options.maxZoom || zoom < this.options.minZoom) {
         this._removeAllTiles();
-        return;
+        return ;
       }
       for (key in this._tiles) {
         tile = this._tiles[key];
@@ -3570,7 +2933,7 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
     },
     _onMoveEnd: function() {
       if (!this._map || this._map._animatingZoom) {
-        return;
+        return ;
       }
       this._update();
     },
@@ -3585,14 +2948,14 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
     _update: function(center) {
       var map = this._map;
       if (!map) {
-        return;
+        return ;
       }
       var zoom = map.getZoom();
       if (center === undefined) {
         center = map.getCenter();
       }
       if (this._tileZoom === undefined) {
-        return;
+        return ;
       }
       var pixelBounds = this._getTiledPixelBounds(center),
           tileRange = this._pxBoundsToTileRange(pixelBounds),
@@ -3608,7 +2971,7 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
       }
       if (Math.abs(zoom - this._tileZoom) > 1) {
         this._setView(center, zoom);
-        return;
+        return ;
       }
       for (var j = tileRange.min.y; j <= tileRange.max.y; j++) {
         for (var i = tileRange.min.x; i <= tileRange.max.x; i++) {
@@ -3682,7 +3045,7 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
     _removeTile: function(key) {
       var tile = this._tiles[key];
       if (!tile) {
-        return;
+        return ;
       }
       L.DomUtil.remove(tile.el);
       delete this._tiles[key];
@@ -3727,7 +3090,7 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
     },
     _tileReady: function(coords, err, tile) {
       if (!this._map) {
-        return;
+        return ;
       }
       if (err) {
         this.fire('tileerror', {
@@ -3739,7 +3102,7 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
       var key = this._tileCoordsToKey(coords);
       tile = this._tiles[key];
       if (!tile) {
-        return;
+        return ;
       }
       tile.loaded = +new Date();
       if (this._map._fadeAnimated) {
@@ -4330,7 +3693,7 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
     },
     _initInteraction: function() {
       if (!this.options.interactive) {
-        return;
+        return ;
       }
       L.DomUtil.addClass(this._icon, 'leaflet-interactive');
       this.addInteractiveTarget(this._icon);
@@ -4453,7 +3816,7 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
     },
     update: function() {
       if (!this._map) {
-        return;
+        return ;
       }
       this._container.style.visibility = 'hidden';
       this._updateContent();
@@ -4489,7 +3852,7 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
     },
     _updateContent: function() {
       if (!this._content) {
-        return;
+        return ;
       }
       var node = this._contentNode;
       var content = (typeof this._content === 'function') ? this._content(this._source || this) : this._content;
@@ -4505,7 +3868,7 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
     },
     _updatePosition: function() {
       if (!this._map) {
-        return;
+        return ;
       }
       var pos = this._map.latLngToLayerPoint(this._latlng),
           offset = L.point(this.options.offset),
@@ -4621,7 +3984,7 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
     },
     _adjustPan: function() {
       if (!this.options.autoPan || (this._map._panAnim && this._map._panAnim._inProgress)) {
-        return;
+        return ;
       }
       var map = this._map,
           marginBottom = parseInt(L.DomUtil.getStyle(this._container, 'marginBottom'), 10) || 0,
@@ -4778,15 +4141,15 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
     _openPopup: function(e) {
       var layer = e.layer || e.target;
       if (!this._popup) {
-        return;
+        return ;
       }
       if (!this._map) {
-        return;
+        return ;
       }
       L.DomEvent.stop(e);
       if (layer instanceof L.Path) {
         this.openPopup(e.layer || e.target, e.latlng);
-        return;
+        return ;
       }
       if (this._map.hasLayer(this._popup) && this._popup._source === layer) {
         this.closePopup();
@@ -4944,7 +4307,7 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
     },
     _initTooltipInteractions: function(remove) {
       if (!remove && this._tooltipHandlersAdded) {
-        return;
+        return ;
       }
       var onOff = remove ? 'off' : 'on',
           events = {
@@ -5026,7 +4389,7 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
     _openTooltip: function(e) {
       var layer = e.layer || e.target;
       if (!this._tooltip || !this._map) {
-        return;
+        return ;
       }
       this.openTooltip(layer, this._tooltip.options.sticky ? e.latlng : undefined);
     },
@@ -5622,11 +4985,11 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
       var bounds = this._renderer._bounds;
       this._parts = [];
       if (!this._pxBounds || !this._pxBounds.intersects(bounds)) {
-        return;
+        return ;
       }
       if (this.options.noClip) {
         this._parts = this._rings;
-        return;
+        return ;
       }
       var parts = this._parts,
           i,
@@ -5662,7 +5025,7 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
     },
     _update: function() {
       if (!this._map) {
-        return;
+        return ;
       }
       this._clipPoints();
       this._simplifyPoints();
@@ -5780,11 +5143,11 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
       bounds = new L.Bounds(bounds.min.subtract(p), bounds.max.add(p));
       this._parts = [];
       if (!this._pxBounds || !this._pxBounds.intersects(bounds)) {
-        return;
+        return ;
       }
       if (this.options.noClip) {
         this._parts = this._rings;
-        return;
+        return ;
       }
       for (var i = 0,
           len = this._rings.length,
@@ -5945,7 +5308,7 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
     },
     _update: function() {
       if (this._map._animatingZoom && this._bounds) {
-        return;
+        return ;
       }
       L.Renderer.prototype._update.call(this);
       var b = this._bounds,
@@ -5986,7 +5349,7 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
       var path = layer._path,
           options = layer.options;
       if (!path) {
-        return;
+        return ;
       }
       if (options.stroke) {
         path.setAttribute('stroke', options.color);
@@ -6080,7 +5443,7 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
     },
     _update: function() {
       if (this._map._animatingZoom) {
-        return;
+        return ;
       }
       L.Renderer.prototype._update.call(this);
       this.fire('update');
@@ -6186,7 +5549,7 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
     },
     _update: function() {
       if (this._map._animatingZoom && this._bounds) {
-        return;
+        return ;
       }
       this._drawnLayers = {};
       L.Renderer.prototype._update.call(this);
@@ -6239,7 +5602,7 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
     },
     _requestRedraw: function(layer) {
       if (!this._map) {
-        return;
+        return ;
       }
       var padding = (layer.options.weight || 0) + 1;
       this._redrawBounds = this._redrawBounds || new L.Bounds();
@@ -6284,7 +5647,7 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
           len = parts.length,
           ctx = this._ctx;
       if (!len) {
-        return;
+        return ;
       }
       this._drawnLayers[layer._leaflet_id] = layer;
       ctx.beginPath();
@@ -6304,7 +5667,7 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
     },
     _updateCircle: function(layer) {
       if (layer._empty()) {
-        return;
+        return ;
       }
       var p = layer._point,
           ctx = this._ctx,
@@ -6357,7 +5720,7 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
     },
     _onMouseMove: function(e) {
       if (!this._map || this._map.dragging.moving() || this._map._animatingZoom) {
-        return;
+        return ;
       }
       var point = this._map.mouseEventToLayerPoint(e);
       this._handleMouseOut(e, point);
@@ -6828,7 +6191,7 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
           elapsed = L.DomEvent._lastClick && (timeStamp - L.DomEvent._lastClick);
       if ((elapsed && elapsed > 100 && elapsed < 500) || (e.target._simulatedClick && !e._simulated)) {
         L.DomEvent.stop(e);
-        return;
+        return ;
       }
       L.DomEvent._lastClick = timeStamp;
       handler(e);
@@ -6860,14 +6223,14 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
     },
     enable: function() {
       if (this._enabled) {
-        return;
+        return ;
       }
       L.DomEvent.on(this._dragStartTarget, L.Draggable.START.join(' '), this._onDown, this);
       this._enabled = true;
     },
     disable: function() {
       if (!this._enabled) {
-        return;
+        return ;
       }
       L.DomEvent.off(this._dragStartTarget, L.Draggable.START.join(' '), this._onDown, this);
       this._enabled = false;
@@ -6875,14 +6238,14 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
     },
     _onDown: function(e) {
       if (e._simulated || !this._enabled) {
-        return;
+        return ;
       }
       this._moved = false;
       if (L.DomUtil.hasClass(this._element, 'leaflet-zoom-anim')) {
-        return;
+        return ;
       }
       if (L.Draggable._dragging || e.shiftKey || ((e.which !== 1) && (e.button !== 1) && !e.touches) || !this._enabled) {
-        return;
+        return ;
       }
       L.Draggable._dragging = true;
       if (this._preventOutline) {
@@ -6891,7 +6254,7 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
       L.DomUtil.disableImageDrag();
       L.DomUtil.disableTextSelection();
       if (this._moving) {
-        return;
+        return ;
       }
       this.fire('down');
       var first = e.touches ? e.touches[0] : e;
@@ -6900,20 +6263,20 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
     },
     _onMove: function(e) {
       if (e._simulated || !this._enabled) {
-        return;
+        return ;
       }
       if (e.touches && e.touches.length > 1) {
         this._moved = true;
-        return;
+        return ;
       }
       var first = (e.touches && e.touches.length === 1 ? e.touches[0] : e),
           newPoint = new L.Point(first.clientX, first.clientY),
           offset = newPoint.subtract(this._startPoint);
       if (!offset.x && !offset.y) {
-        return;
+        return ;
       }
       if (Math.abs(offset.x) + Math.abs(offset.y) < this.options.clickTolerance) {
-        return;
+        return ;
       }
       L.DomEvent.preventDefault(e);
       if (!this._moved) {
@@ -6941,7 +6304,7 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
     },
     _onUp: function(e) {
       if (e._simulated || !this._enabled) {
-        return;
+        return ;
       }
       L.DomUtil.removeClass(document.body, 'leaflet-dragging');
       if (this._lastTarget) {
@@ -7070,7 +6433,7 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
     },
     _onPreDragLimit: function() {
       if (!this._viscosity || !this._offsetLimit) {
-        return;
+        return ;
       }
       var offset = this._draggable._newPos.subtract(this._draggable._startPos);
       var limit = this._offsetLimit;
@@ -7192,7 +6555,7 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
       this._delta = 0;
       this._startTime = null;
       if (!delta) {
-        return;
+        return ;
       }
       if (map.options.scrollWheelZoom === 'center') {
         map.setZoom(zoom + delta);
@@ -7218,7 +6581,7 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
           count = e.touches.length;
         }
         if (count > 1) {
-          return;
+          return ;
         }
         var now = Date.now(),
             delta = now - (last || now);
@@ -7305,7 +6668,7 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
           if (this.TAG_WHITE_LIST.indexOf(e.target.tagName) < 0) {
             L.DomEvent.preventDefault(e);
           } else {
-            return;
+            return ;
           }
         }
         this._handlePointer(e, handler);
@@ -7345,7 +6708,7 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
     _addPointerMove: function(obj, handler, id) {
       var onMove = L.bind(function(e) {
         if ((e.pointerType === e.MSPOINTER_TYPE_MOUSE || e.pointerType === 'mouse') && e.buttons === 0) {
-          return;
+          return ;
         }
         this._handlePointer(e, handler);
       }, this);
@@ -7377,7 +6740,7 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
     _onTouchStart: function(e) {
       var map = this._map;
       if (!e.touches || e.touches.length !== 2 || map._animatingZoom || this._zooming) {
-        return;
+        return ;
       }
       var p1 = map.mouseEventToContainerPoint(e.touches[0]),
           p2 = map.mouseEventToContainerPoint(e.touches[1]);
@@ -7396,7 +6759,7 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
     },
     _onTouchMove: function(e) {
       if (!e.touches || e.touches.length !== 2 || !this._zooming) {
-        return;
+        return ;
       }
       var map = this._map,
           p1 = map.mouseEventToContainerPoint(e.touches[0]),
@@ -7409,12 +6772,12 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
       if (map.options.touchZoom === 'center') {
         this._center = this._startLatLng;
         if (scale === 1) {
-          return;
+          return ;
         }
       } else {
         var delta = p1._add(p2)._divideBy(2)._subtract(this._centerPoint);
         if (scale === 1 && delta.x === 0 && delta.y === 0) {
-          return;
+          return ;
         }
         this._center = map.unproject(map.project(this._pinchStartLatLng, this._zoom).subtract(delta), this._zoom);
       }
@@ -7433,7 +6796,7 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
     _onTouchEnd: function() {
       if (!this._moved || !this._zooming) {
         this._zooming = false;
-        return;
+        return ;
       }
       this._zooming = false;
       L.Util.cancelAnimFrame(this._animRequest);
@@ -7459,14 +6822,14 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
     },
     _onDown: function(e) {
       if (!e.touches) {
-        return;
+        return ;
       }
       L.DomEvent.preventDefault(e);
       this._fireClick = true;
       if (e.touches.length > 1) {
         this._fireClick = false;
         clearTimeout(this._holdTimeout);
-        return;
+        return ;
       }
       var first = e.touches[0],
           el = first.target;
@@ -7588,11 +6951,11 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
     },
     _onMouseUp: function(e) {
       if ((e.which !== 1) && (e.button !== 1)) {
-        return;
+        return ;
       }
       this._finish();
       if (!this._moved) {
-        return;
+        return ;
       }
       setTimeout(L.bind(this._resetState, this), 0);
       var bounds = new L.LatLngBounds(this._map.containerPointToLatLng(this._startPoint), this._map.containerPointToLatLng(this._point));
@@ -7652,7 +7015,7 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
     },
     _onMouseDown: function() {
       if (this._focused) {
-        return;
+        return ;
       }
       var body = document.body,
           docEl = document.documentElement,
@@ -7707,14 +7070,14 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
     },
     _onKeyDown: function(e) {
       if (e.altKey || e.ctrlKey || e.metaKey) {
-        return;
+        return ;
       }
       var key = e.keyCode,
           map = this._map,
           offset;
       if (key in this._panKeys) {
         if (map._panAnim && map._panAnim._inProgress) {
-          return;
+          return ;
         }
         offset = this._panKeys[key];
         if (e.shiftKey) {
@@ -7729,7 +7092,7 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
       } else if (key === 27) {
         map.closePopup();
       } else {
-        return;
+        return ;
       }
       L.DomEvent.stop(e);
     }
@@ -7991,7 +7354,7 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
     },
     _update: function() {
       if (!this._map) {
-        return;
+        return ;
       }
       var attribs = [];
       for (var i in this._attributions) {
@@ -8341,7 +7704,7 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
     },
     stop: function() {
       if (!this._inProgress) {
-        return;
+        return ;
       }
       this._step(true);
       this._complete();
@@ -8520,7 +7883,7 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
     },
     _onZoomTransitionEnd: function() {
       if (!this._animatingZoom) {
-        return;
+        return ;
       }
       L.DomUtil.removeClass(this._mapPane, 'leaflet-zoom-anim');
       this._animatingZoom = false;
@@ -8666,28 +8029,339 @@ var _removeDefine = $__System.get("@@amd-helpers").createDefine();
     }
   });
 }(window, document));
-
-_removeDefine();
 })();
-(function() {
-var _removeDefine = $__System.get("@@amd-helpers").createDefine();
-define("14", ["13"], function(main) {
-  return main;
+System.register("npm:is-function@1.0.1", ["npm:is-function@1.0.1/index"], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  module.exports = require("npm:is-function@1.0.1/index");
+  global.define = __define;
+  return module.exports;
 });
 
-_removeDefine();
+System.register("npm:trim@0.0.1", ["npm:trim@0.0.1/index"], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  module.exports = require("npm:trim@0.0.1/index");
+  global.define = __define;
+  return module.exports;
+});
+
+System.register("npm:for-each@0.3.2", ["npm:for-each@0.3.2/index"], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  module.exports = require("npm:for-each@0.3.2/index");
+  global.define = __define;
+  return module.exports;
+});
+
+System.register("npm:xtend@4.0.1", ["npm:xtend@4.0.1/immutable"], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  module.exports = require("npm:xtend@4.0.1/immutable");
+  global.define = __define;
+  return module.exports;
+});
+
+System.register("npm:process@0.11.9", ["npm:process@0.11.9/browser"], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  module.exports = require("npm:process@0.11.9/browser");
+  global.define = __define;
+  return module.exports;
+});
+
+(function() {
+function define(){};  define.amd = {};
+System.register("github:Leaflet/Leaflet@1.0.1", ["github:Leaflet/Leaflet@1.0.1/dist/leaflet-src"], false, function(__require, __exports, __module) {
+  return (function(main) {
+    return main;
+  }).call(this, __require('github:Leaflet/Leaflet@1.0.1/dist/leaflet-src'));
+});
 })();
-$__System.register("1", ["12", "14"], function(exports_1, context_1) {
+System.register("npm:parse-headers@2.0.1/parse-headers", ["npm:trim@0.0.1", "npm:for-each@0.3.2"], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  var trim = require("npm:trim@0.0.1"),
+      forEach = require("npm:for-each@0.3.2"),
+      isArray = function(arg) {
+        return Object.prototype.toString.call(arg) === '[object Array]';
+      };
+  module.exports = function(headers) {
+    if (!headers)
+      return {};
+    var result = {};
+    forEach(trim(headers).split('\n'), function(row) {
+      var index = row.indexOf(':'),
+          key = trim(row.slice(0, index)).toLowerCase(),
+          value = trim(row.slice(index + 1));
+      if (typeof(result[key]) === 'undefined') {
+        result[key] = value;
+      } else if (isArray(result[key])) {
+        result[key].push(value);
+      } else {
+        result[key] = [result[key], value];
+      }
+    });
+    return result;
+  };
+  global.define = __define;
+  return module.exports;
+});
+
+System.register("github:jspm/nodelibs-process@0.1.2/index", ["npm:process@0.11.9"], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  module.exports = System._nodeRequire ? process : require("npm:process@0.11.9");
+  global.define = __define;
+  return module.exports;
+});
+
+System.register("npm:parse-headers@2.0.1", ["npm:parse-headers@2.0.1/parse-headers"], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  module.exports = require("npm:parse-headers@2.0.1/parse-headers");
+  global.define = __define;
+  return module.exports;
+});
+
+System.register("github:jspm/nodelibs-process@0.1.2", ["github:jspm/nodelibs-process@0.1.2/index"], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  module.exports = require("github:jspm/nodelibs-process@0.1.2/index");
+  global.define = __define;
+  return module.exports;
+});
+
+System.register("npm:xhr@2.2.2/index", ["npm:global@4.3.1/window", "npm:is-function@1.0.1", "npm:parse-headers@2.0.1", "npm:xtend@4.0.1", "github:jspm/nodelibs-process@0.1.2"], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  (function(process) {
+    "use strict";
+    var window = require("npm:global@4.3.1/window");
+    var isFunction = require("npm:is-function@1.0.1");
+    var parseHeaders = require("npm:parse-headers@2.0.1");
+    var xtend = require("npm:xtend@4.0.1");
+    module.exports = createXHR;
+    createXHR.XMLHttpRequest = window.XMLHttpRequest || noop;
+    createXHR.XDomainRequest = "withCredentials" in (new createXHR.XMLHttpRequest()) ? createXHR.XMLHttpRequest : window.XDomainRequest;
+    forEachArray(["get", "put", "post", "patch", "head", "delete"], function(method) {
+      createXHR[method === "delete" ? "del" : method] = function(uri, options, callback) {
+        options = initParams(uri, options, callback);
+        options.method = method.toUpperCase();
+        return _createXHR(options);
+      };
+    });
+    function forEachArray(array, iterator) {
+      for (var i = 0; i < array.length; i++) {
+        iterator(array[i]);
+      }
+    }
+    function isEmpty(obj) {
+      for (var i in obj) {
+        if (obj.hasOwnProperty(i))
+          return false;
+      }
+      return true;
+    }
+    function initParams(uri, options, callback) {
+      var params = uri;
+      if (isFunction(options)) {
+        callback = options;
+        if (typeof uri === "string") {
+          params = {uri: uri};
+        }
+      } else {
+        params = xtend(options, {uri: uri});
+      }
+      params.callback = callback;
+      return params;
+    }
+    function createXHR(uri, options, callback) {
+      options = initParams(uri, options, callback);
+      return _createXHR(options);
+    }
+    function _createXHR(options) {
+      if (typeof options.callback === "undefined") {
+        throw new Error("callback argument missing");
+      }
+      var called = false;
+      var callback = function cbOnce(err, response, body) {
+        if (!called) {
+          called = true;
+          options.callback(err, response, body);
+        }
+      };
+      function readystatechange() {
+        if (xhr.readyState === 4) {
+          loadFunc();
+        }
+      }
+      function getBody() {
+        var body = undefined;
+        if (xhr.response) {
+          body = xhr.response;
+        } else {
+          body = xhr.responseText || getXml(xhr);
+        }
+        if (isJson) {
+          try {
+            body = JSON.parse(body);
+          } catch (e) {}
+        }
+        return body;
+      }
+      var failureResponse = {
+        body: undefined,
+        headers: {},
+        statusCode: 0,
+        method: method,
+        url: uri,
+        rawRequest: xhr
+      };
+      function errorFunc(evt) {
+        clearTimeout(timeoutTimer);
+        if (!(evt instanceof Error)) {
+          evt = new Error("" + (evt || "Unknown XMLHttpRequest Error"));
+        }
+        evt.statusCode = 0;
+        return callback(evt, failureResponse);
+      }
+      function loadFunc() {
+        if (aborted)
+          return ;
+        var status;
+        clearTimeout(timeoutTimer);
+        if (options.useXDR && xhr.status === undefined) {
+          status = 200;
+        } else {
+          status = (xhr.status === 1223 ? 204 : xhr.status);
+        }
+        var response = failureResponse;
+        var err = null;
+        if (status !== 0) {
+          response = {
+            body: getBody(),
+            statusCode: status,
+            method: method,
+            headers: {},
+            url: uri,
+            rawRequest: xhr
+          };
+          if (xhr.getAllResponseHeaders) {
+            response.headers = parseHeaders(xhr.getAllResponseHeaders());
+          }
+        } else {
+          err = new Error("Internal XMLHttpRequest Error");
+        }
+        return callback(err, response, response.body);
+      }
+      var xhr = options.xhr || null;
+      if (!xhr) {
+        if (options.cors || options.useXDR) {
+          xhr = new createXHR.XDomainRequest();
+        } else {
+          xhr = new createXHR.XMLHttpRequest();
+        }
+      }
+      var key;
+      var aborted;
+      var uri = xhr.url = options.uri || options.url;
+      var method = xhr.method = options.method || "GET";
+      var body = options.body || options.data || null;
+      var headers = xhr.headers = options.headers || {};
+      var sync = !!options.sync;
+      var isJson = false;
+      var timeoutTimer;
+      if ("json" in options) {
+        isJson = true;
+        headers["accept"] || headers["Accept"] || (headers["Accept"] = "application/json");
+        if (method !== "GET" && method !== "HEAD") {
+          headers["content-type"] || headers["Content-Type"] || (headers["Content-Type"] = "application/json");
+          body = JSON.stringify(options.json);
+        }
+      }
+      xhr.onreadystatechange = readystatechange;
+      xhr.onload = loadFunc;
+      xhr.onerror = errorFunc;
+      xhr.onprogress = function() {};
+      xhr.ontimeout = errorFunc;
+      xhr.open(method, uri, !sync, options.username, options.password);
+      if (!sync) {
+        xhr.withCredentials = !!options.withCredentials;
+      }
+      if (!sync && options.timeout > 0) {
+        timeoutTimer = setTimeout(function() {
+          aborted = true;
+          xhr.abort("timeout");
+          var e = new Error("XMLHttpRequest timeout");
+          e.code = "ETIMEDOUT";
+          errorFunc(e);
+        }, options.timeout);
+      }
+      if (xhr.setRequestHeader) {
+        for (key in headers) {
+          if (headers.hasOwnProperty(key)) {
+            xhr.setRequestHeader(key, headers[key]);
+          }
+        }
+      } else if (options.headers && !isEmpty(options.headers)) {
+        throw new Error("Headers cannot be set on an XDomainRequest object");
+      }
+      if ("responseType" in options) {
+        xhr.responseType = options.responseType;
+      }
+      if ("beforeSend" in options && typeof options.beforeSend === "function") {
+        options.beforeSend(xhr);
+      }
+      xhr.send(body);
+      return xhr;
+    }
+    function getXml(xhr) {
+      if (xhr.responseType === "document") {
+        return xhr.responseXML;
+      }
+      var firefoxBugTakenEffect = xhr.status === 204 && xhr.responseXML && xhr.responseXML.documentElement.nodeName === "parsererror";
+      if (xhr.responseType === "" && !firefoxBugTakenEffect) {
+        return xhr.responseXML;
+      }
+      return null;
+    }
+    function noop() {}
+  })(require("github:jspm/nodelibs-process@0.1.2"));
+  global.define = __define;
+  return module.exports;
+});
+
+System.register("npm:xhr@2.2.2", ["npm:xhr@2.2.2/index"], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  module.exports = require("npm:xhr@2.2.2/index");
+  global.define = __define;
+  return module.exports;
+});
+
+System.register("t2", ["npm:xhr@2.2.2", "github:Leaflet/Leaflet@1.0.1"], function(exports_1, context_1) {
   "use strict";
   var __moduleName = context_1 && context_1.id;
   var xhr_1,
-      L;
-  var realTimeRtdPos;
+      leaflet_1,
+      realTimeRtdPos;
   return {
     setters: [function(xhr_1_1) {
       xhr_1 = xhr_1_1;
-    }, function(L_1) {
-      L = L_1;
+    }, function(leaflet_1_1) {
+      leaflet_1 = leaflet_1_1;
     }],
     execute: function() {
       (function(realTimeRtdPos) {
@@ -8698,12 +8372,13 @@ $__System.register("1", ["12", "14"], function(exports_1, context_1) {
         var markers = [];
         var drawingPins = false;
         var map;
-        var polTime = 33000;
+        var polTime = 4000;
+        var intervalID;
         var countDownSteps = polTime / 1000;
         var countDownInterval;
         var counterdown = countDownSteps;
-        var myLocation = new L.LatLng(39.735, -104.99);
-        var redIcon = L.icon({
+        var myLocation = new leaflet_1.default.LatLng(39.735, -104.99);
+        var redIcon = leaflet_1.default.icon({
           iconUrl: 'marker-icon-red.png',
           iconSize: [30, 50],
           iconAnchor: [15, 50]
@@ -8728,11 +8403,11 @@ $__System.register("1", ["12", "14"], function(exports_1, context_1) {
             if (currentMeMarker) {
               map.removeLayer(currentMeMarker);
             }
-            currentMeMarker = L.marker(myLocation, {icon: redIcon}).addTo(map);
+            currentMeMarker = leaflet_1.default.marker(myLocation, {icon: redIcon}).addTo(map);
             if (app.positions.ready) {
               app.positions.forEach(function(pos) {
-                if (bounds_1.contains(L.latLng(pos.lat, pos.long))) {
-                  var mtemp = L.marker([pos.lat, pos.long]);
+                if (bounds_1.contains(leaflet_1.default.latLng(pos.lat, pos.long))) {
+                  var mtemp = leaflet_1.default.marker([pos.lat, pos.long]);
                   markers.push(mtemp);
                   mtemp.addTo(map).bindPopup(pos.line);
                 }
@@ -8769,6 +8444,11 @@ $__System.register("1", ["12", "14"], function(exports_1, context_1) {
                 feed.forEach(function(entity) {
                   app.positions.push(entity);
                 });
+                clearInterval(intervalID);
+                polTime = 33000;
+                countDownSteps = polTime / 1000;
+                counterdown = countDownSteps;
+                intervalID = setInterval(getNewPositions, polTime);
                 app.positions.ready = true;
                 removePins();
                 redrawPins();
@@ -8791,10 +8471,10 @@ $__System.register("1", ["12", "14"], function(exports_1, context_1) {
           if (!mapStarted) {
             mapStarted = true;
             document.getElementById("infotext").style.visibility = "hidden";
-            map = L.map('map').setView(startLoc, 15);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'}).addTo(map);
+            map = leaflet_1.default.map('map').setView(startLoc, 15);
+            leaflet_1.default.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'}).addTo(map);
             getNewPositions();
-            setInterval(getNewPositions, polTime);
+            intervalID = setInterval(getNewPositions, polTime);
             map.on('dragend zoomend', function(e) {
               removePins();
               redrawPins();
@@ -8806,7 +8486,7 @@ $__System.register("1", ["12", "14"], function(exports_1, context_1) {
           if ("geolocation" in navigator) {
             navigator.geolocation.getCurrentPosition(function(position) {
               var curLoc = [position.coords.latitude, position.coords.longitude];
-              myLocation = new L.LatLng(position.coords.latitude, position.coords.longitude);
+              myLocation = new leaflet_1.default.LatLng(position.coords.latitude, position.coords.longitude);
               if (mapStarted) {
                 map.setView(curLoc);
                 document.getElementById("mapcenter").style.visibility = "visible";
@@ -8833,7 +8513,7 @@ $__System.register("1", ["12", "14"], function(exports_1, context_1) {
           if ("geolocation" in navigator) {
             navigator.geolocation.getCurrentPosition(function(position) {
               startLoc = [position.coords.latitude, position.coords.longitude];
-              myLocation = new L.LatLng(position.coords.latitude, position.coords.longitude);
+              myLocation = new leaflet_1.default.LatLng(position.coords.latitude, position.coords.longitude);
               if (!mapStarted) {
                 InitMapLoop(startLoc);
               }
@@ -8853,8 +8533,5 @@ $__System.register("1", ["12", "14"], function(exports_1, context_1) {
   };
 });
 
-})
-(function(factory) {
-  factory();
 });
 //# sourceMappingURL=bundle.js.map

@@ -1,9 +1,9 @@
 /* */ 
-var Sntp = require('sntp');
-var Boom = require('boom');
+var Sntp = require("sntp");
+var Boom = require("boom");
 var internals = {};
 exports.version = function() {
-  return require('../package.json!systemjs-json').version;
+  return require("../package.json!systemjs-json").version;
 };
 exports.limits = {maxMatchLength: 4096};
 internals.hostHeaderRegex = /^(?:(?:\r\n)?\s)*((?:[^:]+)|(?:\[[^\]]+\]))(?::(\d+))?(?:(?:\r\n)?\s)*$/;
@@ -85,15 +85,15 @@ exports.parseAuthorizationHeader = function(header, keys) {
   var verify = attributesString.replace(/(\w+)="([^"\\]*)"\s*(?:,\s*|$)/g, function($0, $1, $2) {
     if (keys.indexOf($1) === -1) {
       errorMessage = 'Unknown attribute: ' + $1;
-      return;
+      return ;
     }
     if ($2.match(internals.attributeRegex) === null) {
       errorMessage = 'Bad attribute value: ' + $1;
-      return;
+      return ;
     }
     if (attributes.hasOwnProperty($1)) {
       errorMessage = 'Duplicate attribute: ' + $1;
-      return;
+      return ;
     }
     attributes[$1] = $2;
     return '';

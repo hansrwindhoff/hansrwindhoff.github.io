@@ -1,1 +1,1 @@
-module.exports = require("npm:isstream@0.1.2/isstream.js");
+module.exports = require("npm:isstream@0.1.2/isstream");

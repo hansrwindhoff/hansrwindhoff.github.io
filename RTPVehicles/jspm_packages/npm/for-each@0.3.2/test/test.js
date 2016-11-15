@@ -1,6 +1,6 @@
 /* */ 
-var test = require('tape'),
-    forEach = require('../index');
+var test = require("tape"),
+    forEach = require("../index");
 test("forEach calls each iterator", function(t) {
   var count = 0;
   t.plan(4);

@@ -1,5 +1,5 @@
 /* */ 
-var crypto = require('crypto');
+var crypto = require("crypto");
 exports.createSign = crypto.createSign;
 exports.Sign = crypto.Sign;
 exports.createVerify = crypto.createVerify;

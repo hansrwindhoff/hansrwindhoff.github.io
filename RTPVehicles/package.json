@@ -1,13 +1,13 @@
 {
   "jspm": {
     "dependencies": {
-      "leaflet": "github:Leaflet/Leaflet@^1.0.1",
-      "xhr": "npm:xhr@^2.2.2"
+      "leaflet": "github:Leaflet/Leaflet@1.0.1",
+      "xhr": "npm:xhr@2.2.2"
     },
     "devDependencies": {
-      "babel": "npm:babel-core@^5.8.24",
-      "babel-runtime": "npm:babel-runtime@^5.8.24",
-      "core-js": "npm:core-js@^1.1.4"
+      "babel": "npm:babel-core@5.8.24",
+      "babel-runtime": "npm:babel-runtime@5.8.24",
+      "core-js": "npm:core-js@1.1.4"
     }
   }
 }

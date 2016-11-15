@@ -1,9 +1,9 @@
 /* */ 
 (function(Buffer, process) {
-  var Crypto = require('crypto');
-  var Path = require('path');
-  var Util = require('util');
-  var Escape = require('./escape');
+  var Crypto = require("crypto");
+  var Path = require("path");
+  var Util = require("util");
+  var Escape = require("./escape");
   var internals = {};
   exports.clone = function(obj, seen) {
     if (typeof obj !== 'object' || obj === null) {
@@ -484,7 +484,7 @@
   };
   exports.assert = function(condition) {
     if (condition) {
-      return;
+      return ;
     }
     if (arguments.length === 2 && arguments[1] instanceof Error) {
       throw arguments[1];
@@ -653,4 +653,4 @@
     }
     return target;
   };
-})(require('buffer').Buffer, require('process'));
+})(require("buffer").Buffer, require("process"));

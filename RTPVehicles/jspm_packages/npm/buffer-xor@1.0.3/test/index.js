@@ -1,9 +1,9 @@
 /* */ 
 (function(Buffer) {
-  var assert = require('assert');
-  var xor = require('../index');
-  var xorInplace = require('../inplace');
-  var fixtures = require('./fixtures.json!systemjs-json');
+  var assert = require("assert");
+  var xor = require("../index");
+  var xorInplace = require("../inplace");
+  var fixtures = require("./fixtures.json!systemjs-json");
   describe('xor', function() {
     fixtures.forEach(function(f) {
       it('returns ' + f.expected + ' for ' + f.a + '/' + f.b, function() {
@@ -28,4 +28,4 @@
       });
     });
   });
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

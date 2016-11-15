@@ -1,11 +1,11 @@
 /* */ 
 (function(Buffer) {
   "use strict";
-  var core = require('./core');
-  var curve255 = require('./curve255');
-  var utils = require('./utils');
-  var BigInteger = require('jsbn').BigInteger;
-  var crypto = require('crypto');
+  var core = require("./core");
+  var curve255 = require("./curve255");
+  var utils = require("./utils");
+  var BigInteger = require("jsbn").BigInteger;
+  var crypto = require("crypto");
   var ns = {};
   function _bi255(value) {
     if (!(this instanceof _bi255)) {
@@ -392,4 +392,4 @@
     return core.generateKey(false);
   };
   module.exports = ns;
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

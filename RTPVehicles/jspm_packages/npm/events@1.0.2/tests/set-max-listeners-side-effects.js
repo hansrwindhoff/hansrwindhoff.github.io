@@ -1,6 +1,6 @@
 /* */ 
-var assert = require('assert');
-var events = require('../../events@1.0.2');
+var assert = require("assert");
+var events = require("../events");
 var e = new events.EventEmitter;
 assert.deepEqual(e._events, {});
 e.setMaxListeners(5);

@@ -1,6 +1,6 @@
 /* */ 
-var assert = require('assert');
-var BN = require('../lib/bn').BN;
+var assert = require("assert");
+var BN = require("../lib/bn").BN;
 describe('BN.js/Binary', function() {
   describe('.shl()', function() {
     it('should shl numbers', function() {

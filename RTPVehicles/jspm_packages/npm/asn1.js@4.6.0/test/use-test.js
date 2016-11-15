@@ -1,11 +1,11 @@
 /* */ 
 (function(Buffer) {
-  var assert = require('assert');
-  var asn1 = require('../lib/asn1');
+  var assert = require("assert");
+  var asn1 = require("../lib/asn1");
   var bn = asn1.bignum;
-  var fixtures = require('./fixtures');
+  var fixtures = require("./fixtures");
   var jsonEqual = fixtures.jsonEqual;
-  var Buffer = require('buffer').Buffer;
+  var Buffer = require("buffer").Buffer;
   describe('asn1.js models', function() {
     describe('plain use', function() {
       it('should encode submodel', function() {
@@ -102,4 +102,4 @@
       });
     });
   });
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

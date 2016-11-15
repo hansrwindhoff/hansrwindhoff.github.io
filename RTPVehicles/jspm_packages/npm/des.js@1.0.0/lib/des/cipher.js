@@ -1,7 +1,7 @@
 /* */ 
 (function(Buffer) {
   'use strict';
-  var assert = require('minimalistic-assert');
+  var assert = require("minimalistic-assert");
   function Cipher(options) {
     this.options = options;
     this.type = this.options.type;
@@ -100,4 +100,4 @@
     this._flushBuffer(out, 0);
     return this._unpad(out);
   };
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

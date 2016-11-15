@@ -1,6 +1,6 @@
 /* */ 
-var inherits = require('inherits');
-var DEREncoder = require('./der');
+var inherits = require("inherits");
+var DEREncoder = require("./der");
 function PEMEncoder(entity) {
   DEREncoder.call(this, entity);
   this.enc = 'pem';

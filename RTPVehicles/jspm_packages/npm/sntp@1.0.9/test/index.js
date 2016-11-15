@@ -1,9 +1,9 @@
 /* */ 
 (function(Buffer) {
-  var Dns = require('dns');
-  var Dgram = require('dgram');
-  var Lab = require('lab');
-  var Sntp = require('../lib/index');
+  var Dns = require("dns");
+  var Dgram = require("dgram");
+  var Lab = require("lab");
+  var Sntp = require("../lib/index");
   var internals = {};
   var lab = exports.lab = Lab.script();
   var before = lab.before;
@@ -337,4 +337,4 @@
       });
     });
   });
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

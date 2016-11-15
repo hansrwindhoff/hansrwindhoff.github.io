@@ -1,8 +1,8 @@
 /* */ 
-var Code = require('code');
-var Hawk = require('../lib/index');
-var Lab = require('lab');
-var Package = require('../package.json!systemjs-json');
+var Code = require("code");
+var Hawk = require("../lib/index");
+var Lab = require("lab");
+var Package = require("../package.json!systemjs-json");
 var internals = {};
 var lab = exports.lab = Lab.script();
 var describe = lab.experiment;

@@ -1,6 +1,6 @@
 /* */ 
 "use strict";
-var crypto = require('crypto');
+var crypto = require("crypto");
 var ns = {};
 function _setbit(n, c, v) {
   var i = c >> 4;

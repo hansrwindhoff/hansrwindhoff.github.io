@@ -1,7 +1,7 @@
 /* */ 
-var test = require('tape');
-var evp = require('./index');
-var crypto = require('crypto');
+var test = require("tape");
+var evp = require("./index");
+var crypto = require("crypto");
 function runTest(password) {
   test('password: ' + password, function(t) {
     t.plan(1);

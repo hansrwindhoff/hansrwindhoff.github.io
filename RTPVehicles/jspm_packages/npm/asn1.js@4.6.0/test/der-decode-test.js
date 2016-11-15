@@ -1,8 +1,8 @@
 /* */ 
 (function(Buffer) {
-  var assert = require('assert');
-  var asn1 = require('../lib/asn1');
-  var Buffer = require('buffer').Buffer;
+  var assert = require("assert");
+  var asn1 = require("../lib/asn1");
+  var Buffer = require("buffer").Buffer;
   describe('asn1.js DER decoder', function() {
     it('should propagate implicit tag', function() {
       var B = asn1.define('B', function() {
@@ -116,4 +116,4 @@
       });
     });
   });
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

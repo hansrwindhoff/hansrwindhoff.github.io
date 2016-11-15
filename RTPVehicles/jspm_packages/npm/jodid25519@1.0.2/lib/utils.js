@@ -1,6 +1,6 @@
 /* */ 
 "use strict";
-var core = require('./core');
+var core = require("./core");
 var ns = {};
 var _HEXCHARS = "0123456789abcdef";
 function _hexencode(vector) {

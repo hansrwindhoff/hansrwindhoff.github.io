@@ -5,13 +5,13 @@
     Signer: Signer
   };
   var nacl;
-  var stream = require('stream');
-  var util = require('util');
-  var assert = require('assert-plus');
-  var Signature = require('./signature');
+  var stream = require("stream");
+  var util = require("util");
+  var assert = require("assert-plus");
+  var Signature = require("./signature");
   function Verifier(key, hashAlgo) {
     if (nacl === undefined)
-      nacl = require('tweetnacl');
+      nacl = require("tweetnacl");
     if (hashAlgo.toLowerCase() !== 'sha512')
       throw (new Error('ED25519 only supports the use of ' + 'SHA-512 hashes'));
     this.key = key;
@@ -44,7 +44,7 @@
   };
   function Signer(key, hashAlgo) {
     if (nacl === undefined)
-      nacl = require('tweetnacl');
+      nacl = require("tweetnacl");
     if (hashAlgo.toLowerCase() !== 'sha512')
       throw (new Error('ED25519 only supports the use of ' + 'SHA-512 hashes'));
     this.key = key;
@@ -68,4 +68,4 @@
     sigObj.hashAlgorithm = 'sha512';
     return (sigObj);
   };
-})(require('buffer').Buffer);
+})(require("buffer").Buffer);

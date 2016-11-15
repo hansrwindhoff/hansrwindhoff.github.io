@@ -1,6 +1,6 @@
 /* */ 
 (function(Buffer, process) {
-  var compat = require('./browser');
+  var compat = require("./browser");
   process.on('message', function(m) {
     try {
       var result = compat.pbkdf2Sync(new Buffer(m.password, 'hex'), new Buffer(m.salt, 'hex'), m.iterations, m.keylen, m.digest);
@@ -17,4 +17,4 @@
       process.exit();
     }
   });
-})(require('buffer').Buffer, require('process'));
+})(require("buffer").Buffer, require("process"));

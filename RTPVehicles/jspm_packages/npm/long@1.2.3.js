@@ -1,1 +1,1 @@
-module.exports = require("npm:long@1.2.3/index.js");
+module.exports = require("npm:long@1.2.3/index");

@@ -1,2 +1,2 @@
 /* */ 
-module.exports = require('./inplace');
+module.exports = require("./inplace");

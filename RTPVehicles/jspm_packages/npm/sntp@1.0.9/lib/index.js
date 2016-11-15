@@ -1,8 +1,8 @@
 /* */ 
 (function(Buffer, process) {
-  var Dgram = require('dgram');
-  var Dns = require('dns');
-  var Hoek = require('hoek');
+  var Dgram = require("dgram");
+  var Dns = require("dns");
+  var Hoek = require("hoek");
   var internals = {};
   exports.time = function(options, callback) {
     if (arguments.length !== 2) {
@@ -78,7 +78,7 @@
   internals.NtpMessage = function(buffer) {
     this.isValid = false;
     if (buffer.length !== 48) {
-      return;
+      return ;
     }
     var li = (buffer[0] >> 6);
     switch (li) {
@@ -194,7 +194,7 @@
       process.nextTick(function() {
         callback(null, internals.last.offset);
       });
-      return;
+      return ;
     }
     exports.time(options, function(err, time) {
       if (err) {
@@ -219,7 +219,7 @@
       process.nextTick(function() {
         callback();
       });
-      return;
+      return ;
     }
     exports.offset(options, function(err, offset) {
       internals.now.intervalId = setInterval(function() {
@@ -230,7 +230,7 @@
   };
   exports.stop = function() {
     if (!internals.now.intervalId) {
-      return;
+      return ;
     }
     clearInterval(internals.now.intervalId);
     internals.now.intervalId = 0;
@@ -246,4 +246,4 @@
     return now + internals.last.offset;
   };
   internals.ignore = function() {};
-})(require('buffer').Buffer, require('process'));
+})(require("buffer").Buffer, require("process"));

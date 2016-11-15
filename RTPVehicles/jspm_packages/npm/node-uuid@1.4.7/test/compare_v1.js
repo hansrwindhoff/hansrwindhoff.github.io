@@ -1,11 +1,11 @@
 /* */ 
-var assert = require('assert'),
-    nodeuuid = require('../uuid'),
-    uuidjs = require('uuid-js'),
-    libuuid = require('uuid').generate,
-    util = require('util'),
-    exec = require('child_process').exec,
-    os = require('os');
+var assert = require("assert"),
+    nodeuuid = require("../uuid"),
+    uuidjs = require("uuid-js"),
+    libuuid = require("uuid").generate,
+    util = require("util"),
+    exec = require("child_process").exec,
+    os = require("os");
 var uuidCmd = os.type() === 'Darwin' ? 'uuid -1' : 'uuidgen -t';
 function compare(ids) {
   console.log(ids);

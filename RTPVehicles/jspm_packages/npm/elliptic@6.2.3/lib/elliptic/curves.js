@@ -1,8 +1,8 @@
 /* */ 
 'use strict';
 var curves = exports;
-var hash = require('hash.js');
-var elliptic = require('../elliptic');
+var hash = require("hash.js");
+var elliptic = require("../elliptic");
 var assert = elliptic.utils.assert;
 function PresetCurve(options) {
   if (options.type === 'short')
@@ -113,7 +113,7 @@ defineCurve('ed25519', {
 });
 var pre;
 try {
-  pre = require('./precomputed/secp256k1');
+  pre = require("./precomputed/secp256k1");
 } catch (e) {
   pre = undefined;
 }
