@@ -143,6 +143,8 @@ System.register(["xhr", "leaflet"], function (exports_1, context_1) {
                             myLocation = new leaflet_1.default.LatLng(position.coords.latitude, position.coords.longitude);
                             if (mapStarted) {
                                 map.setView(curLoc);
+                                removePins();
+                                redrawPins();
                                 document.getElementById("mapcenter").style.visibility = "visible";
                             }
                         }, function (err) {

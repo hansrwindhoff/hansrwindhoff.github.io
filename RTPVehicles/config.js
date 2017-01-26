@@ -17,8 +17,8 @@ System.config({
 
 System.config({
   "map": {
-    "babel": "npm:babel-core@5.8.38",
-    "babel-runtime": "npm:babel-runtime@5.8.38",
+    "babel": "npm:babel-core@5.8.24",
+    "babel-runtime": "npm:babel-runtime@5.8.24",
     "core-js": "npm:core-js@1.2.7",
     "gtfs-realtime-bindings": "npm:gtfs-realtime-bindings@0.0.4",
     "leaflet": "github:Leaflet/Leaflet@1.0.1",
@@ -151,6 +151,9 @@ System.config({
       "process": "github:jspm/nodelibs-process@0.1.2",
       "querystring": "github:jspm/nodelibs-querystring@0.1.0",
       "url": "github:jspm/nodelibs-url@0.1.0"
+    },
+    "npm:babel-runtime@5.8.24": {
+      "process": "github:jspm/nodelibs-process@0.1.2"
     },
     "npm:babel-runtime@5.8.38": {
       "process": "github:jspm/nodelibs-process@0.1.2"

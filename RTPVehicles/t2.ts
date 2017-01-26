@@ -2,7 +2,7 @@
 "use strict";
 
 import xhr from 'xhr';
-import {default as L }  from 'leaflet';
+import { default as L } from 'leaflet';
 
 module realTimeRtdPos {
 
@@ -177,6 +177,8 @@ module realTimeRtdPos {
                     myLocation = new L.LatLng(position.coords.latitude, position.coords.longitude);
                     if (mapStarted) {
                         map.setView(curLoc);
+                        removePins();
+                        redrawPins();
                         document.getElementById("mapcenter").style.visibility = "visible";
                         //$('#mapcenter').show();
 

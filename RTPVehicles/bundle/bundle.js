@@ -8489,6 +8489,8 @@ System.register("t2", ["npm:xhr@2.2.2", "github:Leaflet/Leaflet@1.0.1"], functio
               myLocation = new leaflet_1.default.LatLng(position.coords.latitude, position.coords.longitude);
               if (mapStarted) {
                 map.setView(curLoc);
+                removePins();
+                redrawPins();
                 document.getElementById("mapcenter").style.visibility = "visible";
               }
             }, function(err) {
