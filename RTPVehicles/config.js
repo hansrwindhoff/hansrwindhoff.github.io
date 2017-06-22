@@ -1,25 +1,22 @@
 System.config({
-  "baseURL": ".",
-  "transpiler": "babel",
-  "babelOptions": {
+  baseURL: ".",
+  defaultJSExtensions: true,
+  transpiler: "babel",
+  babelOptions: {
     "optional": [
       "runtime",
       "optimisation.modules.system"
     ]
   },
-  "paths": {
-    "github:*": "jspm_packages/github/*.js",
-    "npm:*": "jspm_packages/npm/*.js",
-    "*": "*.js"
+  paths: {
+    "github:*": "jspm_packages/github/*",
+    "npm:*": "jspm_packages/npm/*"
   },
-  "defaultJSExtensions": true
-});
 
-System.config({
-  "map": {
+  map: {
     "babel": "npm:babel-core@5.8.24",
     "babel-runtime": "npm:babel-runtime@5.8.24",
-    "core-js": "npm:core-js@1.2.7",
+    "core-js": "npm:core-js@1.1.4",
     "gtfs-realtime-bindings": "npm:gtfs-realtime-bindings@0.0.4",
     "leaflet": "github:Leaflet/Leaflet@1.0.1",
     "request": "npm:request@2.72.0",
@@ -29,6 +26,9 @@ System.config({
     },
     "github:jspm/nodelibs-buffer@0.1.0": {
       "buffer": "npm:buffer@3.6.0"
+    },
+    "github:jspm/nodelibs-buffer@0.1.1": {
+      "buffer": "npm:buffer@5.0.6"
     },
     "github:jspm/nodelibs-constants@0.1.0": {
       "constants-browserify": "npm:constants-browserify@0.0.1"
@@ -64,7 +64,7 @@ System.config({
       "path-browserify": "npm:path-browserify@0.0.0"
     },
     "github:jspm/nodelibs-process@0.1.2": {
-      "process": "npm:process@0.11.9"
+      "process": "npm:process@0.11.10"
     },
     "github:jspm/nodelibs-punycode@0.1.0": {
       "punycode": "npm:punycode@1.3.2"
@@ -134,7 +134,7 @@ System.config({
     },
     "npm:assert@1.4.1": {
       "assert": "github:jspm/nodelibs-assert@0.1.0",
-      "buffer": "github:jspm/nodelibs-buffer@0.1.0",
+      "buffer": "github:jspm/nodelibs-buffer@0.1.1",
       "process": "github:jspm/nodelibs-process@0.1.2",
       "util": "npm:util@0.10.3"
     },
@@ -153,9 +153,6 @@ System.config({
       "url": "github:jspm/nodelibs-url@0.1.0"
     },
     "npm:babel-runtime@5.8.24": {
-      "process": "github:jspm/nodelibs-process@0.1.2"
-    },
-    "npm:babel-runtime@5.8.38": {
       "process": "github:jspm/nodelibs-process@0.1.2"
     },
     "npm:bl@1.1.2": {
@@ -234,6 +231,10 @@ System.config({
       "isarray": "npm:isarray@1.0.0",
       "process": "github:jspm/nodelibs-process@0.1.2"
     },
+    "npm:buffer@5.0.6": {
+      "base64-js": "npm:base64-js@1.2.1",
+      "ieee754": "npm:ieee754@1.1.8"
+    },
     "npm:bytebuffer@2.3.2": {
       "buffer": "github:jspm/nodelibs-buffer@0.1.0",
       "fs": "github:jspm/nodelibs-fs@0.1.2",
@@ -270,9 +271,8 @@ System.config({
     "npm:constants-browserify@0.0.1": {
       "systemjs-json": "github:systemjs/plugin-json@0.1.2"
     },
-    "npm:core-js@1.2.7": {
+    "npm:core-js@1.1.4": {
       "fs": "github:jspm/nodelibs-fs@0.1.2",
-      "path": "github:jspm/nodelibs-path@0.1.0",
       "process": "github:jspm/nodelibs-process@0.1.2",
       "systemjs-json": "github:systemjs/plugin-json@0.1.2"
     },
@@ -397,8 +397,7 @@ System.config({
       "process": "github:jspm/nodelibs-process@0.1.2",
       "tty": "github:jspm/nodelibs-tty@0.1.0"
     },
-    "npm:global@4.3.1": {
-      "min-document": "npm:min-document@2.19.0",
+    "npm:global@4.3.2": {
       "process": "npm:process@0.5.2"
     },
     "npm:graceful-readlink@1.0.1": {
@@ -502,9 +501,6 @@ System.config({
       "mime-db": "npm:mime-db@1.23.0",
       "path": "github:jspm/nodelibs-path@0.1.0"
     },
-    "npm:min-document@2.19.0": {
-      "dom-walk": "npm:dom-walk@0.1.1"
-    },
     "npm:node-uuid@1.4.7": {
       "buffer": "github:jspm/nodelibs-buffer@0.1.0",
       "crypto": "github:jspm/nodelibs-crypto@0.1.0"
@@ -550,6 +546,11 @@ System.config({
     },
     "npm:process-nextick-args@1.0.7": {
       "process": "github:jspm/nodelibs-process@0.1.2"
+    },
+    "npm:process@0.11.10": {
+      "assert": "github:jspm/nodelibs-assert@0.1.0",
+      "fs": "github:jspm/nodelibs-fs@0.1.2",
+      "vm": "github:jspm/nodelibs-vm@0.1.0"
     },
     "npm:process@0.11.9": {
       "assert": "github:jspm/nodelibs-assert@0.1.0",
@@ -736,7 +737,7 @@ System.config({
       "indexof": "npm:indexof@0.0.1"
     },
     "npm:xhr@2.2.2": {
-      "global": "npm:global@4.3.1",
+      "global": "npm:global@4.3.2",
       "is-function": "npm:is-function@1.0.1",
       "parse-headers": "npm:parse-headers@2.0.1",
       "process": "github:jspm/nodelibs-process@0.1.2",
@@ -747,4 +748,3 @@ System.config({
     }
   }
 });
-

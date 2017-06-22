@@ -20,7 +20,7 @@ System.register(["xhr", "leaflet"], function (exports_1, context_1) {
                 var markers = [];
                 var drawingPins = false;
                 var map;
-                var polTime = 4000;
+                var polTime = 30000;
                 var intervalID;
                 var countDownSteps = polTime / 1000;
                 var countDownInterval;

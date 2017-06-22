@@ -13,7 +13,7 @@ module realTimeRtdPos {
     let markers = [];
     let drawingPins = false;
     let map: L.Map;
-    let polTime = 4000;
+    let polTime = 30000;
     let intervalID;
     let countDownSteps = polTime / 1000;
     let countDownInterval;

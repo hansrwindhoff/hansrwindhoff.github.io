@@ -1,401 +1,32 @@
-(function(global) {
-
-  var defined = {};
-
-  // indexOf polyfill for IE8
-  var indexOf = Array.prototype.indexOf || function(item) {
-    for (var i = 0, l = this.length; i < l; i++)
-      if (this[i] === item)
-        return i;
-    return -1;
-  }
-
-  function dedupe(deps) {
-    var newDeps = [];
-    for (var i = 0, l = deps.length; i < l; i++)
-      if (indexOf.call(newDeps, deps[i]) == -1)
-        newDeps.push(deps[i])
-    return newDeps;
-  }
-
-  function register(name, deps, declare, execute) {
-    if (typeof name != 'string')
-      throw "System.register provided no module name";
-
-    var entry;
-
-    // dynamic
-    if (typeof declare == 'boolean') {
-      entry = {
-        declarative: false,
-        deps: deps,
-        execute: execute,
-        executingRequire: declare
-      };
-    }
-    else {
-      // ES6 declarative
-      entry = {
-        declarative: true,
-        deps: deps,
-        declare: declare
-      };
-    }
-
-    entry.name = name;
-
-    // we never overwrite an existing define
-    if (!(name in defined))
-      defined[name] = entry; 
-
-    entry.deps = dedupe(entry.deps);
-
-    // we have to normalize dependencies
-    // (assume dependencies are normalized for now)
-    // entry.normalizedDeps = entry.deps.map(normalize);
-    entry.normalizedDeps = entry.deps;
-  }
-
-  function buildGroups(entry, groups) {
-    groups[entry.groupIndex] = groups[entry.groupIndex] || [];
-
-    if (indexOf.call(groups[entry.groupIndex], entry) != -1)
-      return;
-
-    groups[entry.groupIndex].push(entry);
-
-    for (var i = 0, l = entry.normalizedDeps.length; i < l; i++) {
-      var depName = entry.normalizedDeps[i];
-      var depEntry = defined[depName];
-
-      // not in the registry means already linked / ES6
-      if (!depEntry || depEntry.evaluated)
-        continue;
-
-      // now we know the entry is in our unlinked linkage group
-      var depGroupIndex = entry.groupIndex + (depEntry.declarative != entry.declarative);
-
-      // the group index of an entry is always the maximum
-      if (depEntry.groupIndex === undefined || depEntry.groupIndex < depGroupIndex) {
-
-        // if already in a group, remove from the old group
-        if (depEntry.groupIndex !== undefined) {
-          groups[depEntry.groupIndex].splice(indexOf.call(groups[depEntry.groupIndex], depEntry), 1);
-
-          // if the old group is empty, then we have a mixed depndency cycle
-          if (groups[depEntry.groupIndex].length == 0)
-            throw new TypeError("Mixed dependency cycle detected");
-        }
-
-        depEntry.groupIndex = depGroupIndex;
-      }
-
-      buildGroups(depEntry, groups);
-    }
-  }
-
-  function link(name) {
-    var startEntry = defined[name];
-
-    startEntry.groupIndex = 0;
-
-    var groups = [];
-
-    buildGroups(startEntry, groups);
-
-    var curGroupDeclarative = !!startEntry.declarative == groups.length % 2;
-    for (var i = groups.length - 1; i >= 0; i--) {
-      var group = groups[i];
-      for (var j = 0; j < group.length; j++) {
-        var entry = group[j];
-
-        // link each group
-        if (curGroupDeclarative)
-          linkDeclarativeModule(entry);
-        else
-          linkDynamicModule(entry);
-      }
-      curGroupDeclarative = !curGroupDeclarative; 
-    }
-  }
-
-  // module binding records
-  var moduleRecords = {};
-  function getOrCreateModuleRecord(name) {
-    return moduleRecords[name] || (moduleRecords[name] = {
-      name: name,
-      dependencies: [],
-      exports: {}, // start from an empty module and extend
-      importers: []
-    })
-  }
-
-  function linkDeclarativeModule(entry) {
-    // only link if already not already started linking (stops at circular)
-    if (entry.module)
-      return;
-
-    var module = entry.module = getOrCreateModuleRecord(entry.name);
-    var exports = entry.module.exports;
-
-    var declaration = entry.declare.call(global, function(name, value) {
-      module.locked = true;
-      exports[name] = value;
-
-      for (var i = 0, l = module.importers.length; i < l; i++) {
-        var importerModule = module.importers[i];
-        if (!importerModule.locked) {
-          var importerIndex = indexOf.call(importerModule.dependencies, module);
-          importerModule.setters[importerIndex](exports);
-        }
-      }
-
-      module.locked = false;
-      return value;
-    });
-
-    module.setters = declaration.setters;
-    module.execute = declaration.execute;
-
-    if (!module.setters || !module.execute)
-      throw new TypeError("Invalid System.register form for " + entry.name);
-
-    // now link all the module dependencies
-    for (var i = 0, l = entry.normalizedDeps.length; i < l; i++) {
-      var depName = entry.normalizedDeps[i];
-      var depEntry = defined[depName];
-      var depModule = moduleRecords[depName];
-
-      // work out how to set depExports based on scenarios...
-      var depExports;
-
-      if (depModule) {
-        depExports = depModule.exports;
-      }
-      else if (depEntry && !depEntry.declarative) {
-        if (depEntry.module.exports && depEntry.module.exports.__esModule)
-          depExports = depEntry.module.exports;
-        else
-          depExports = { 'default': depEntry.module.exports, __useDefault: true };
-      }
-      // in the module registry
-      else if (!depEntry) {
-        depExports = load(depName);
-      }
-      // we have an entry -> link
-      else {
-        linkDeclarativeModule(depEntry);
-        depModule = depEntry.module;
-        depExports = depModule.exports;
-      }
-
-      // only declarative modules have dynamic bindings
-      if (depModule && depModule.importers) {
-        depModule.importers.push(module);
-        module.dependencies.push(depModule);
-      }
-      else
-        module.dependencies.push(null);
-
-      // run the setter for this dependency
-      if (module.setters[i])
-        module.setters[i](depExports);
-    }
-  }
-
-  // An analog to loader.get covering execution of all three layers (real declarative, simulated declarative, simulated dynamic)
-  function getModule(name) {
-    var exports;
-    var entry = defined[name];
-
-    if (!entry) {
-      exports = load(name);
-      if (!exports)
-        throw new Error("Unable to load dependency " + name + ".");
-    }
-
-    else {
-      if (entry.declarative)
-        ensureEvaluated(name, []);
-
-      else if (!entry.evaluated)
-        linkDynamicModule(entry);
-
-      exports = entry.module.exports;
-    }
-
-    if ((!entry || entry.declarative) && exports && exports.__useDefault)
-      return exports['default'];
-
-    return exports;
-  }
-
-  function linkDynamicModule(entry) {
-    if (entry.module)
-      return;
-
-    var exports = {};
-
-    var module = entry.module = { exports: exports, id: entry.name };
-
-    // AMD requires execute the tree first
-    if (!entry.executingRequire) {
-      for (var i = 0, l = entry.normalizedDeps.length; i < l; i++) {
-        var depName = entry.normalizedDeps[i];
-        var depEntry = defined[depName];
-        if (depEntry)
-          linkDynamicModule(depEntry);
-      }
-    }
-
-    // now execute
-    entry.evaluated = true;
-    var output = entry.execute.call(global, function(name) {
-      for (var i = 0, l = entry.deps.length; i < l; i++) {
-        if (entry.deps[i] != name)
-          continue;
-        return getModule(entry.normalizedDeps[i]);
-      }
-      throw new TypeError('Module ' + name + ' not declared as a dependency.');
-    }, exports, module);
-
-    if (output)
-      module.exports = output;
-  }
-
-  /*
-   * Given a module, and the list of modules for this current branch,
-   *  ensure that each of the dependencies of this module is evaluated
-   *  (unless one is a circular dependency already in the list of seen
-   *  modules, in which case we execute it)
-   *
-   * Then we evaluate the module itself depth-first left to right 
-   * execution to match ES6 modules
-   */
-  function ensureEvaluated(moduleName, seen) {
-    var entry = defined[moduleName];
-
-    // if already seen, that means it's an already-evaluated non circular dependency
-    if (!entry || entry.evaluated || !entry.declarative)
-      return;
-
-    // this only applies to declarative modules which late-execute
-
-    seen.push(moduleName);
-
-    for (var i = 0, l = entry.normalizedDeps.length; i < l; i++) {
-      var depName = entry.normalizedDeps[i];
-      if (indexOf.call(seen, depName) == -1) {
-        if (!defined[depName])
-          load(depName);
-        else
-          ensureEvaluated(depName, seen);
-      }
-    }
-
-    if (entry.evaluated)
-      return;
-
-    entry.evaluated = true;
-    entry.module.execute.call(global);
-  }
-
-  // magical execution function
-  var modules = {};
-  function load(name) {
-    if (modules[name])
-      return modules[name];
-
-    var entry = defined[name];
-
-    // first we check if this module has already been defined in the registry
-    if (!entry)
-      throw "Module " + name + " not present.";
-
-    // recursively ensure that the module and all its 
-    // dependencies are linked (with dependency group handling)
-    link(name);
-
-    // now handle dependency execution in correct order
-    ensureEvaluated(name, []);
-
-    // remove from the registry
-    defined[name] = undefined;
-
-    var module = entry.module.exports;
-
-    if (!module || !entry.declarative && module.__esModule !== true)
-      module = { 'default': module, __useDefault: true };
-
-    // return the defined module object
-    return modules[name] = module;
-  };
-
-  return function(mains, declare) {
-
-    var System;
-    var System = {
-      register: register, 
-      get: load, 
-      set: function(name, module) {
-        modules[name] = module; 
-      },
-      newModule: function(module) {
-        return module;
-      },
-      global: global 
-    };
-    System.set('@empty', {});
-
-    declare(System);
-
-    for (var i = 0; i < mains.length; i++)
-      load(mains[i]);
-  }
-
-})(typeof window != 'undefined' ? window : global)
-/* (['mainModule'], function(System) {
-  System.register(...);
-}); */
-
-(['t2'], function(System) {
-
-System.register("npm:global@4.3.1/window", [], true, function(require, exports, module) {
-  var global = System.global,
-      __define = global.define;
-  global.define = undefined;
-  if (typeof window !== "undefined") {
-    module.exports = window;
-  } else if (typeof global !== "undefined") {
-    module.exports = global;
-  } else if (typeof self !== "undefined") {
-    module.exports = self;
-  } else {
-    module.exports = {};
-  }
-  global.define = __define;
-  return module.exports;
-});
-
-System.register("npm:is-function@1.0.1/index", [], true, function(require, exports, module) {
-  var global = System.global,
-      __define = global.define;
-  global.define = undefined;
-  module.exports = isFunction;
-  var toString = Object.prototype.toString;
-  function isFunction(fn) {
-    var string = toString.call(fn);
-    return string === '[object Function]' || (typeof fn === 'function' && string !== '[object RegExp]') || (typeof window !== 'undefined' && (fn === window.setTimeout || fn === window.alert || fn === window.confirm || fn === window.prompt));
-  }
+!function(e){function r(e,r,o){return 4===arguments.length?t.apply(this,arguments):void n(e,{declarative:!0,deps:r,declare:o})}function t(e,r,t,o){n(e,{declarative:!1,deps:r,executingRequire:t,execute:o})}function n(e,r){r.name=e,e in g||(g[e]=r),r.normalizedDeps=r.deps}function o(e,r){if(r[e.groupIndex]=r[e.groupIndex]||[],-1==m.call(r[e.groupIndex],e)){r[e.groupIndex].push(e);for(var t=0,n=e.normalizedDeps.length;n>t;t++){var a=e.normalizedDeps[t],u=g[a];if(u&&!u.evaluated){var d=e.groupIndex+(u.declarative!=e.declarative);if(void 0===u.groupIndex||u.groupIndex<d){if(void 0!==u.groupIndex&&(r[u.groupIndex].splice(m.call(r[u.groupIndex],u),1),0==r[u.groupIndex].length))throw new TypeError("Mixed dependency cycle detected");u.groupIndex=d}o(u,r)}}}}function a(e){var r=g[e];r.groupIndex=0;var t=[];o(r,t);for(var n=!!r.declarative==t.length%2,a=t.length-1;a>=0;a--){for(var u=t[a],i=0;i<u.length;i++){var s=u[i];n?d(s):l(s)}n=!n}}function u(e){return D[e]||(D[e]={name:e,dependencies:[],exports:{},importers:[]})}function d(r){if(!r.module){var t=r.module=u(r.name),n=r.module.exports,o=r.declare.call(e,function(e,r){if(t.locked=!0,"object"==typeof e)for(var o in e)n[o]=e[o];else n[e]=r;for(var a=0,u=t.importers.length;u>a;a++){var d=t.importers[a];if(!d.locked)for(var i=0;i<d.dependencies.length;++i)d.dependencies[i]===t&&d.setters[i](n)}return t.locked=!1,r},r.name);t.setters=o.setters,t.execute=o.execute;for(var a=0,i=r.normalizedDeps.length;i>a;a++){var l,s=r.normalizedDeps[a],c=g[s],f=D[s];f?l=f.exports:c&&!c.declarative?l=c.esModule:c?(d(c),f=c.module,l=f.exports):l=v(s),f&&f.importers?(f.importers.push(t),t.dependencies.push(f)):t.dependencies.push(null),t.setters[a]&&t.setters[a](l)}}}function i(e){var r,t=g[e];if(t)t.declarative?p(e,[]):t.evaluated||l(t),r=t.module.exports;else if(r=v(e),!r)throw new Error("Unable to load dependency "+e+".");return(!t||t.declarative)&&r&&r.__useDefault?r["default"]:r}function l(r){if(!r.module){var t={},n=r.module={exports:t,id:r.name};if(!r.executingRequire)for(var o=0,a=r.normalizedDeps.length;a>o;o++){var u=r.normalizedDeps[o],d=g[u];d&&l(d)}r.evaluated=!0;var c=r.execute.call(e,function(e){for(var t=0,n=r.deps.length;n>t;t++)if(r.deps[t]==e)return i(r.normalizedDeps[t]);throw new TypeError("Module "+e+" not declared as a dependency.")},t,n);c&&(n.exports=c),t=n.exports,t&&t.__esModule?r.esModule=t:r.esModule=s(t)}}function s(e){var r={};if("object"==typeof e||"function"==typeof e){var t=e&&e.hasOwnProperty;if(h)for(var n in e)f(r,e,n)||c(r,e,n,t);else for(var n in e)c(r,e,n,t)}return r["default"]=e,y(r,"__useDefault",{value:!0}),r}function c(e,r,t,n){(!n||r.hasOwnProperty(t))&&(e[t]=r[t])}function f(e,r,t){try{var n;return(n=Object.getOwnPropertyDescriptor(r,t))&&y(e,t,n),!0}catch(o){return!1}}function p(r,t){var n=g[r];if(n&&!n.evaluated&&n.declarative){t.push(r);for(var o=0,a=n.normalizedDeps.length;a>o;o++){var u=n.normalizedDeps[o];-1==m.call(t,u)&&(g[u]?p(u,t):v(u))}n.evaluated||(n.evaluated=!0,n.module.execute.call(e))}}function v(e){if(I[e])return I[e];if("@node/"==e.substr(0,6))return _(e.substr(6));var r=g[e];if(!r)throw"Module "+e+" not present.";return a(e),p(e,[]),g[e]=void 0,r.declarative&&y(r.module.exports,"__esModule",{value:!0}),I[e]=r.declarative?r.module.exports:r.esModule}var g={},m=Array.prototype.indexOf||function(e){for(var r=0,t=this.length;t>r;r++)if(this[r]===e)return r;return-1},h=!0;try{Object.getOwnPropertyDescriptor({a:0},"a")}catch(x){h=!1}var y;!function(){try{Object.defineProperty({},"a",{})&&(y=Object.defineProperty)}catch(e){y=function(e,r,t){try{e[r]=t.value||t.get.call(e)}catch(n){}}}}();var D={},_="undefined"!=typeof System&&System._nodeRequire||"undefined"!=typeof require&&require.resolve&&"undefined"!=typeof process&&require,I={"@empty":{}};return function(e,n,o){return function(a){a(function(a){for(var u={_nodeRequire:_,register:r,registerDynamic:t,get:v,set:function(e,r){I[e]=r},newModule:function(e){return e}},d=0;d<n.length;d++)(function(e,r){r&&r.__esModule?I[e]=r:I[e]=s(r)})(n[d],arguments[d]);o(u);var i=v(e[0]);if(e.length>1)for(var d=1;d<e.length;d++)v(e[d]);return i.__useDefault?i["default"]:i})}}}("undefined"!=typeof self?self:global)
+
+(["1"], [], function($__System) {
+var require = this.require, exports = this.exports, module = this.module;
+!function(e){function n(e,n){e=e.replace(l,"");var r=e.match(u),t=(r[1].split(",")[n]||"require").replace(s,""),i=p[t]||(p[t]=new RegExp(a+t+f,"g"));i.lastIndex=0;for(var o,c=[];o=i.exec(e);)c.push(o[2]||o[3]);return c}function r(e,n,t,o){if("object"==typeof e&&!(e instanceof Array))return r.apply(null,Array.prototype.splice.call(arguments,1,arguments.length-1));if("string"==typeof e&&"function"==typeof n&&(e=[e]),!(e instanceof Array)){if("string"==typeof e){var l=i.get(e);return l.__useDefault?l["default"]:l}throw new TypeError("Invalid require")}for(var a=[],f=0;f<e.length;f++)a.push(i["import"](e[f],o));Promise.all(a).then(function(e){n&&n.apply(null,e)},t)}function t(t,l,a){"string"!=typeof t&&(a=l,l=t,t=null),l instanceof Array||(a=l,l=["require","exports","module"].splice(0,a.length)),"function"!=typeof a&&(a=function(e){return function(){return e}}(a)),void 0===l[l.length-1]&&l.pop();var f,u,s;-1!=(f=o.call(l,"require"))&&(l.splice(f,1),t||(l=l.concat(n(a.toString(),f)))),-1!=(u=o.call(l,"exports"))&&l.splice(u,1),-1!=(s=o.call(l,"module"))&&l.splice(s,1);var p={name:t,deps:l,execute:function(n,t,o){for(var p=[],c=0;c<l.length;c++)p.push(n(l[c]));o.uri=o.id,o.config=function(){},-1!=s&&p.splice(s,0,o),-1!=u&&p.splice(u,0,t),-1!=f&&p.splice(f,0,function(e,t,l){return"string"==typeof e&&"function"!=typeof t?n(e):r.call(i,e,t,l,o.id)});var d=a.apply(-1==u?e:t,p);return"undefined"==typeof d&&o&&(d=o.exports),"undefined"!=typeof d?d:void 0}};if(t)c.anonDefine||c.isBundle?c.anonDefine&&c.anonDefine.name&&(c.anonDefine=null):c.anonDefine=p,c.isBundle=!0,i.registerDynamic(p.name,p.deps,!1,p.execute);else{if(c.anonDefine&&!c.anonDefine.name)throw new Error("Multiple anonymous defines in module "+t);c.anonDefine=p}}var i=$__System,o=Array.prototype.indexOf||function(e){for(var n=0,r=this.length;r>n;n++)if(this[n]===e)return n;return-1},l=/(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/gm,a="(?:^|[^$_a-zA-Z\\xA0-\\uFFFF.])",f="\\s*\\(\\s*(\"([^\"]+)\"|'([^']+)')\\s*\\)",u=/\(([^\)]*)\)/,s=/^\s+|\s+$/g,p={};t.amd={};var c={isBundle:!1,anonDefine:null};i.amdDefine=t,i.amdRequire=r}("undefined"!=typeof self?self:global);
+$__System.registerDynamic("2", [], true, function($__require, exports, module) {
   ;
-  global.define = __define;
+  var define,
+      global = this,
+      GLOBAL = this;
+  var win;
+  if (typeof window !== "undefined") {
+    win = window;
+  } else if (typeof global !== "undefined") {
+    win = global;
+  } else if (typeof self !== "undefined") {
+    win = self;
+  } else {
+    win = {};
+  }
+  module.exports = win;
   return module.exports;
 });
 
-System.register("npm:trim@0.0.1/index", [], true, function(require, exports, module) {
-  var global = System.global,
-      __define = global.define;
-  global.define = undefined;
+$__System.registerDynamic("3", [], true, function($__require, exports, module) {
+  ;
+  var define,
+      global = this,
+      GLOBAL = this;
   exports = module.exports = trim;
   function trim(str) {
     return str.replace(/^\s*|\s*$/g, '');
@@ -406,15 +37,48 @@ System.register("npm:trim@0.0.1/index", [], true, function(require, exports, mod
   exports.right = function(str) {
     return str.replace(/\s*$/, '');
   };
-  global.define = __define;
   return module.exports;
 });
 
-System.register("npm:for-each@0.3.2/index", ["npm:is-function@1.0.1"], true, function(require, exports, module) {
-  var global = System.global,
-      __define = global.define;
-  global.define = undefined;
-  var isFunction = require("npm:is-function@1.0.1");
+$__System.registerDynamic("4", ["3"], true, function($__require, exports, module) {
+  ;
+  var define,
+      global = this,
+      GLOBAL = this;
+  module.exports = $__require('3');
+  return module.exports;
+});
+
+$__System.registerDynamic("5", [], true, function($__require, exports, module) {
+  ;
+  var define,
+      global = this,
+      GLOBAL = this;
+  module.exports = isFunction;
+  var toString = Object.prototype.toString;
+  function isFunction(fn) {
+    var string = toString.call(fn);
+    return string === '[object Function]' || (typeof fn === 'function' && string !== '[object RegExp]') || (typeof window !== 'undefined' && (fn === window.setTimeout || fn === window.alert || fn === window.confirm || fn === window.prompt));
+  }
+  ;
+  return module.exports;
+});
+
+$__System.registerDynamic("6", ["5"], true, function($__require, exports, module) {
+  ;
+  var define,
+      global = this,
+      GLOBAL = this;
+  module.exports = $__require('5');
+  return module.exports;
+});
+
+$__System.registerDynamic("7", ["6"], true, function($__require, exports, module) {
+  ;
+  var define,
+      global = this,
+      GLOBAL = this;
+  var isFunction = $__require('6');
   module.exports = forEach;
   var toString = Object.prototype.toString;
   var hasOwnProperty = Object.prototype.hasOwnProperty;
@@ -453,14 +117,63 @@ System.register("npm:for-each@0.3.2/index", ["npm:is-function@1.0.1"], true, fun
       }
     }
   }
-  global.define = __define;
   return module.exports;
 });
 
-System.register("npm:xtend@4.0.1/immutable", [], true, function(require, exports, module) {
-  var global = System.global,
-      __define = global.define;
-  global.define = undefined;
+$__System.registerDynamic("8", ["7"], true, function($__require, exports, module) {
+  ;
+  var define,
+      global = this,
+      GLOBAL = this;
+  module.exports = $__require('7');
+  return module.exports;
+});
+
+$__System.registerDynamic("9", ["4", "8"], true, function($__require, exports, module) {
+  ;
+  var define,
+      global = this,
+      GLOBAL = this;
+  var trim = $__require('4'),
+      forEach = $__require('8'),
+      isArray = function(arg) {
+        return Object.prototype.toString.call(arg) === '[object Array]';
+      };
+  module.exports = function(headers) {
+    if (!headers)
+      return {};
+    var result = {};
+    forEach(trim(headers).split('\n'), function(row) {
+      var index = row.indexOf(':'),
+          key = trim(row.slice(0, index)).toLowerCase(),
+          value = trim(row.slice(index + 1));
+      if (typeof(result[key]) === 'undefined') {
+        result[key] = value;
+      } else if (isArray(result[key])) {
+        result[key].push(value);
+      } else {
+        result[key] = [result[key], value];
+      }
+    });
+    return result;
+  };
+  return module.exports;
+});
+
+$__System.registerDynamic("a", ["9"], true, function($__require, exports, module) {
+  ;
+  var define,
+      global = this,
+      GLOBAL = this;
+  module.exports = $__require('9');
+  return module.exports;
+});
+
+$__System.registerDynamic("b", [], true, function($__require, exports, module) {
+  ;
+  var define,
+      global = this,
+      GLOBAL = this;
   module.exports = extend;
   var hasOwnProperty = Object.prototype.hasOwnProperty;
   function extend() {
@@ -475,14 +188,23 @@ System.register("npm:xtend@4.0.1/immutable", [], true, function(require, exports
     }
     return target;
   }
-  global.define = __define;
   return module.exports;
 });
 
-System.register("npm:process@0.11.9/browser", [], true, function(require, exports, module) {
-  var global = System.global,
-      __define = global.define;
-  global.define = undefined;
+$__System.registerDynamic("c", ["b"], true, function($__require, exports, module) {
+  ;
+  var define,
+      global = this,
+      GLOBAL = this;
+  module.exports = $__require('b');
+  return module.exports;
+});
+
+$__System.registerDynamic("d", [], true, function($__require, exports, module) {
+  ;
+  var define,
+      global = this,
+      GLOBAL = this;
   var process = module.exports = {};
   var cachedSetTimeout;
   var cachedClearTimeout;
@@ -554,7 +276,7 @@ System.register("npm:process@0.11.9/browser", [], true, function(require, export
   var queueIndex = -1;
   function cleanUpNextTick() {
     if (!draining || !currentQueue) {
-      return ;
+      return;
     }
     draining = false;
     if (currentQueue.length) {
@@ -568,7 +290,7 @@ System.register("npm:process@0.11.9/browser", [], true, function(require, export
   }
   function drainQueue() {
     if (draining) {
-      return ;
+      return;
     }
     var timeout = runTimeout(cleanUpNextTick);
     draining = true;
@@ -621,6 +343,11 @@ System.register("npm:process@0.11.9/browser", [], true, function(require, export
   process.removeListener = noop;
   process.removeAllListeners = noop;
   process.emit = noop;
+  process.prependListener = noop;
+  process.prependOnceListener = noop;
+  process.listeners = function(name) {
+    return [];
+  };
   process.binding = function(name) {
     throw new Error('process.binding is not supported');
   };
@@ -633,12 +360,248 @@ System.register("npm:process@0.11.9/browser", [], true, function(require, export
   process.umask = function() {
     return 0;
   };
-  global.define = __define;
+  return module.exports;
+});
+
+$__System.registerDynamic("e", ["d"], true, function($__require, exports, module) {
+  ;
+  var define,
+      global = this,
+      GLOBAL = this;
+  module.exports = $__require('d');
+  return module.exports;
+});
+
+$__System.registerDynamic("f", ["e"], true, function($__require, exports, module) {
+  ;
+  var define,
+      global = this,
+      GLOBAL = this;
+  module.exports = $__System._nodeRequire ? process : $__require('e');
+  return module.exports;
+});
+
+$__System.registerDynamic("10", ["f"], true, function($__require, exports, module) {
+  ;
+  var define,
+      global = this,
+      GLOBAL = this;
+  module.exports = $__require('f');
+  return module.exports;
+});
+
+$__System.registerDynamic("11", ["2", "6", "a", "c", "10"], true, function($__require, exports, module) {
+  ;
+  var define,
+      global = this,
+      GLOBAL = this;
+  (function(process) {
+    "use strict";
+    var window = $__require('2');
+    var isFunction = $__require('6');
+    var parseHeaders = $__require('a');
+    var xtend = $__require('c');
+    module.exports = createXHR;
+    createXHR.XMLHttpRequest = window.XMLHttpRequest || noop;
+    createXHR.XDomainRequest = "withCredentials" in (new createXHR.XMLHttpRequest()) ? createXHR.XMLHttpRequest : window.XDomainRequest;
+    forEachArray(["get", "put", "post", "patch", "head", "delete"], function(method) {
+      createXHR[method === "delete" ? "del" : method] = function(uri, options, callback) {
+        options = initParams(uri, options, callback);
+        options.method = method.toUpperCase();
+        return _createXHR(options);
+      };
+    });
+    function forEachArray(array, iterator) {
+      for (var i = 0; i < array.length; i++) {
+        iterator(array[i]);
+      }
+    }
+    function isEmpty(obj) {
+      for (var i in obj) {
+        if (obj.hasOwnProperty(i))
+          return false;
+      }
+      return true;
+    }
+    function initParams(uri, options, callback) {
+      var params = uri;
+      if (isFunction(options)) {
+        callback = options;
+        if (typeof uri === "string") {
+          params = {uri: uri};
+        }
+      } else {
+        params = xtend(options, {uri: uri});
+      }
+      params.callback = callback;
+      return params;
+    }
+    function createXHR(uri, options, callback) {
+      options = initParams(uri, options, callback);
+      return _createXHR(options);
+    }
+    function _createXHR(options) {
+      if (typeof options.callback === "undefined") {
+        throw new Error("callback argument missing");
+      }
+      var called = false;
+      var callback = function cbOnce(err, response, body) {
+        if (!called) {
+          called = true;
+          options.callback(err, response, body);
+        }
+      };
+      function readystatechange() {
+        if (xhr.readyState === 4) {
+          loadFunc();
+        }
+      }
+      function getBody() {
+        var body = undefined;
+        if (xhr.response) {
+          body = xhr.response;
+        } else {
+          body = xhr.responseText || getXml(xhr);
+        }
+        if (isJson) {
+          try {
+            body = JSON.parse(body);
+          } catch (e) {}
+        }
+        return body;
+      }
+      var failureResponse = {
+        body: undefined,
+        headers: {},
+        statusCode: 0,
+        method: method,
+        url: uri,
+        rawRequest: xhr
+      };
+      function errorFunc(evt) {
+        clearTimeout(timeoutTimer);
+        if (!(evt instanceof Error)) {
+          evt = new Error("" + (evt || "Unknown XMLHttpRequest Error"));
+        }
+        evt.statusCode = 0;
+        return callback(evt, failureResponse);
+      }
+      function loadFunc() {
+        if (aborted)
+          return;
+        var status;
+        clearTimeout(timeoutTimer);
+        if (options.useXDR && xhr.status === undefined) {
+          status = 200;
+        } else {
+          status = (xhr.status === 1223 ? 204 : xhr.status);
+        }
+        var response = failureResponse;
+        var err = null;
+        if (status !== 0) {
+          response = {
+            body: getBody(),
+            statusCode: status,
+            method: method,
+            headers: {},
+            url: uri,
+            rawRequest: xhr
+          };
+          if (xhr.getAllResponseHeaders) {
+            response.headers = parseHeaders(xhr.getAllResponseHeaders());
+          }
+        } else {
+          err = new Error("Internal XMLHttpRequest Error");
+        }
+        return callback(err, response, response.body);
+      }
+      var xhr = options.xhr || null;
+      if (!xhr) {
+        if (options.cors || options.useXDR) {
+          xhr = new createXHR.XDomainRequest();
+        } else {
+          xhr = new createXHR.XMLHttpRequest();
+        }
+      }
+      var key;
+      var aborted;
+      var uri = xhr.url = options.uri || options.url;
+      var method = xhr.method = options.method || "GET";
+      var body = options.body || options.data || null;
+      var headers = xhr.headers = options.headers || {};
+      var sync = !!options.sync;
+      var isJson = false;
+      var timeoutTimer;
+      if ("json" in options) {
+        isJson = true;
+        headers["accept"] || headers["Accept"] || (headers["Accept"] = "application/json");
+        if (method !== "GET" && method !== "HEAD") {
+          headers["content-type"] || headers["Content-Type"] || (headers["Content-Type"] = "application/json");
+          body = JSON.stringify(options.json);
+        }
+      }
+      xhr.onreadystatechange = readystatechange;
+      xhr.onload = loadFunc;
+      xhr.onerror = errorFunc;
+      xhr.onprogress = function() {};
+      xhr.ontimeout = errorFunc;
+      xhr.open(method, uri, !sync, options.username, options.password);
+      if (!sync) {
+        xhr.withCredentials = !!options.withCredentials;
+      }
+      if (!sync && options.timeout > 0) {
+        timeoutTimer = setTimeout(function() {
+          aborted = true;
+          xhr.abort("timeout");
+          var e = new Error("XMLHttpRequest timeout");
+          e.code = "ETIMEDOUT";
+          errorFunc(e);
+        }, options.timeout);
+      }
+      if (xhr.setRequestHeader) {
+        for (key in headers) {
+          if (headers.hasOwnProperty(key)) {
+            xhr.setRequestHeader(key, headers[key]);
+          }
+        }
+      } else if (options.headers && !isEmpty(options.headers)) {
+        throw new Error("Headers cannot be set on an XDomainRequest object");
+      }
+      if ("responseType" in options) {
+        xhr.responseType = options.responseType;
+      }
+      if ("beforeSend" in options && typeof options.beforeSend === "function") {
+        options.beforeSend(xhr);
+      }
+      xhr.send(body);
+      return xhr;
+    }
+    function getXml(xhr) {
+      if (xhr.responseType === "document") {
+        return xhr.responseXML;
+      }
+      var firefoxBugTakenEffect = xhr.status === 204 && xhr.responseXML && xhr.responseXML.documentElement.nodeName === "parsererror";
+      if (xhr.responseType === "" && !firefoxBugTakenEffect) {
+        return xhr.responseXML;
+      }
+      return null;
+    }
+    function noop() {}
+  })($__require('10'));
+  return module.exports;
+});
+
+$__System.registerDynamic("12", ["11"], true, function($__require, exports, module) {
+  ;
+  var define,
+      global = this,
+      GLOBAL = this;
+  module.exports = $__require('11');
   return module.exports;
 });
 
 (function() {
-function define(){};  define.amd = {};
+var define = $__System.amdDefine;
 (function(window, document, undefined) {
   var L = {version: "1.0.1"};
   function expose() {
@@ -652,9 +615,7 @@ function define(){};  define.amd = {};
   if (typeof module === 'object' && typeof module.exports === 'object') {
     module.exports = L;
   } else if (typeof define === 'function' && define.amd) {
-    System.register("github:Leaflet/Leaflet@1.0.1/dist/leaflet-src", [], false, typeof L == "function" ? L : function() {
-      return L;
-    });
+    define("13", [], L);
   }
   if (typeof window !== 'undefined') {
     expose();
@@ -842,7 +803,7 @@ function define(){};  define.amd = {};
     proto._initHooks = [];
     proto.callInitHooks = function() {
       if (this._initHooksCalled) {
-        return ;
+        return;
       }
       if (parentProto.callInitHooks) {
         parentProto.callInitHooks.call(this);
@@ -921,7 +882,7 @@ function define(){};  define.amd = {};
       for (var i = 0,
           len = listeners.length; i < len; i++) {
         if (listeners[i].fn === fn && listeners[i].ctx === context) {
-          return ;
+          return;
         }
       }
       listeners.push(newListener);
@@ -932,18 +893,18 @@ function define(){};  define.amd = {};
           i,
           len;
       if (!this._events) {
-        return ;
+        return;
       }
       listeners = this._events[type];
       if (!listeners) {
-        return ;
+        return;
       }
       if (!fn) {
         for (i = 0, len = listeners.length; i < len; i++) {
           listeners[i].fn = L.Util.falseFn;
         }
         delete this._events[type];
-        return ;
+        return;
       }
       if (context === this) {
         context = undefined;
@@ -960,7 +921,7 @@ function define(){};  define.amd = {};
               this._events[type] = listeners = listeners.slice();
             }
             listeners.splice(i, 1);
-            return ;
+            return;
           }
         }
       }
@@ -1190,7 +1151,7 @@ function define(){};  define.amd = {};
   };
   L.Bounds = function(a, b) {
     if (!a) {
-      return ;
+      return;
     }
     var points = b ? [a, b] : a;
     for (var i = 0,
@@ -1379,7 +1340,7 @@ function define(){};  define.amd = {};
         filter = el.filters.item(filterName);
       } catch (e) {
         if (value === 1) {
-          return ;
+          return;
         }
       }
       value = Math.round(value * 100);
@@ -1454,7 +1415,7 @@ function define(){};  define.amd = {};
         element = element.parentNode;
       }
       if (!element || !element.style) {
-        return ;
+        return;
       }
       L.DomUtil.restoreOutline();
       this._outlineElement = element;
@@ -1464,7 +1425,7 @@ function define(){};  define.amd = {};
     };
     L.DomUtil.restoreOutline = function() {
       if (!this._outlineElement) {
-        return ;
+        return;
       }
       this._outlineElement.style.outline = this._outlineStyle;
       delete this._outlineElement;
@@ -1535,7 +1496,7 @@ function define(){};  define.amd = {};
   };
   L.LatLngBounds = function(southWest, northEast) {
     if (!southWest) {
-      return ;
+      return;
     }
     var latlngs = northEast ? [southWest, northEast] : southWest;
     for (var i = 0,
@@ -2229,7 +2190,7 @@ function define(){};  define.amd = {};
     },
     _initEvents: function(remove) {
       if (!L.DomEvent) {
-        return ;
+        return;
       }
       this._targets = {};
       this._targets[L.stamp(this._container)] = this;
@@ -2291,7 +2252,7 @@ function define(){};  define.amd = {};
     },
     _handleDOMEvent: function(e) {
       if (!this._loaded || L.DomEvent._skipped(e)) {
-        return ;
+        return;
       }
       var type = e.type === 'keypress' && e.keyCode === 13 ? 'click' : e.type;
       if (type === 'mousedown') {
@@ -2306,11 +2267,11 @@ function define(){};  define.amd = {};
         this._fireDOMEvent(synth, synth.type, targets);
       }
       if (e._stopped) {
-        return ;
+        return;
       }
       targets = (targets || []).concat(this._findEventTargets(e, type));
       if (!targets.length) {
-        return ;
+        return;
       }
       var target = targets[0];
       if (type === 'contextmenu' && target.listens(type, true)) {
@@ -2326,7 +2287,7 @@ function define(){};  define.amd = {};
       for (var i = 0; i < targets.length; i++) {
         targets[i].fire(type, data, true);
         if (data.originalEvent._stopped || (targets[i].options.nonBubblingEvents && L.Util.indexOf(targets[i].options.nonBubblingEvents, type) !== -1)) {
-          return ;
+          return;
         }
       }
     },
@@ -2450,7 +2411,7 @@ function define(){};  define.amd = {};
     _layerAdd: function(e) {
       var map = e.target;
       if (!map.hasLayer(this)) {
-        return ;
+        return;
       }
       this._map = map;
       this._zoomAnimated = map._zoomAnimated;
@@ -2713,10 +2674,10 @@ function define(){};  define.amd = {};
     },
     _updateOpacity: function() {
       if (!this._map) {
-        return ;
+        return;
       }
       if (L.Browser.ielt9) {
-        return ;
+        return;
       }
       L.DomUtil.setOpacity(this._container, this.options.opacity);
       var now = +new Date(),
@@ -2748,7 +2709,7 @@ function define(){};  define.amd = {};
     },
     _initContainer: function() {
       if (this._container) {
-        return ;
+        return;
       }
       this._container = L.DomUtil.create('div', 'leaflet-layer ' + (this.options.className || ''));
       this._updateZIndex();
@@ -2788,14 +2749,14 @@ function define(){};  define.amd = {};
     },
     _pruneTiles: function() {
       if (!this._map) {
-        return ;
+        return;
       }
       var key,
           tile;
       var zoom = this._map.getZoom();
       if (zoom > this.options.maxZoom || zoom < this.options.minZoom) {
         this._removeAllTiles();
-        return ;
+        return;
       }
       for (key in this._tiles) {
         tile = this._tiles[key];
@@ -2933,7 +2894,7 @@ function define(){};  define.amd = {};
     },
     _onMoveEnd: function() {
       if (!this._map || this._map._animatingZoom) {
-        return ;
+        return;
       }
       this._update();
     },
@@ -2948,14 +2909,14 @@ function define(){};  define.amd = {};
     _update: function(center) {
       var map = this._map;
       if (!map) {
-        return ;
+        return;
       }
       var zoom = map.getZoom();
       if (center === undefined) {
         center = map.getCenter();
       }
       if (this._tileZoom === undefined) {
-        return ;
+        return;
       }
       var pixelBounds = this._getTiledPixelBounds(center),
           tileRange = this._pxBoundsToTileRange(pixelBounds),
@@ -2971,7 +2932,7 @@ function define(){};  define.amd = {};
       }
       if (Math.abs(zoom - this._tileZoom) > 1) {
         this._setView(center, zoom);
-        return ;
+        return;
       }
       for (var j = tileRange.min.y; j <= tileRange.max.y; j++) {
         for (var i = tileRange.min.x; i <= tileRange.max.x; i++) {
@@ -3045,7 +3006,7 @@ function define(){};  define.amd = {};
     _removeTile: function(key) {
       var tile = this._tiles[key];
       if (!tile) {
-        return ;
+        return;
       }
       L.DomUtil.remove(tile.el);
       delete this._tiles[key];
@@ -3090,7 +3051,7 @@ function define(){};  define.amd = {};
     },
     _tileReady: function(coords, err, tile) {
       if (!this._map) {
-        return ;
+        return;
       }
       if (err) {
         this.fire('tileerror', {
@@ -3102,7 +3063,7 @@ function define(){};  define.amd = {};
       var key = this._tileCoordsToKey(coords);
       tile = this._tiles[key];
       if (!tile) {
-        return ;
+        return;
       }
       tile.loaded = +new Date();
       if (this._map._fadeAnimated) {
@@ -3693,7 +3654,7 @@ function define(){};  define.amd = {};
     },
     _initInteraction: function() {
       if (!this.options.interactive) {
-        return ;
+        return;
       }
       L.DomUtil.addClass(this._icon, 'leaflet-interactive');
       this.addInteractiveTarget(this._icon);
@@ -3816,7 +3777,7 @@ function define(){};  define.amd = {};
     },
     update: function() {
       if (!this._map) {
-        return ;
+        return;
       }
       this._container.style.visibility = 'hidden';
       this._updateContent();
@@ -3852,7 +3813,7 @@ function define(){};  define.amd = {};
     },
     _updateContent: function() {
       if (!this._content) {
-        return ;
+        return;
       }
       var node = this._contentNode;
       var content = (typeof this._content === 'function') ? this._content(this._source || this) : this._content;
@@ -3868,7 +3829,7 @@ function define(){};  define.amd = {};
     },
     _updatePosition: function() {
       if (!this._map) {
-        return ;
+        return;
       }
       var pos = this._map.latLngToLayerPoint(this._latlng),
           offset = L.point(this.options.offset),
@@ -3984,7 +3945,7 @@ function define(){};  define.amd = {};
     },
     _adjustPan: function() {
       if (!this.options.autoPan || (this._map._panAnim && this._map._panAnim._inProgress)) {
-        return ;
+        return;
       }
       var map = this._map,
           marginBottom = parseInt(L.DomUtil.getStyle(this._container, 'marginBottom'), 10) || 0,
@@ -4141,15 +4102,15 @@ function define(){};  define.amd = {};
     _openPopup: function(e) {
       var layer = e.layer || e.target;
       if (!this._popup) {
-        return ;
+        return;
       }
       if (!this._map) {
-        return ;
+        return;
       }
       L.DomEvent.stop(e);
       if (layer instanceof L.Path) {
         this.openPopup(e.layer || e.target, e.latlng);
-        return ;
+        return;
       }
       if (this._map.hasLayer(this._popup) && this._popup._source === layer) {
         this.closePopup();
@@ -4307,7 +4268,7 @@ function define(){};  define.amd = {};
     },
     _initTooltipInteractions: function(remove) {
       if (!remove && this._tooltipHandlersAdded) {
-        return ;
+        return;
       }
       var onOff = remove ? 'off' : 'on',
           events = {
@@ -4389,7 +4350,7 @@ function define(){};  define.amd = {};
     _openTooltip: function(e) {
       var layer = e.layer || e.target;
       if (!this._tooltip || !this._map) {
-        return ;
+        return;
       }
       this.openTooltip(layer, this._tooltip.options.sticky ? e.latlng : undefined);
     },
@@ -4985,11 +4946,11 @@ function define(){};  define.amd = {};
       var bounds = this._renderer._bounds;
       this._parts = [];
       if (!this._pxBounds || !this._pxBounds.intersects(bounds)) {
-        return ;
+        return;
       }
       if (this.options.noClip) {
         this._parts = this._rings;
-        return ;
+        return;
       }
       var parts = this._parts,
           i,
@@ -5025,7 +4986,7 @@ function define(){};  define.amd = {};
     },
     _update: function() {
       if (!this._map) {
-        return ;
+        return;
       }
       this._clipPoints();
       this._simplifyPoints();
@@ -5143,11 +5104,11 @@ function define(){};  define.amd = {};
       bounds = new L.Bounds(bounds.min.subtract(p), bounds.max.add(p));
       this._parts = [];
       if (!this._pxBounds || !this._pxBounds.intersects(bounds)) {
-        return ;
+        return;
       }
       if (this.options.noClip) {
         this._parts = this._rings;
-        return ;
+        return;
       }
       for (var i = 0,
           len = this._rings.length,
@@ -5308,7 +5269,7 @@ function define(){};  define.amd = {};
     },
     _update: function() {
       if (this._map._animatingZoom && this._bounds) {
-        return ;
+        return;
       }
       L.Renderer.prototype._update.call(this);
       var b = this._bounds,
@@ -5349,7 +5310,7 @@ function define(){};  define.amd = {};
       var path = layer._path,
           options = layer.options;
       if (!path) {
-        return ;
+        return;
       }
       if (options.stroke) {
         path.setAttribute('stroke', options.color);
@@ -5443,7 +5404,7 @@ function define(){};  define.amd = {};
     },
     _update: function() {
       if (this._map._animatingZoom) {
-        return ;
+        return;
       }
       L.Renderer.prototype._update.call(this);
       this.fire('update');
@@ -5549,7 +5510,7 @@ function define(){};  define.amd = {};
     },
     _update: function() {
       if (this._map._animatingZoom && this._bounds) {
-        return ;
+        return;
       }
       this._drawnLayers = {};
       L.Renderer.prototype._update.call(this);
@@ -5602,7 +5563,7 @@ function define(){};  define.amd = {};
     },
     _requestRedraw: function(layer) {
       if (!this._map) {
-        return ;
+        return;
       }
       var padding = (layer.options.weight || 0) + 1;
       this._redrawBounds = this._redrawBounds || new L.Bounds();
@@ -5647,7 +5608,7 @@ function define(){};  define.amd = {};
           len = parts.length,
           ctx = this._ctx;
       if (!len) {
-        return ;
+        return;
       }
       this._drawnLayers[layer._leaflet_id] = layer;
       ctx.beginPath();
@@ -5667,7 +5628,7 @@ function define(){};  define.amd = {};
     },
     _updateCircle: function(layer) {
       if (layer._empty()) {
-        return ;
+        return;
       }
       var p = layer._point,
           ctx = this._ctx,
@@ -5720,7 +5681,7 @@ function define(){};  define.amd = {};
     },
     _onMouseMove: function(e) {
       if (!this._map || this._map.dragging.moving() || this._map._animatingZoom) {
-        return ;
+        return;
       }
       var point = this._map.mouseEventToLayerPoint(e);
       this._handleMouseOut(e, point);
@@ -6191,7 +6152,7 @@ function define(){};  define.amd = {};
           elapsed = L.DomEvent._lastClick && (timeStamp - L.DomEvent._lastClick);
       if ((elapsed && elapsed > 100 && elapsed < 500) || (e.target._simulatedClick && !e._simulated)) {
         L.DomEvent.stop(e);
-        return ;
+        return;
       }
       L.DomEvent._lastClick = timeStamp;
       handler(e);
@@ -6223,14 +6184,14 @@ function define(){};  define.amd = {};
     },
     enable: function() {
       if (this._enabled) {
-        return ;
+        return;
       }
       L.DomEvent.on(this._dragStartTarget, L.Draggable.START.join(' '), this._onDown, this);
       this._enabled = true;
     },
     disable: function() {
       if (!this._enabled) {
-        return ;
+        return;
       }
       L.DomEvent.off(this._dragStartTarget, L.Draggable.START.join(' '), this._onDown, this);
       this._enabled = false;
@@ -6238,14 +6199,14 @@ function define(){};  define.amd = {};
     },
     _onDown: function(e) {
       if (e._simulated || !this._enabled) {
-        return ;
+        return;
       }
       this._moved = false;
       if (L.DomUtil.hasClass(this._element, 'leaflet-zoom-anim')) {
-        return ;
+        return;
       }
       if (L.Draggable._dragging || e.shiftKey || ((e.which !== 1) && (e.button !== 1) && !e.touches) || !this._enabled) {
-        return ;
+        return;
       }
       L.Draggable._dragging = true;
       if (this._preventOutline) {
@@ -6254,7 +6215,7 @@ function define(){};  define.amd = {};
       L.DomUtil.disableImageDrag();
       L.DomUtil.disableTextSelection();
       if (this._moving) {
-        return ;
+        return;
       }
       this.fire('down');
       var first = e.touches ? e.touches[0] : e;
@@ -6263,20 +6224,20 @@ function define(){};  define.amd = {};
     },
     _onMove: function(e) {
       if (e._simulated || !this._enabled) {
-        return ;
+        return;
       }
       if (e.touches && e.touches.length > 1) {
         this._moved = true;
-        return ;
+        return;
       }
       var first = (e.touches && e.touches.length === 1 ? e.touches[0] : e),
           newPoint = new L.Point(first.clientX, first.clientY),
           offset = newPoint.subtract(this._startPoint);
       if (!offset.x && !offset.y) {
-        return ;
+        return;
       }
       if (Math.abs(offset.x) + Math.abs(offset.y) < this.options.clickTolerance) {
-        return ;
+        return;
       }
       L.DomEvent.preventDefault(e);
       if (!this._moved) {
@@ -6304,7 +6265,7 @@ function define(){};  define.amd = {};
     },
     _onUp: function(e) {
       if (e._simulated || !this._enabled) {
-        return ;
+        return;
       }
       L.DomUtil.removeClass(document.body, 'leaflet-dragging');
       if (this._lastTarget) {
@@ -6433,7 +6394,7 @@ function define(){};  define.amd = {};
     },
     _onPreDragLimit: function() {
       if (!this._viscosity || !this._offsetLimit) {
-        return ;
+        return;
       }
       var offset = this._draggable._newPos.subtract(this._draggable._startPos);
       var limit = this._offsetLimit;
@@ -6555,7 +6516,7 @@ function define(){};  define.amd = {};
       this._delta = 0;
       this._startTime = null;
       if (!delta) {
-        return ;
+        return;
       }
       if (map.options.scrollWheelZoom === 'center') {
         map.setZoom(zoom + delta);
@@ -6581,7 +6542,7 @@ function define(){};  define.amd = {};
           count = e.touches.length;
         }
         if (count > 1) {
-          return ;
+          return;
         }
         var now = Date.now(),
             delta = now - (last || now);
@@ -6668,7 +6629,7 @@ function define(){};  define.amd = {};
           if (this.TAG_WHITE_LIST.indexOf(e.target.tagName) < 0) {
             L.DomEvent.preventDefault(e);
           } else {
-            return ;
+            return;
           }
         }
         this._handlePointer(e, handler);
@@ -6708,7 +6669,7 @@ function define(){};  define.amd = {};
     _addPointerMove: function(obj, handler, id) {
       var onMove = L.bind(function(e) {
         if ((e.pointerType === e.MSPOINTER_TYPE_MOUSE || e.pointerType === 'mouse') && e.buttons === 0) {
-          return ;
+          return;
         }
         this._handlePointer(e, handler);
       }, this);
@@ -6740,7 +6701,7 @@ function define(){};  define.amd = {};
     _onTouchStart: function(e) {
       var map = this._map;
       if (!e.touches || e.touches.length !== 2 || map._animatingZoom || this._zooming) {
-        return ;
+        return;
       }
       var p1 = map.mouseEventToContainerPoint(e.touches[0]),
           p2 = map.mouseEventToContainerPoint(e.touches[1]);
@@ -6759,7 +6720,7 @@ function define(){};  define.amd = {};
     },
     _onTouchMove: function(e) {
       if (!e.touches || e.touches.length !== 2 || !this._zooming) {
-        return ;
+        return;
       }
       var map = this._map,
           p1 = map.mouseEventToContainerPoint(e.touches[0]),
@@ -6772,12 +6733,12 @@ function define(){};  define.amd = {};
       if (map.options.touchZoom === 'center') {
         this._center = this._startLatLng;
         if (scale === 1) {
-          return ;
+          return;
         }
       } else {
         var delta = p1._add(p2)._divideBy(2)._subtract(this._centerPoint);
         if (scale === 1 && delta.x === 0 && delta.y === 0) {
-          return ;
+          return;
         }
         this._center = map.unproject(map.project(this._pinchStartLatLng, this._zoom).subtract(delta), this._zoom);
       }
@@ -6796,7 +6757,7 @@ function define(){};  define.amd = {};
     _onTouchEnd: function() {
       if (!this._moved || !this._zooming) {
         this._zooming = false;
-        return ;
+        return;
       }
       this._zooming = false;
       L.Util.cancelAnimFrame(this._animRequest);
@@ -6822,14 +6783,14 @@ function define(){};  define.amd = {};
     },
     _onDown: function(e) {
       if (!e.touches) {
-        return ;
+        return;
       }
       L.DomEvent.preventDefault(e);
       this._fireClick = true;
       if (e.touches.length > 1) {
         this._fireClick = false;
         clearTimeout(this._holdTimeout);
-        return ;
+        return;
       }
       var first = e.touches[0],
           el = first.target;
@@ -6951,11 +6912,11 @@ function define(){};  define.amd = {};
     },
     _onMouseUp: function(e) {
       if ((e.which !== 1) && (e.button !== 1)) {
-        return ;
+        return;
       }
       this._finish();
       if (!this._moved) {
-        return ;
+        return;
       }
       setTimeout(L.bind(this._resetState, this), 0);
       var bounds = new L.LatLngBounds(this._map.containerPointToLatLng(this._startPoint), this._map.containerPointToLatLng(this._point));
@@ -7015,7 +6976,7 @@ function define(){};  define.amd = {};
     },
     _onMouseDown: function() {
       if (this._focused) {
-        return ;
+        return;
       }
       var body = document.body,
           docEl = document.documentElement,
@@ -7070,14 +7031,14 @@ function define(){};  define.amd = {};
     },
     _onKeyDown: function(e) {
       if (e.altKey || e.ctrlKey || e.metaKey) {
-        return ;
+        return;
       }
       var key = e.keyCode,
           map = this._map,
           offset;
       if (key in this._panKeys) {
         if (map._panAnim && map._panAnim._inProgress) {
-          return ;
+          return;
         }
         offset = this._panKeys[key];
         if (e.shiftKey) {
@@ -7092,7 +7053,7 @@ function define(){};  define.amd = {};
       } else if (key === 27) {
         map.closePopup();
       } else {
-        return ;
+        return;
       }
       L.DomEvent.stop(e);
     }
@@ -7354,7 +7315,7 @@ function define(){};  define.amd = {};
     },
     _update: function() {
       if (!this._map) {
-        return ;
+        return;
       }
       var attribs = [];
       for (var i in this._attributions) {
@@ -7704,7 +7665,7 @@ function define(){};  define.amd = {};
     },
     stop: function() {
       if (!this._inProgress) {
-        return ;
+        return;
       }
       this._step(true);
       this._complete();
@@ -7883,7 +7844,7 @@ function define(){};  define.amd = {};
     },
     _onZoomTransitionEnd: function() {
       if (!this._animatingZoom) {
-        return ;
+        return;
       }
       L.DomUtil.removeClass(this._mapPane, 'leaflet-zoom-anim');
       this._animatingZoom = false;
@@ -8029,329 +7990,16 @@ function define(){};  define.amd = {};
     }
   });
 }(window, document));
+
 })();
-System.register("npm:is-function@1.0.1", ["npm:is-function@1.0.1/index"], true, function(require, exports, module) {
-  var global = System.global,
-      __define = global.define;
-  global.define = undefined;
-  module.exports = require("npm:is-function@1.0.1/index");
-  global.define = __define;
-  return module.exports;
-});
-
-System.register("npm:trim@0.0.1", ["npm:trim@0.0.1/index"], true, function(require, exports, module) {
-  var global = System.global,
-      __define = global.define;
-  global.define = undefined;
-  module.exports = require("npm:trim@0.0.1/index");
-  global.define = __define;
-  return module.exports;
-});
-
-System.register("npm:for-each@0.3.2", ["npm:for-each@0.3.2/index"], true, function(require, exports, module) {
-  var global = System.global,
-      __define = global.define;
-  global.define = undefined;
-  module.exports = require("npm:for-each@0.3.2/index");
-  global.define = __define;
-  return module.exports;
-});
-
-System.register("npm:xtend@4.0.1", ["npm:xtend@4.0.1/immutable"], true, function(require, exports, module) {
-  var global = System.global,
-      __define = global.define;
-  global.define = undefined;
-  module.exports = require("npm:xtend@4.0.1/immutable");
-  global.define = __define;
-  return module.exports;
-});
-
-System.register("npm:process@0.11.9", ["npm:process@0.11.9/browser"], true, function(require, exports, module) {
-  var global = System.global,
-      __define = global.define;
-  global.define = undefined;
-  module.exports = require("npm:process@0.11.9/browser");
-  global.define = __define;
-  return module.exports;
-});
-
 (function() {
-function define(){};  define.amd = {};
-System.register("github:Leaflet/Leaflet@1.0.1", ["github:Leaflet/Leaflet@1.0.1/dist/leaflet-src"], false, function(__require, __exports, __module) {
-  return (function(main) {
-    return main;
-  }).call(this, __require('github:Leaflet/Leaflet@1.0.1/dist/leaflet-src'));
+var define = $__System.amdDefine;
+define("14", ["13"], function(main) {
+  return main;
 });
+
 })();
-System.register("npm:parse-headers@2.0.1/parse-headers", ["npm:trim@0.0.1", "npm:for-each@0.3.2"], true, function(require, exports, module) {
-  var global = System.global,
-      __define = global.define;
-  global.define = undefined;
-  var trim = require("npm:trim@0.0.1"),
-      forEach = require("npm:for-each@0.3.2"),
-      isArray = function(arg) {
-        return Object.prototype.toString.call(arg) === '[object Array]';
-      };
-  module.exports = function(headers) {
-    if (!headers)
-      return {};
-    var result = {};
-    forEach(trim(headers).split('\n'), function(row) {
-      var index = row.indexOf(':'),
-          key = trim(row.slice(0, index)).toLowerCase(),
-          value = trim(row.slice(index + 1));
-      if (typeof(result[key]) === 'undefined') {
-        result[key] = value;
-      } else if (isArray(result[key])) {
-        result[key].push(value);
-      } else {
-        result[key] = [result[key], value];
-      }
-    });
-    return result;
-  };
-  global.define = __define;
-  return module.exports;
-});
-
-System.register("github:jspm/nodelibs-process@0.1.2/index", ["npm:process@0.11.9"], true, function(require, exports, module) {
-  var global = System.global,
-      __define = global.define;
-  global.define = undefined;
-  module.exports = System._nodeRequire ? process : require("npm:process@0.11.9");
-  global.define = __define;
-  return module.exports;
-});
-
-System.register("npm:parse-headers@2.0.1", ["npm:parse-headers@2.0.1/parse-headers"], true, function(require, exports, module) {
-  var global = System.global,
-      __define = global.define;
-  global.define = undefined;
-  module.exports = require("npm:parse-headers@2.0.1/parse-headers");
-  global.define = __define;
-  return module.exports;
-});
-
-System.register("github:jspm/nodelibs-process@0.1.2", ["github:jspm/nodelibs-process@0.1.2/index"], true, function(require, exports, module) {
-  var global = System.global,
-      __define = global.define;
-  global.define = undefined;
-  module.exports = require("github:jspm/nodelibs-process@0.1.2/index");
-  global.define = __define;
-  return module.exports;
-});
-
-System.register("npm:xhr@2.2.2/index", ["npm:global@4.3.1/window", "npm:is-function@1.0.1", "npm:parse-headers@2.0.1", "npm:xtend@4.0.1", "github:jspm/nodelibs-process@0.1.2"], true, function(require, exports, module) {
-  var global = System.global,
-      __define = global.define;
-  global.define = undefined;
-  (function(process) {
-    "use strict";
-    var window = require("npm:global@4.3.1/window");
-    var isFunction = require("npm:is-function@1.0.1");
-    var parseHeaders = require("npm:parse-headers@2.0.1");
-    var xtend = require("npm:xtend@4.0.1");
-    module.exports = createXHR;
-    createXHR.XMLHttpRequest = window.XMLHttpRequest || noop;
-    createXHR.XDomainRequest = "withCredentials" in (new createXHR.XMLHttpRequest()) ? createXHR.XMLHttpRequest : window.XDomainRequest;
-    forEachArray(["get", "put", "post", "patch", "head", "delete"], function(method) {
-      createXHR[method === "delete" ? "del" : method] = function(uri, options, callback) {
-        options = initParams(uri, options, callback);
-        options.method = method.toUpperCase();
-        return _createXHR(options);
-      };
-    });
-    function forEachArray(array, iterator) {
-      for (var i = 0; i < array.length; i++) {
-        iterator(array[i]);
-      }
-    }
-    function isEmpty(obj) {
-      for (var i in obj) {
-        if (obj.hasOwnProperty(i))
-          return false;
-      }
-      return true;
-    }
-    function initParams(uri, options, callback) {
-      var params = uri;
-      if (isFunction(options)) {
-        callback = options;
-        if (typeof uri === "string") {
-          params = {uri: uri};
-        }
-      } else {
-        params = xtend(options, {uri: uri});
-      }
-      params.callback = callback;
-      return params;
-    }
-    function createXHR(uri, options, callback) {
-      options = initParams(uri, options, callback);
-      return _createXHR(options);
-    }
-    function _createXHR(options) {
-      if (typeof options.callback === "undefined") {
-        throw new Error("callback argument missing");
-      }
-      var called = false;
-      var callback = function cbOnce(err, response, body) {
-        if (!called) {
-          called = true;
-          options.callback(err, response, body);
-        }
-      };
-      function readystatechange() {
-        if (xhr.readyState === 4) {
-          loadFunc();
-        }
-      }
-      function getBody() {
-        var body = undefined;
-        if (xhr.response) {
-          body = xhr.response;
-        } else {
-          body = xhr.responseText || getXml(xhr);
-        }
-        if (isJson) {
-          try {
-            body = JSON.parse(body);
-          } catch (e) {}
-        }
-        return body;
-      }
-      var failureResponse = {
-        body: undefined,
-        headers: {},
-        statusCode: 0,
-        method: method,
-        url: uri,
-        rawRequest: xhr
-      };
-      function errorFunc(evt) {
-        clearTimeout(timeoutTimer);
-        if (!(evt instanceof Error)) {
-          evt = new Error("" + (evt || "Unknown XMLHttpRequest Error"));
-        }
-        evt.statusCode = 0;
-        return callback(evt, failureResponse);
-      }
-      function loadFunc() {
-        if (aborted)
-          return ;
-        var status;
-        clearTimeout(timeoutTimer);
-        if (options.useXDR && xhr.status === undefined) {
-          status = 200;
-        } else {
-          status = (xhr.status === 1223 ? 204 : xhr.status);
-        }
-        var response = failureResponse;
-        var err = null;
-        if (status !== 0) {
-          response = {
-            body: getBody(),
-            statusCode: status,
-            method: method,
-            headers: {},
-            url: uri,
-            rawRequest: xhr
-          };
-          if (xhr.getAllResponseHeaders) {
-            response.headers = parseHeaders(xhr.getAllResponseHeaders());
-          }
-        } else {
-          err = new Error("Internal XMLHttpRequest Error");
-        }
-        return callback(err, response, response.body);
-      }
-      var xhr = options.xhr || null;
-      if (!xhr) {
-        if (options.cors || options.useXDR) {
-          xhr = new createXHR.XDomainRequest();
-        } else {
-          xhr = new createXHR.XMLHttpRequest();
-        }
-      }
-      var key;
-      var aborted;
-      var uri = xhr.url = options.uri || options.url;
-      var method = xhr.method = options.method || "GET";
-      var body = options.body || options.data || null;
-      var headers = xhr.headers = options.headers || {};
-      var sync = !!options.sync;
-      var isJson = false;
-      var timeoutTimer;
-      if ("json" in options) {
-        isJson = true;
-        headers["accept"] || headers["Accept"] || (headers["Accept"] = "application/json");
-        if (method !== "GET" && method !== "HEAD") {
-          headers["content-type"] || headers["Content-Type"] || (headers["Content-Type"] = "application/json");
-          body = JSON.stringify(options.json);
-        }
-      }
-      xhr.onreadystatechange = readystatechange;
-      xhr.onload = loadFunc;
-      xhr.onerror = errorFunc;
-      xhr.onprogress = function() {};
-      xhr.ontimeout = errorFunc;
-      xhr.open(method, uri, !sync, options.username, options.password);
-      if (!sync) {
-        xhr.withCredentials = !!options.withCredentials;
-      }
-      if (!sync && options.timeout > 0) {
-        timeoutTimer = setTimeout(function() {
-          aborted = true;
-          xhr.abort("timeout");
-          var e = new Error("XMLHttpRequest timeout");
-          e.code = "ETIMEDOUT";
-          errorFunc(e);
-        }, options.timeout);
-      }
-      if (xhr.setRequestHeader) {
-        for (key in headers) {
-          if (headers.hasOwnProperty(key)) {
-            xhr.setRequestHeader(key, headers[key]);
-          }
-        }
-      } else if (options.headers && !isEmpty(options.headers)) {
-        throw new Error("Headers cannot be set on an XDomainRequest object");
-      }
-      if ("responseType" in options) {
-        xhr.responseType = options.responseType;
-      }
-      if ("beforeSend" in options && typeof options.beforeSend === "function") {
-        options.beforeSend(xhr);
-      }
-      xhr.send(body);
-      return xhr;
-    }
-    function getXml(xhr) {
-      if (xhr.responseType === "document") {
-        return xhr.responseXML;
-      }
-      var firefoxBugTakenEffect = xhr.status === 204 && xhr.responseXML && xhr.responseXML.documentElement.nodeName === "parsererror";
-      if (xhr.responseType === "" && !firefoxBugTakenEffect) {
-        return xhr.responseXML;
-      }
-      return null;
-    }
-    function noop() {}
-  })(require("github:jspm/nodelibs-process@0.1.2"));
-  global.define = __define;
-  return module.exports;
-});
-
-System.register("npm:xhr@2.2.2", ["npm:xhr@2.2.2/index"], true, function(require, exports, module) {
-  var global = System.global,
-      __define = global.define;
-  global.define = undefined;
-  module.exports = require("npm:xhr@2.2.2/index");
-  global.define = __define;
-  return module.exports;
-});
-
-System.register("t2", ["npm:xhr@2.2.2", "github:Leaflet/Leaflet@1.0.1"], function(exports_1, context_1) {
+$__System.register("1", ["12", "14"], function(exports_1, context_1) {
   "use strict";
   var __moduleName = context_1 && context_1.id;
   var xhr_1,
@@ -8372,7 +8020,7 @@ System.register("t2", ["npm:xhr@2.2.2", "github:Leaflet/Leaflet@1.0.1"], functio
         var markers = [];
         var drawingPins = false;
         var map;
-        var polTime = 4000;
+        var polTime = 30000;
         var intervalID;
         var countDownSteps = polTime / 1000;
         var countDownInterval;
@@ -8535,5 +8183,8 @@ System.register("t2", ["npm:xhr@2.2.2", "github:Leaflet/Leaflet@1.0.1"], functio
   };
 });
 
+})
+(function(factory) {
+  factory();
 });
 //# sourceMappingURL=bundle.js.map
